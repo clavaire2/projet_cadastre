@@ -1,0 +1,72 @@
+CREATE TABLE `chef_brigade` (
+  `ident` INT(11) NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
+  `prenom` VARCHAR(255) NOT NULL,
+  `email_chefbrigade` VARCHAR(255) UNIQUE NOT NULL,
+  `numero_telephone` VARCHAR(15) UNIQUE DEFAULT NULL,
+  `date_inscription` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `password` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`ident`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+CREATE TABLE `brigade` (
+  `ident` INT(11) NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
+  `prenom` VARCHAR(255) NOT NULL,
+  `email_brigade` VARCHAR(255) UNIQUE NOT NULL,
+  `numero_telephone` VARCHAR(15) UNIQUE DEFAULT NULL,
+  `date_inscription` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `password` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`ident`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+
+CREATE TABLE `securisation` (
+  `ident` INT(11) NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
+  `prenom` VARCHAR(255) NOT NULL,
+  `email_securisation` VARCHAR(255) UNIQUE NOT NULL,
+  `numero_telephone` VARCHAR(15) UNIQUE DEFAULT NULL,
+  `date_inscription` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `password` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`ident`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+CREATE TABLE `evaluation_cadastrale` (
+  `ident` INT(11) NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
+  `prenom` VARCHAR(255) NOT NULL,
+  `email_evaluationcadastrale` VARCHAR(255) UNIQUE NOT NULL,
+  `numero_telephone` VARCHAR(15) UNIQUE DEFAULT NULL,
+  `date_inscription` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `password` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`ident`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+CREATE TABLE `signature` (
+  `ident` INT(11) NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
+  `prenom` VARCHAR(255) NOT NULL,
+  `email_signature` VARCHAR(255) UNIQUE NOT NULL,
+  `numero_telephone` VARCHAR(15) UNIQUE DEFAULT NULL,
+  `date_inscription` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `password` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`ident`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+
+CREATE TABLE `conversation_fonciere` (
+  `ident` INT(11) NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
+  `prenom` VARCHAR(255) NOT NULL,
+  `email_conversationfonciere` VARCHAR(255) UNIQUE NOT NULL,
+  `numero_telephone` VARCHAR(15) UNIQUE DEFAULT NULL,
+  `date_inscription` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `password` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`ident`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
