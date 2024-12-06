@@ -1,3 +1,4 @@
+import secrets
 from flask import *
 from flask_mysqldb import MySQL
 import  hashlib
@@ -11,7 +12,18 @@ app.config['MYSQL_USER'] = my_user
 app.config['MYSQL_PASSWORD'] = my_password
 app.config['MYSQL_DB'] =  my_db
 app.config['MYSQL_CURSORCLASS'] =my_CURSORCLASS
+from flask_mail import Mail, Message
+from datetime import datetime, timedelta
 
+
+
+app.config['MAIL_SERVER'] = 'mail.alabdigital.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_DEFAULT_SENDER'] = 'support_alabdigital@alabdigital.com'
+app.config['MAIL_USERNAME'] = 'support_alabdigital@alabdigital.com'
+app.config['MAIL_PASSWORD'] = 't$sZm$Z7m~rt.tO2_s@TGVd_alabdigital@alabdig'
+mail = Mail(app)
 mysql = MySQL()
 mysql.init_app(app)
 
@@ -307,7 +319,7 @@ def terminer_dossier_chefbrigade(id_dossier):
             """, (nom_dossier, chef_brigade_id, validateur))
 
             # Supprimer le dossier de gestion_chef_brigade
-            cur.execute("DELETE FROM gestion_chef_brigade WHERE id = %s", [id_dossier])
+            cur.execute("UPDATE gestion_chef_brigade SET statut = 'Terminé' WHERE id = %s", [id_dossier])
 
             # Commit
             mysql.connection.commit()
@@ -359,6 +371,8 @@ def liste_dossiers_assignes():
 
 
 
+
+
 @app.route("/valider_dossier/<int:id_dossier>", methods=['POST'])
 def valider_dossier(id_dossier):
     if 'email_chefbrigade' not in session:
@@ -399,29 +413,36 @@ def valider_dossier(id_dossier):
 
 @app.route('/dossiers_valides')
 def dossiers_valides():
-    if 'email_chefbrigade' in session:
-        # Vérifier que l'utilisateur est connecté et est un chef de brigade
-        loggedIn_admin, firstName = getLogin("email_chefbrigade", "chef_brigade")
-        
-        if loggedIn_admin:
-            cur = mysql.connection.cursor()
-
-            # Récupérer la liste des dossiers validés par ce chef de brigade
-            cur.execute("""
-                SELECT id, nom_dossier, date_creation, date_validation, chef_validateur
-                FROM gestion_brigade
-                WHERE chef_validateur = %s
-            """, [firstName])
-            dossiers = cur.fetchall()
-
-            cur.close()
-            return render_template('chef_brigade/dossier/dossiers_valides.html', dossiers=dossiers, name_chef=firstName)
-        else:
-            flash("Erreur de connexion, veuillez réessayer.", "danger")
-            return redirect(url_for('login'))
-    else:
-        flash("Vous devez être connecté pour voir cette page.", "danger")
+    # Vérifier si un chef de brigade est connecté
+    if 'email_chefbrigade' not in session:
         return redirect(url_for('login'))
+
+    # Récupérer les informations du chef de brigade connecté
+    loggedIn, firstName = getLogin('email_chefbrigade', 'chef_brigade')
+    if not loggedIn:
+        return redirect(url_for('login'))
+
+    cur = mysql.connection.cursor()
+
+    # Identifier le chef de brigade connecté
+    cur.execute("SELECT ident FROM chef_brigade WHERE email_chefbrigade = %s", [session['email_chefbrigade']])
+    chef_brigade = cur.fetchone()
+
+    if not chef_brigade:
+        return render_template('error.html', message="Chef de brigade introuvable.")
+
+    chef_brigade_id = chef_brigade[0]
+
+    # Récupérer les dossiers assignés à ce chef
+    cur.execute("""
+        SELECT *
+        FROM gestion_chef_brigade
+        WHERE chef_brigade_id = %s AND statut = 'Terminé'
+    """, [chef_brigade_id])
+
+    dossiers = cur.fetchall()
+    cur.close()
+    return render_template('chef_brigade/dossier/dossiers_valides.html', dossiers=dossiers, firstName=firstName, loggedIn=loggedIn,)
 
 
 
@@ -1466,6 +1487,132 @@ def login():
             flash('Email ou mot de passe incorrect.', 'danger')
             return redirect(url_for('login'))
     return render_template('login.html')
+
+
+
+
+#####******************* Mot de passe oublié
+
+
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form['email']
+
+        # Dictionnaire des tables et des colonnes d'email
+        tables = {
+            "chef_brigade": "email_chefbrigade",
+            "brigade": "email_brigade",
+            "securisation": "email_securisation",
+            "evaluation_cadastrale": "email_evaluationcadastrale",
+            "signature": "email_signature",
+            "conversation_fonciere": "email_conversationfonciere"
+        }
+
+        cursor = mysql.connection.cursor()
+        user = None
+        table_name = None
+        column_name = None
+
+        # Parcourir chaque table et vérifier si l'email existe
+        for table, email_column in tables.items():
+            query = f"SELECT * FROM {table} WHERE {email_column} = %s"
+            cursor.execute(query, (email,))
+            user = cursor.fetchone()
+            if user:
+                table_name = table
+                column_name = email_column
+                break
+
+        if user:
+            # Générer un token de réinitialisation unique
+            reset_token = secrets.token_hex(16)
+            token_expiration = datetime.now() + timedelta(hours=1)
+
+            # Enregistrer le token dans la table correspondante
+            update_query = f"""
+                UPDATE {table_name}
+                SET reset_token = %s, token_expiration = %s
+                WHERE {column_name} = %s
+            """
+            cursor.execute(update_query, (reset_token, token_expiration, email))
+            mysql.connection.commit()
+
+            # Générer et envoyer le lien de réinitialisation
+            reset_link = url_for('reset_password', token=reset_token, table=table_name, _external=True)
+            msg = Message(
+                "Réinitialisation de votre mot de passe",
+                recipients=[email]
+            )
+            msg.body = f"Bonjour, cliquez sur le lien suivant pour réinitialiser votre mot de passe : {reset_link}"
+            mail.send(msg)
+
+            flash("Un email avec un lien de réinitialisation a été envoyé à votre adresse email.")
+            return redirect('/')
+        
+        flash("Cet email n'existe pas dans notre système.")
+        return redirect('/forgot_password')
+
+    return render_template('mot_de passe_oublier/mot_de_passe_oublier.html')
+
+
+@app.route('/reset_password/<table>/<token>', methods=['GET', 'POST'])
+def reset_password(table, token):
+    # Dictionnaire des colonnes d'email pour chaque table
+    email_columns = {
+        "chef_brigade": "email_chefbrigade",
+        "brigade": "email_brigade",
+        "securisation": "email_securisation",
+        "evaluation_cadastrale": "email_evaluationcadastrale",
+        "signature": "email_signature",
+        "conversation_fonciere": "email_conversationfonciere"
+    }
+
+    if table not in email_columns:
+        flash("Table invalide.")
+        return redirect('/forgot_password')
+
+    email_column = email_columns[table]
+    cursor = mysql.connection.cursor()
+
+    # Vérifier le token et sa validité
+    query = f"""
+        SELECT * FROM {table} 
+        WHERE reset_token = %s AND token_expiration > NOW()
+    """
+    cursor.execute(query, (token,))
+    user = cursor.fetchone()
+
+    if not user:
+        flash("Le lien de réinitialisation est invalide ou a expiré.")
+        return redirect('/forgot_password')
+
+    if request.method == 'POST':
+        new_password = request.form['password']
+        confirm_password = request.form['confirm_password']
+
+        if new_password != confirm_password:
+            flash("Les mots de passe ne correspondent pas. Veuillez réessayer.")
+            return redirect(request.url)
+
+        # Hacher le nouveau mot de passe
+        hashed_password = hashlib.md5(new_password.encode()).hexdigest()
+
+        # Mettre à jour le mot de passe et réinitialiser les colonnes de token
+        update_query = f"""
+            UPDATE {table} 
+            SET password = %s, reset_token = NULL, token_expiration = NULL
+            WHERE reset_token = %s
+        """
+        cursor.execute(update_query, (hashed_password, token))
+        mysql.connection.commit()
+
+        flash("Votre mot de passe a été réinitialisé avec succès.")
+        return redirect('/')
+
+    return render_template('mot_de passe_oublier/reinitialiser_mot_de_passe.html', table=table, token=token)
+
+
 
 
 if __name__ == "__main__":

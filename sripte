@@ -70,3 +70,29 @@ CREATE TABLE `conversation_fonciere` (
   `password` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`ident`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+
+ALTER TABLE `chef_brigade`
+ADD COLUMN `reset_token` VARCHAR(255) DEFAULT NULL,
+ADD COLUMN `token_expiration` DATETIME DEFAULT NULL;
+
+ALTER TABLE `brigade`
+ADD COLUMN `reset_token` VARCHAR(255) DEFAULT NULL,
+ADD COLUMN `token_expiration` DATETIME DEFAULT NULL;
+
+ALTER TABLE `securisation`
+ADD COLUMN `reset_token` VARCHAR(255) DEFAULT NULL,
+ADD COLUMN `token_expiration` DATETIME DEFAULT NULL;
+
+ALTER TABLE `evaluation_cadastrale`
+ADD COLUMN `reset_token` VARCHAR(255) DEFAULT NULL,
+ADD COLUMN `token_expiration` DATETIME DEFAULT NULL;
+
+ALTER TABLE `signature`
+ADD COLUMN `reset_token` VARCHAR(255) DEFAULT NULL,
+ADD COLUMN `token_expiration` DATETIME DEFAULT NULL;
+
+ALTER TABLE `conversation_fonciere`
+ADD COLUMN `reset_token` VARCHAR(255) DEFAULT NULL,
+ADD COLUMN `token_expiration` DATETIME DEFAULT NULL;
