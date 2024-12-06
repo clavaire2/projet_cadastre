@@ -80,18 +80,21 @@
                 <li class="menu-title"><span data-key="t-menu">Menu</span></li>
                 
 
-                <a class="nav-link menu-link" href="/evaluationcadastrale_tableau_de_bord"  role="button">
+                <a class="nav-link menu-link" href="{{ url_for('evaluationcadastrale_tableau_de_bord') }}"  role="button">
                         <i class="ri-dashboard-2-line"></i> <span data-key="t-apps">Tableau de bord</span>
                 </a>
 
-                <a class="nav-link menu-link" href="/liste_gestion_evaluationcadastrale"  role="button">
+                <a class="nav-link menu-link" href="{{ url_for('liste_gestion_evaluationcadastrale') }}"  role="button">
                     <i class="ri-apps-2-line"></i> <span data-key="t-apps">Dossier en attente</span>
                 </a>
 
-                <a class="nav-link menu-link" href="/liste_dossiers_assignes_evaluation_cadastrale"  role="button">
+                <a class="nav-link menu-link" href="{{ url_for('liste_dossiers_assignes_evaluation_cadastrale') }}"  role="button">
                     <i class="ri-apps-2-line"></i> <span data-key="t-apps">Dossier en cours</span>
                 </a>
 
+                <a class="nav-link menu-link" href="{{ url_for('dossiers_Evaluation_cadastral_valide') }}"  role="button">
+                    <i class="ri-apps-2-line"></i> <span data-key="t-apps">Dossier en Validés</span>
+                </a>
 
 
 

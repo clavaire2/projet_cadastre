@@ -80,17 +80,22 @@
                 <li class="menu-title"><span data-key="t-menu">Menu</span></li>
                 
 
-                <a class="nav-link menu-link" href="brigade_tableau_de_bord"  role="button">
+                <a class="nav-link menu-link" href="{{ url_for('brigade_tableau_de_bord') }}"  role="button">
                         <i class="ri-dashboard-2-line"></i> <span data-key="t-apps">Tableau de bord</span>
                 </a>
 
-                <a class="nav-link menu-link" href="/dossiers_en_attente_brigade"  role="button">
+                <a class="nav-link menu-link" href="{{ url_for('dossiers_en_attente_brigade') }}"  role="button">
                     <i class="ri-apps-2-line"></i> <span data-key="t-apps">Dossier en attente</span>
                 </a>
 
-                <a class="nav-link menu-link" href="/dossiers_brigade_en_cours"  role="button">
+                <a class="nav-link menu-link" href="{{ url_for('dossiers_brigade_en_cours') }}"  role="button">
                     <i class="ri-apps-2-line"></i> <span data-key="t-apps">Dossier en cours</span>
                 </a>
+
+                <a class="nav-link menu-link" href="{{ url_for('dossiers_brigade_valide') }}"  role="button">
+                    <i class="ri-apps-2-line"></i> <span data-key="t-apps">Dossier validés</span>
+                </a>
+                
 
 
 

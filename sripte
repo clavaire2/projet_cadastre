@@ -71,7 +71,7 @@ CREATE TABLE `conversation_fonciere` (
   PRIMARY KEY (`ident`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-
+---c'est pour mot de passe oublié
 
 ALTER TABLE `chef_brigade`
 ADD COLUMN `reset_token` VARCHAR(255) DEFAULT NULL,

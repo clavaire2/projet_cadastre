@@ -138,8 +138,7 @@ def valider_dossier_a(dossier_id):
 
 
 
-
-
+############ chef brigade
 @app.route("/inscription_chefbrigade",methods=['POST', 'GET'])
 def inscription_chefbrigade():
     if request.method == 'POST':
@@ -194,8 +193,6 @@ def liste_gestion_chef_brigade():
     
     return render_template('chef_brigade/dossier/liste_chef_brigade.html', dossiers=dossiers,loggedIn=loggedIn, firstName=firstName)
 
-
-
 @app.route("/dossiers_disponibles")
 def liste_dossiers_chef_brigade():
     loggedIn, firstName = getLogin('email_chefbrigade', 'chef_brigade')
@@ -216,12 +213,6 @@ def liste_dossiers_chef_brigade():
         loggedIn=loggedIn,
         firstName=firstName
     )
-
-    
-    
-    
-
-
 
 @app.route("/assigner_dossier/<int:id_dossier>", methods=['POST'])
 def assigner_dossier(id_dossier):
@@ -274,7 +265,6 @@ def assigner_dossier(id_dossier):
         return render_template('error.html', message=f"Erreur lors de l'assignation : {e}")
     finally:
         cur.close()
-
 
 @app.route('/terminer_dossier_chefbrigade/<int:id_dossier>', methods=['POST'])
 def terminer_dossier_chefbrigade(id_dossier):
@@ -329,7 +319,6 @@ def terminer_dossier_chefbrigade(id_dossier):
     cur.close()
     return render_template('error.html', message="Dossier introuvable ou non assigné.")
 
-
 @app.route("/dossiers_assignes")
 def liste_dossiers_assignes():
     # Vérifier si un chef de brigade est connecté
@@ -368,10 +357,6 @@ def liste_dossiers_assignes():
         loggedIn=loggedIn,
         firstName=firstName
     )
-
-
-
-
 
 @app.route("/valider_dossier/<int:id_dossier>", methods=['POST'])
 def valider_dossier(id_dossier):
@@ -451,6 +436,8 @@ def dossiers_valides():
 
 
 
+
+############ brigade
 @app.route("/inscription_brigade",methods=['POST', 'GET'])
 def inscription_brigade():
     if request.method == 'POST':
@@ -486,8 +473,6 @@ def inscription_brigade():
             return f"Erreur lors de l'inscription : {e}"
     return render_template('brigade/connexion/cree_compte.html')
 
-
-
 @app.route("/dossiers_en_attente_brigade")
 def dossiers_en_attente_brigade():
     # Vérifier si l'utilisateur est connecté et est un membre de la brigade
@@ -511,7 +496,6 @@ def dossiers_en_attente_brigade():
         loggedIn=loggedIn,
         firstName=firstName
     )
-
 
 @app.route("/assigner_dossier_brigade/<int:id_dossier>", methods=['POST'])
 def assigner_dossier_brigade(id_dossier):
@@ -539,7 +523,6 @@ def assigner_dossier_brigade(id_dossier):
 
     flash("Dossier assigné avec succès.", "success")
     return redirect(url_for('dossiers_en_attente_brigade'))
-
 
 @app.route("/terminer_dossier_brigade/<int:id_dossier>", methods=['POST'])
 def terminer_dossier_brigade(id_dossier):
@@ -587,8 +570,6 @@ def terminer_dossier_brigade(id_dossier):
     flash("Le dossier a été validé et transféré avec succès.", "success")
     return redirect(url_for('dossiers_brigade_en_cours'))
 
-
-
 @app.route("/dossiers_brigade_en_cours")
 def dossiers_brigade_en_cours():
     # Vérifier si l'utilisateur est connecté
@@ -618,7 +599,39 @@ def dossiers_brigade_en_cours():
         firstName=firstName
     )
 
+@app.route("/dossiers_brigade_valide")
+def dossiers_brigade_valide():
+    # Vérifier si l'utilisateur est connecté
+    if 'email_brigade' not in session:
+        return redirect(url_for('login'))
 
+    # Récupérer les informations de la brigade connectée
+    loggedIn, firstName = getLogin('email_brigade', 'brigade')
+    if not loggedIn:
+        return redirect(url_for('login'))
+    
+    cur = mysql.connection.cursor()
+    
+    # Identifier le chef de brigade connecté
+    cur.execute("SELECT ident FROM brigade WHERE email_brigade = %s", [session['email_brigade']])
+    brigade = cur.fetchone()
+    if not brigade:
+        flash("Erreur : brigade introuvable.")
+        return redirect(url_for('login'))
+    
+    brigade_id = brigade[0]
+    
+    # Récupérer les dossiers avec le statut "Terminé" pour la brigade connectée
+    cur.execute("""SELECT * FROM gestion_brigade WHERE brigade_id = %s AND statut = 'Terminé'""", [brigade_id])
+    dossiers = cur.fetchall()
+    cur.close()
+    
+    return render_template(
+        "brigade/dossier/dossiers_valides.html",
+        dossiers=dossiers,
+        loggedIn=loggedIn,
+        firstName=firstName
+    )
 
 @app.route("/brigade_tableau_de_bord")
 def brigade_tableau_de_bord():
@@ -634,6 +647,9 @@ def brigade_tableau_de_bord():
 
 
 
+
+
+###################securisation
 @app.route("/inscription_securisation",methods=['POST', 'GET'])
 def inscription_securisation():
     if request.method == 'POST':
@@ -668,8 +684,6 @@ def inscription_securisation():
         except Exception as e:
             return f"Erreur lors de l'inscription : {e}"
     return render_template('securisation/connexion/cree_compte.html')
-
-
 
 @app.route("/liste_gestion_securisation")
 def liste_gestion_securisation():
@@ -727,7 +741,6 @@ def liste_dossiers_assignes_securisation():
         firstName=firstName
     )
 
-
 @app.route("/assigner_dossier_securisation/<int:dossier_id>", methods=["POST"])
 def assigner_dossier_securisation(dossier_id):
     # Vérifier si l'utilisateur est connecté comme un membre de la sécurisation
@@ -755,8 +768,6 @@ def assigner_dossier_securisation(dossier_id):
 
     flash("Dossier assigné avec succès.", "success")
     return redirect(url_for('liste_dossiers_assignes_securisation'))
-
-
 
 @app.route('/valider_dossier_securisation/<int:id_dossier>', methods=['POST'])
 def valider_dossier_securisation(id_dossier):
@@ -813,7 +824,39 @@ def valider_dossier_securisation(id_dossier):
     # Si le dossier n'est pas trouvé ou ne peut pas être validé
     return 'Dossier non trouvé ou statut invalide', 400
 
+@app.route("/dossiers_securisation_valide")
+def dossiers_securisation_valide():
+    # Vérifier si l'utilisateur est connecté
+    if 'email_securisation' not in session:
+        return redirect(url_for('login'))
 
+    # Récupérer les informations de la brigade connectée
+    loggedIn, firstName = getLogin('email_securisation', 'securisation')
+    if not loggedIn:
+        return redirect(url_for('login'))
+    
+    cur = mysql.connection.cursor()
+    
+    # Identifier le chef de brigade connecté
+    cur.execute("SELECT ident FROM securisation WHERE email_securisation = %s", [session['email_securisation']])
+    securisation = cur.fetchone()
+    if not securisation:
+        flash("Erreur : securisation introuvable.")
+        return redirect(url_for('login'))
+    
+    securisation_id = securisation[0]
+    
+    # Récupérer les dossiers avec le statut "Terminé" pour la brigade connectée
+    cur.execute("""SELECT * FROM gestion_securisation WHERE securisation_id = %s AND statut = 'Terminé'""", [securisation_id])
+    dossiers = cur.fetchall()
+    cur.close()
+    
+    return render_template(
+        "securisation/dossier/dossiers_valides.html",
+        dossiers=dossiers,
+        loggedIn=loggedIn,
+        firstName=firstName
+    )
 
 @app.route("/securisation_tableau_de_bord")
 def securisation_tableau_de_bord():
@@ -830,7 +873,7 @@ def securisation_tableau_de_bord():
 
 
 
-
+###################evaluationcadastrale
 @app.route("/inscription_evaluationcadastrale",methods=['POST', 'GET'])
 def inscription_evaluationcadastrale():
     if request.method == 'POST':
@@ -866,8 +909,6 @@ def inscription_evaluationcadastrale():
             return f"Erreur lors de l'inscription : {e}"
     return render_template('evaluation_cadastrale/connexion/cree_compte.html')
 
-
-
 @app.route("/evaluationcadastrale_tableau_de_bord")
 def evaluationcadastrale_tableau_de_bord():
     if 'email_evaluationcadastrale' not in session:
@@ -878,9 +919,6 @@ def evaluationcadastrale_tableau_de_bord():
     if not loggedIn:
         return redirect(url_for('login'))
     return render_template('evaluation_cadastrale/index.html',loggedIn=loggedIn, firstName=firstName)
-
-
-
 
 @app.route("/liste_gestion_evaluationcadastrale")
 def liste_gestion_evaluationcadastrale():
@@ -910,8 +948,6 @@ def liste_gestion_evaluationcadastrale():
         firstName=firstName
     )
 
-
-
 @app.route("/assigner_dossier_evaluation_cadastrale/<int:dossier_id>", methods=["POST"])
 def assigner_dossier_evaluation_cadastrale(dossier_id):
     # Vérifier si l'utilisateur est connecté comme un membre de la sécurisation
@@ -940,7 +976,6 @@ def assigner_dossier_evaluation_cadastrale(dossier_id):
     flash("Dossier assigné avec succès.", "success")
     return redirect(url_for('liste_gestion_evaluationcadastrale'))
 
-
 @app.route("/liste_dossiers_assignes_evaluation_cadastrale")
 def liste_dossiers_assignes_evaluation_cadastrale():
     # Vérifier si l'utilisateur est connecté et est un membre de la sécurisation
@@ -968,7 +1003,6 @@ def liste_dossiers_assignes_evaluation_cadastrale():
         loggedIn=loggedIn,
         firstName=firstName
     )
-    
 
 @app.route('/valider_dossier_evaluationcadastrale/<int:id_dossier>', methods=['POST'])
 def valider_dossier_evaluationcadastrale(id_dossier):
@@ -1025,11 +1059,47 @@ def valider_dossier_evaluationcadastrale(id_dossier):
     # Si le dossier n'est pas trouvé ou ne peut pas être validé
     return 'Dossier non trouvé ou statut invalide', 400
 
+@app.route("/dossiers_Evaluation_cadastral_valide")
+def dossiers_Evaluation_cadastral_valide():
+    # Vérifier si l'utilisateur est connecté
+    if 'email_evaluationcadastrale' not in session:
+        return redirect(url_for('login'))
+
+    # Récupérer les informations de la brigade connectée
+    loggedIn, firstName = getLogin('email_evaluationcadastrale', 'evaluation_cadastrale')
+    if not loggedIn:
+        return redirect(url_for('login'))
+    
+    cur = mysql.connection.cursor()
+    
+    # Identifier le chef de brigade connecté
+    cur.execute("SELECT ident FROM evaluation_cadastrale WHERE email_evaluationcadastrale = %s", [session['email_evaluationcadastrale']])
+    evaluation_cadastrale = cur.fetchone()
+    if not evaluation_cadastrale:
+        flash("Erreur : evaluation_cadastrale introuvable.")
+        return redirect(url_for('login'))
+    
+    evaluation_cadastrale_id = evaluation_cadastrale[0]
+    
+    # Récupérer les dossiers avec le statut "Terminé" pour la brigade connectée
+    cur.execute("""SELECT * FROM gestion_evaluation_cadastrale WHERE evaluation_cadastrale_id = %s AND statut = 'Terminé'""", [evaluation_cadastrale_id])
+    dossiers = cur.fetchall()
+    cur.close()
+    
+    return render_template(
+        "evaluation_cadastrale/dossier/dossiers_valides.html",
+        dossiers=dossiers,
+        loggedIn=loggedIn,
+        firstName=firstName
+    )
 
 
 
 
 
+
+
+###################Signature
 @app.route("/inscription_signature",methods=['POST', 'GET'])
 def inscription_signature():
     if request.method == 'POST':
@@ -1076,7 +1146,6 @@ def signature_fonciere_tableau_de_bord():
         return redirect(url_for('login'))
     return render_template('signature/index.html')
 
-
 @app.route("/liste_gestion_signature")
 def liste_gestion_signature():
     # Vérifier si l'utilisateur est connecté comme un membre de la sécurisation
@@ -1104,8 +1173,6 @@ def liste_gestion_signature():
         loggedIn=loggedIn,
         firstName=firstName
     )
-
-
 
 @app.route("/assigner_dossier_signature/<int:dossier_id>", methods=["POST"])
 def assigner_dossier_signature(dossier_id):
@@ -1135,8 +1202,6 @@ def assigner_dossier_signature(dossier_id):
 
     flash("Dossier assigné avec succès.", "success")
     return redirect(url_for('liste_gestion_signature'))
-
-
 
 @app.route("/liste_dossiers_assignes_signature")
 def liste_dossiers_assignes_signature():
@@ -1220,9 +1285,50 @@ def valider_dossier_signature(id_dossier):
     # Si le dossier n'est pas trouvé ou ne peut pas être validé
     return 'Dossier non trouvé ou statut invalide', 400
 
+@app.route("/dossiers_signature_valide")
+def dossiers_signature_valide():
+    # Vérifier si l'utilisateur est connecté
+    if 'email_signature' not in session:
+        return redirect(url_for('login'))
+
+    # Récupérer les informations de la brigade connectée
+    loggedIn, firstName = getLogin('email_signature', 'signature')
+    if not loggedIn:
+        return redirect(url_for('login'))
+    
+    cur = mysql.connection.cursor()
+    
+    # Identifier le chef de brigade connecté
+    cur.execute("SELECT ident FROM signature WHERE email_signature = %s", [session['email_signature']])
+    signature = cur.fetchone()
+    if not signature:
+        flash("Erreur : signature introuvable.")
+        return redirect(url_for('login'))
+    
+    signature_id = signature[0]
+    
+    # Récupérer les dossiers avec le statut "Terminé" pour la brigade connectée
+    cur.execute("""SELECT * FROM gestion_signature WHERE signature_id = %s AND statut = 'Terminé'""", [signature_id])
+    dossiers = cur.fetchall()
+    cur.close()
+    
+    return render_template(
+        "signature/dossier/dossiers_valides.html",
+        dossiers=dossiers,
+        loggedIn=loggedIn,
+        firstName=firstName
+    )
 
 
 
+
+
+
+
+
+
+
+###################conversationfonciere
 @app.route("/inscription_conversationfonciere",methods=['POST', 'GET'])
 def inscription_conversationfonciere():
     if request.method == 'POST':
@@ -1269,8 +1375,6 @@ def conversation_fonciere_tableau_de_bord():
         return redirect(url_for('login'))
     return render_template('conversation_fonciere/index.html')
 
-
-
 @app.route("/liste_gestion_fonciere")
 def liste_gestion_fonciere():
     # Vérifier si l'utilisateur est connecté comme un membre de la sécurisation
@@ -1298,7 +1402,6 @@ def liste_gestion_fonciere():
         loggedIn=loggedIn,
         firstName=firstName
     )
-
 
 @app.route("/assigner_dossier_fonciere/<int:dossier_id>", methods=["POST"])
 def assigner_dossier_fonciere(dossier_id):
@@ -1329,7 +1432,6 @@ def assigner_dossier_fonciere(dossier_id):
     flash("Dossier assigné avec succès.", "success")
     return redirect(url_for('liste_gestion_fonciere'))
 
-
 @app.route("/liste_dossiers_assignes_fonciere")
 def liste_dossiers_assignes_fonciere():
     # Vérifier si l'utilisateur est connecté et est un membre de la sécurisation
@@ -1356,64 +1458,6 @@ def liste_dossiers_assignes_fonciere():
         loggedIn=loggedIn,
         firstName=firstName
     )
-    
-  
-
-# @app.route('/fin_dossier_fonciere/<int:id_dossier>', methods=['POST'])
-# def fin_dossier_fonciere(id_dossier):
-#     # Vérifier si l'utilisateur est connecté et est un membre de la sécurisation
-#     if 'email_conversationfonciere' not in session:
-#         return redirect(url_for('login'))
-
-#     # Récupérer l'état de connexion et le prénom
-#     loggedIn, firstName = getLogin('email_conversationfonciere', 'conversation_fonciere')
-#     if not loggedIn:
-#         return redirect(url_for('login'))
-    
-#     cur = mysql.connection.cursor()
-#     cur.execute("SELECT ident, CONCAT(name, ' ', prenom) AS nom_signature FROM signature WHERE email_signature = %s", 
-#                 [session['email_signature']])
-#     signature = cur.fetchone()
-#     signature_id = signature[0]
-#     nom_signature = signature[1]
-
-#     # Récupérer le dossier de la table gestion_signature
-#     cur = mysql.connection.cursor()
-    
-    
-#     cur.execute("""
-#         SELECT *
-#         FROM gestion_signature
-#         WHERE id = %s AND signature_id = %s
-#     """, (id_dossier, signature_id))
-#     dossier = cur.fetchone()
-
-#     if dossier:
-#         # Mise à jour du statut dans gestion_signature pour marquer le dossier comme terminé
-#         cur.execute("""
-#             UPDATE gestion_signature
-#             SET statut = 'Terminé'
-#             WHERE id = %s
-#         """, [id_dossier])
-
-#         # Insertion du dossier dans gestion_evaluation_cadastrale avec le nom du validateur
-       
-        
-#         cur.execute("""
-#         INSERT INTO gestion_fonciere (nom_dossier, date_creation, date_validation, nom_signature, statut)
-#             VALUES (%s, %s, NOW(), %s, 'En attente')
-#         """, (dossier[1], dossier[2], nom_signature))
-
-#         # Commit des changements dans la base de données
-#         mysql.connection.commit()
-#         cur.close()
-
-#         # Retourner à la page des dossiers de la sécurisation
-#         return redirect(url_for('liste_dossiers_assignes_signature'))
-
-#     # Si le dossier n'est pas trouvé ou ne peut pas être validé
-#     return 'Dossier non trouvé ou statut invalide', 400
-
 
 @app.route("/fin_dossier_fonciere/<int:id_dossier>", methods=["POST"])
 def fin_dossier_fonciere(id_dossier):
@@ -1449,12 +1493,46 @@ def fin_dossier_fonciere(id_dossier):
     flash("Dossier assigné et validé avec succès.", "success")
     return redirect(url_for('liste_gestion_fonciere'))
 
+@app.route("/dossiers_fonciere_valide")
+def dossiers_fonciere_valide():
+    # Vérifier si l'utilisateur est connecté
+    if 'email_conversationfonciere' not in session:
+        return redirect(url_for('login'))
+
+    # Récupérer les informations de la brigade connectée
+    loggedIn, firstName = getLogin('email_conversationfonciere', 'conversation_fonciere')
+    if not loggedIn:
+        return redirect(url_for('login'))
+    
+    cur = mysql.connection.cursor()
+    
+    # Identifier le chef de brigade connecté
+    cur.execute("SELECT ident FROM conversation_fonciere WHERE email_conversationfonciere = %s", [session['email_conversationfonciere']])
+    conversation_fonciere = cur.fetchone()
+    if not conversation_fonciere:
+        flash("Erreur : conversation_fonciere introuvable.")
+        return redirect(url_for('login'))
+    
+    fonciere_id = conversation_fonciere[0]
+    
+    # Récupérer les dossiers avec le statut "Terminé" pour la brigade connectée
+    cur.execute("""SELECT * FROM gestion_fonciere WHERE fonciere_id = %s AND statut = 'Terminé'""", [fonciere_id])
+    dossiers = cur.fetchall()
+    cur.close()
+    
+    return render_template(
+        "conversation_fonciere/dossier/dossiers_valides.html",
+        dossiers=dossiers,
+        loggedIn=loggedIn,
+        firstName=firstName
+    )
 
 
 
 
 
 
+#####******************* login
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -1492,8 +1570,6 @@ def login():
 
 
 #####******************* Mot de passe oublié
-
-
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':

@@ -80,20 +80,24 @@
                 <li class="menu-title"><span data-key="t-menu">Menu</span></li>
                 
 
-                <a class="nav-link menu-link" href="/securisation_tableau_de_bord"  role="button">
+                <a class="nav-link menu-link" href="{{ url_for('securisation_tableau_de_bord') }}"  role="button">
                         <i class="ri-dashboard-2-line"></i> <span data-key="t-apps">Tableau de bord</span>
                 </a>
 
-                <a class="nav-link menu-link" href="/liste_gestion_securisation"  role="button">
+                <a class="nav-link menu-link" href="{{ url_for('liste_gestion_securisation') }}"  role="button">
                     <i class="ri-apps-2-line"></i> <span data-key="t-apps">Dossier en attente</span>
                 </a>
 
-                <a class="nav-link menu-link" href="/liste_dossiers_assignes_securisation"  role="button">
+                <a class="nav-link menu-link" href="{{ url_for('liste_dossiers_assignes_securisation') }}"  role="button">
+                    <i class="ri-apps-2-line"></i> <span data-key="t-apps">Dossier en cours</span>
+                </a>
+
+                <a class="nav-link menu-link" href="{{ url_for('dossiers_securisation_valide') }}"  role="button">
                     <i class="ri-apps-2-line"></i> <span data-key="t-apps">Dossier en cours</span>
                 </a>
 
 
-
+                
 
 
            
