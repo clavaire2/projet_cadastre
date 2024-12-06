@@ -75,16 +75,73 @@ def logout():
 
 
 
+
+@app.route("/inscription_admin",methods=['POST', 'GET'])
+def inscription_admin():
+    if request.method == 'POST':
+        name = request.form['name']
+        prenom = request.form['prenom']
+        email = request.form['email']
+        numero_telephone = request.form['numero_telephone']
+        password = request.form['password']
+        confirm_password = request.form['confirm_password']
+
+        # Vérification de la confirmation de mot de passe
+        if password != confirm_password:
+            return "Les mots de passe ne correspondent pas. Veuillez réessayer."
+
+        hashed_password = hashlib.md5(password.encode()).hexdigest()
+        cursor = mysql.connection.cursor()
+        
+        cursor.execute("SELECT * FROM admin WHERE email_admin = %s", (email,))
+        existing_user = cursor.fetchone()
+
+        if existing_user:
+            flash("Cet email est déjà utilisé. Veuillez en utiliser un autre.", "danger")
+            return redirect('/inscription_admin')
+
+        try:
+            cursor = mysql.connection.cursor()
+            query = """INSERT INTO `admin` (name, prenom, email_admin, numero_telephone, password) 
+                       VALUES (%s, %s, %s, %s, %s)"""
+            cursor.execute(query, (name, prenom, email, numero_telephone, hashed_password))
+            mysql.connection.commit()
+            return redirect('/')
+        except Exception as e:
+            return f"Erreur lors de l'inscription : {e}"
+    return render_template('admin/connexion/cree_compte.html')
+
 @app.route("/admin_tableau_de_bord")
 def admin_tableau_de_bord():
+    if 'email_admin' not in session:
+        return redirect(url_for('login'))
+
+    # Récupérer les informations du chef de brigade connecté
+    loggedIn, firstName = getLogin('email_admin', 'admin')
+    if not loggedIn:
+        return redirect(url_for('login'))
     return render_template('admin/index.html')
 
 @app.route("/ajout_dossier")
 def ajout_dossier():
+    if 'email_admin' not in session:
+        return redirect(url_for('login'))
+
+    # Récupérer les informations du chef de brigade connecté
+    loggedIn, firstName = getLogin('email_admin', 'admin')
+    if not loggedIn:
+        return redirect(url_for('login'))
     return render_template('admin/dossier/ajout_dossier.html')
 
 @app.route('/ajouter_dossier', methods=['GET', 'POST'])
 def ajouter_dossier():
+    if 'email_admin' not in session:
+        return redirect(url_for('login'))
+
+    # Récupérer les informations du chef de brigade connecté
+    loggedIn, firstName = getLogin('email_admin', 'admin')
+    if not loggedIn:
+        return redirect(url_for('login'))
     if request.method == 'POST':
         # Récupérer les informations du formulaire
         nom = request.form['nom']
@@ -104,12 +161,19 @@ def ajouter_dossier():
 
 @app.route("/liste_dossier")
 def liste_dossier():
+    if 'email_admin' not in session:
+        return redirect(url_for('login'))
+
+    # Récupérer les informations du chef de brigade connecté
+    loggedIn, firstName = getLogin('email_admin', 'admin')
+    if not loggedIn:
+        return redirect(url_for('login'))
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM dossier")  # Vous pouvez ajuster cette requête si vous avez des filtres
     dossiers = cur.fetchall()  # Récupérer tous les résultats sous forme de liste
     cur.close()
 
-    return render_template('admin/dossier/liste_dossier.html',dossiers=dossiers)
+    return render_template('admin/dossier/liste_dossier.html',dossiers=dossiers,firstName=firstName)
 
 @app.route('/valider_dossier_a/<int:dossier_id>', methods=['POST'])
 def valider_dossier_a(dossier_id):
@@ -1561,6 +1625,9 @@ def login():
         elif is_valid(email, "email_signature", password, "signature"):
             session['email_signature'] = email
             return redirect(url_for('signature_fonciere_tableau_de_bord'))
+        elif is_valid(email, "email_admin", password, "admin"):
+            session['email_admin'] = email
+            return redirect(url_for('admin_tableau_de_bord'))
         else:
             flash('Email ou mot de passe incorrect.', 'danger')
             return redirect(url_for('login'))

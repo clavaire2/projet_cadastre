@@ -91,12 +91,12 @@
                                 <div class="col-lg-6">
                                     <div class="p-lg-5 p-4">
                                         <div>
-                                            <h5 class="text-primary">Cree un compte brigade</h5>
+                                            <h5 class="text-primary">Cree un compte admin</h5>
                                             <p class="text-muted">Entrez bien les informations</p>
                                         </div>
 
                                         <div class="mt-4">
-                                            <form class="needs-validation" method="POST"  action="{{ url_for('inscription_brigade') }}">
+                                            <form class="needs-validation" method="POST"  action="{{ url_for('inscription_admin') }}">
 
                                                 <div class="mb-3">
                                                     <label for="username" class="form-label">Nom <span class="text-danger">*</span></label>
@@ -136,7 +136,7 @@
                                                 <div class="mb-3">
                                                     <label class="form-label" for="password-input">Mot de passe</label>
                                                     <div class="position-relative auth-pass-inputgroup">
-                                                        <input type="password" name="password" class="form-control pe-5 password-input" onpaste="return false" placeholder="Entez le mot de passe" id="password-input" aria-describedby="passwordInput" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" required>
+                                                        <input type="password" name="password" class="form-control pe-5 password-input"  placeholder="Entez le mot de passe" id="password-input" aria-describedby="passwordInput" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" required>
                                                         <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon material-shadow-none" type="button" id="password-addon"><i class="ri-eye-fill align-middle"></i></button>
                                                         <div class="invalid-feedback">
                                                             Veuillez entrer le mot de passe
@@ -148,7 +148,7 @@
                                                 <div class="mb-3">
                                                     <label class="form-label" for="password-input">Confirmer le mot de passe</label>
                                                     <div class="position-relative auth-pass-inputgroup">
-                                                        <input type="password" name="confirm_password" class="form-control pe-5 password-input" onpaste="return false" placeholder="Confirmer le mot de passe" id="password-input" aria-describedby="passwordInput" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" required>
+                                                        <input type="password" name="confirm_password" class="form-control pe-5 password-input"  placeholder="Confirmer le mot de passe" id="password-input" aria-describedby="passwordInput" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" required>
                                                         <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon material-shadow-none" type="button" id="password-addon"><i class="ri-eye-fill align-middle"></i></button>
                                                         <div class="invalid-feedback">
                                                             Veuillez confirmer le mot de passe
