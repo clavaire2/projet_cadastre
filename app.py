@@ -30,18 +30,6 @@ mysql.init_app(app)
 
 
 ###################### Dossier
-
-
-
-
-
-
-
-
-
-
-
-
 def getLogin(email, table):
     cur = mysql.connection.cursor()
     if email not in session:
