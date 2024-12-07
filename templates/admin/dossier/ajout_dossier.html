@@ -1,5 +1,9 @@
 {% extends 'admin/base.html' %}
 
+{% block titre %}
+<title>Cadastre - Ajout de dossiers</title>
+{% endblock %}
+
 {% block contenu %}
 
 <div class="page-content">
@@ -28,7 +32,7 @@
                 <div class="card">
                     <div class="card-header align-items-center d-flex">
                         <h4 class="card-title mb-0 flex-grow-1">Formulaire d'ajout</h4>
-                        
+
                     </div><!-- end card header -->
                     <form action="{{ url_for('ajouter_dossier') }}" method="POST">
                         <div class="card-body">
@@ -43,12 +47,14 @@
                                     <!--end col-->
                                     <div class="col-xxl-3 col-md-6">
                                         <div>
-                                            <input hidden type="text" name="raison" class="form-control" id="labelInput">
+                                            <input hidden type="text" name="raison" class="form-control"
+                                                id="labelInput">
                                         </div>
                                     </div>
-                                    <button type="submit" class="btn btn-success waves-effect waves-light">Ajouter</button>
+                                    <button type="submit"
+                                        class="btn btn-success waves-effect waves-light">Ajouter</button>
                                     <!--end col-->
-                                    
+
                                     <!--end col-->
                                 </div>
                                 <!--end row-->
