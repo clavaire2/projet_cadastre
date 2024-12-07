@@ -80,17 +80,19 @@
                 <li class="menu-title"><span data-key="t-menu">Menu</span></li>
                 
 
-                <a class="nav-link menu-link" href="/admin_tableau_de_bord"  role="button">
+                <a class="nav-link menu-link" href="{{ url_for('admin_tableau_de_bord') }}"  role="button">
                         <i class="ri-dashboard-2-line"></i> <span data-key="t-apps">Tableau de bord</span>
                 </a>
 
-                <a class="nav-link menu-link" href="/ajout_dossier"  role="button">
-                    <i class="ri-apps-2-line"></i> <span data-key="t-apps">Ajout dossier</span>
+                <a class="nav-link menu-link" href="{{ url_for('ajout_dossier') }}"  role="button">
+                    <i class="ri-apps-2-line"></i> <span data-key="t-apps">Ajouter un dossier</span>
                 </a>
 
-                <a class="nav-link menu-link" href="/liste_dossier"  role="button">
-                    <i class="ri-apps-2-line"></i> <span data-key="t-apps">Liste dossier</span>
+                <a class="nav-link menu-link" href="{{ url_for('liste_dossier') }}"  role="button">
+                    <i class="ri-apps-2-line"></i> <span data-key="t-apps">Liste des dossier</span>
                 </a>
+
+                
 
 
 

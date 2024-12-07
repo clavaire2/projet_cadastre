@@ -119,7 +119,7 @@ def ajout_dossier():
     loggedIn, firstName = getLogin('email_admin', 'admin')
     if not loggedIn:
         return redirect(url_for('login'))
-    return render_template('admin/dossier/ajout_dossier.html')
+    return render_template('admin/dossier/ajout_dossier.html',firstName=firstName)
 
 @app.route('/ajouter_dossier', methods=['GET', 'POST'])
 def ajouter_dossier():
