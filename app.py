@@ -120,7 +120,7 @@ def admin_tableau_de_bord():
     loggedIn, firstName = getLogin('email_admin', 'admin')
     if not loggedIn:
         return redirect(url_for('login'))
-    return render_template('admin/index.html')
+    return render_template('admin/index.html', firstName=firstName)
 
 @app.route("/ajout_dossier")
 def ajout_dossier():
