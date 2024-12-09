@@ -1,5 +1,10 @@
 {% extends 'signature/base.html' %}
 
+{% block titre %}
+<title>Cadastre - Dossiers en attente</title>
+
+{% endblock %}
+
 {% block contenu %}
 
 <div class="page-content">
@@ -31,11 +36,11 @@
                     <div class="card-header align-items-center d-flex">
                         <h4 class="card-title mb-0 flex-grow-1">Liste des dossier</h4>
 
-                    
+
                     </div><!-- end card header -->
 
                     <div class="card-body">
-                       
+
                         <div class="live-preview">
                             <div class="table-responsive table-card">
                                 <table class="table align-middle table-nowrap table-striped-columns mb-0">
@@ -58,17 +63,19 @@
                                             <td>{{ dossier[5] }}</td>
                                             <td>{{ dossier[4] }}</td>
                                             <td>
-                                                <form action="{{ url_for('assigner_dossier_signature', dossier_id=dossier[0]) }}" method="POST">
+                                                <form
+                                                    action="{{ url_for('assigner_dossier_signature', dossier_id=dossier[0]) }}"
+                                                    method="POST">
                                                     <button type="submit" class="btn btn-primary">Assigner</button>
                                                 </form>
                                             </td>
                                         </tr>
-                                
+
                                         {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
-                        </div>  
+                        </div>
                     </div><!-- end card-body -->
                 </div><!-- end card -->
             </div><!-- end col -->
