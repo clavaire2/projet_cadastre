@@ -27,7 +27,9 @@ mail = Mail(app)
 mysql = MySQL()
 mysql.init_app(app)
 
-
+from datetime import datetime
+now = datetime.now()
+date_now= now.strftime("%Y-%m-%d %H:%M:%S")
 
 ###################### Dossier
 def getLogin(email, table):
@@ -166,21 +168,15 @@ def liste_dossier():
 @app.route('/valider_dossier_a/<int:dossier_id>', methods=['POST'])
 def valider_dossier_a(dossier_id):
     cur = mysql.connection.cursor()
-
-    # Récupérer les données du dossier
     cur.execute("SELECT nom, date_creation FROM dossier WHERE id = %s", (dossier_id,))
     dossier = cur.fetchone()
-    
     if dossier:
         # Insérer les données dans gestion_chef_brigade
         cur.execute("""
-            INSERT INTO gestion_chef_brigade (nom_dossier, date_creation, statut, raison)
-            VALUES (%s, %s, %s, %s)
-        """, (dossier[0], dossier[1], 'En attente', None))
-        
+            INSERT INTO gestion_chef_brigade (nom_dossier, date_creation,date_envoi, statut, raison)
+            VALUES (%s, %s, %s, %s,%s)""", (dossier[0], date_now, date_now, 'En attente', None))
         # Supprimer le dossier de la table dossier
         cur.execute("DELETE FROM dossier WHERE id = %s", (dossier_id,))
-        
         # Commit les modifications
         mysql.connection.commit()
 

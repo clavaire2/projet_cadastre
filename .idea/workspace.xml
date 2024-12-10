@@ -6,7 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="e81d13a9-a9db-4b7b-8612-6db47c272984" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/admin/includes/footer.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/includes/footer.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/admin/includes/header.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/includes/header.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/admin/includes/navbar.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/includes/navbar.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/brigade/includes/footer.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/brigade/includes/footer.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/chef_brigade/includes/footer.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/chef_brigade/includes/footer.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -77,5 +81,16 @@
       <updated>1733439415346</updated>
     </task>
     <servers />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/app.py</url>
+          <line>69</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
