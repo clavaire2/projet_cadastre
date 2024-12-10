@@ -231,7 +231,25 @@ def chef_brigade_tableau_de_bord():
     loggedIn, firstName = getLogin('email_chefbrigade', 'chef_brigade')
     if not loggedIn:
         return redirect(url_for('login'))
-    return render_template('chef_brigade/index.html', firstName=firstName)
+
+    # Identifier l'utilisateur connecté
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT ident FROM chef_brigade WHERE email_chefbrigade = %s", [session['email_chefbrigade']])
+    user = cur.fetchone()
+    
+    chef_brigade_id = user[0]
+
+    # Requêtes séparées pour chaque statut
+    cur.execute("SELECT COUNT(*) FROM gestion_chef_brigade WHERE statut = 'En attente'")
+    en_attente = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM gestion_chef_brigade WHERE chef_brigade_id = %s AND statut = 'En cours'", [chef_brigade_id])
+    en_cours = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM gestion_chef_brigade WHERE chef_brigade_id = %s AND statut = 'Terminé'", [chef_brigade_id])
+    termine = cur.fetchone()[0]
+    cur.close()
+    return render_template('chef_brigade/index.html', firstName=firstName, en_attente=en_attente, en_cours=en_cours, termine=termine)
 
 @app.route('/liste_gestion_chef_brigade')
 def liste_gestion_chef_brigade():
@@ -694,7 +712,28 @@ def brigade_tableau_de_bord():
     loggedIn, firstName = getLogin('email_brigade', 'brigade')
     if not loggedIn:
         return redirect(url_for('login'))
-    return render_template('brigade/index.html',loggedIn=loggedIn)
+    
+    
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT ident FROM brigade WHERE email_brigade = %s", [session['email_brigade']])
+    brigade = cur.fetchone()
+    if not brigade:
+        flash("Brigade introuvable.")
+        return redirect(url_for('login'))
+    
+    brigade_id = brigade[0]
+
+    # Requêtes séparées pour chaque statut
+    cur.execute("SELECT COUNT(*) FROM gestion_brigade WHERE  statut = 'En attente'")
+    en_attente = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM gestion_brigade WHERE brigade_id = %s AND statut = 'En cours'", [brigade_id])
+    en_cours = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM gestion_brigade WHERE brigade_id = %s AND statut = 'Terminé'", [brigade_id])
+    termine = cur.fetchone()[0]
+    cur.close()
+    return render_template('brigade/index.html',loggedIn=loggedIn,firstName=firstName,en_attente=en_attente,en_cours=en_cours,termine=termine)
 
 
 
