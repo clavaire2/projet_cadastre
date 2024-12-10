@@ -958,7 +958,24 @@ def securisation_tableau_de_bord():
     loggedIn, firstName = getLogin('email_securisation', 'securisation')
     if not loggedIn:
         return redirect(url_for('login'))
-    return render_template('securisation/index.html',loggedIn=loggedIn, firstName=firstName)
+    
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT ident FROM securisation WHERE email_securisation = %s", [session['email_securisation']])
+    securisation = cur.fetchone()
+    
+    securisation_id = securisation[0]
+
+    # Requêtes séparées pour chaque statut
+    cur.execute("SELECT COUNT(*) FROM gestion_securisation WHERE statut = 'En attente'")
+    en_attente = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM gestion_securisation WHERE securisation_id = %s AND statut = 'En cours'", [securisation_id])
+    en_cours = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM gestion_securisation WHERE securisation_id = %s AND statut = 'Terminé'", [securisation_id])
+    termine = cur.fetchone()[0]
+    cur.close()
+    return render_template('securisation/index.html',loggedIn=loggedIn, firstName=firstName,en_attente=en_attente, en_cours=en_cours,termine=termine)
 
 
 
@@ -1009,7 +1026,26 @@ def evaluationcadastrale_tableau_de_bord():
     loggedIn, firstName = getLogin('email_evaluationcadastrale', 'evaluation_cadastrale')
     if not loggedIn:
         return redirect(url_for('login'))
-    return render_template('evaluation_cadastrale/index.html',loggedIn=loggedIn, firstName=firstName)
+    
+    
+    
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT ident FROM evaluation_cadastrale WHERE email_evaluationcadastrale = %s", [session['email_evaluationcadastrale']])
+    evaluation_cadastrale = cur.fetchone()
+
+    evaluation_cadastrale_id = evaluation_cadastrale[0]
+
+    # Requêtes SQL pour chaque statut
+    cur.execute("SELECT COUNT(*) FROM gestion_evaluation_cadastrale WHERE statut = 'En attente'")
+    en_attente = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM gestion_evaluation_cadastrale WHERE evaluation_cadastrale_id = %s AND statut = 'En cours'", [evaluation_cadastrale_id])
+    en_cours = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM gestion_evaluation_cadastrale WHERE evaluation_cadastrale_id = %s AND statut = 'Terminé'", [evaluation_cadastrale_id])
+    termine = cur.fetchone()[0]
+    cur.close()
+    return render_template('evaluation_cadastrale/index.html',loggedIn=loggedIn, firstName=firstName, en_attente=en_attente, en_cours=en_cours, termine=termine)
 
 @app.route("/liste_gestion_evaluationcadastrale")
 def liste_gestion_evaluationcadastrale():
