@@ -1271,7 +1271,27 @@ def signature_fonciere_tableau_de_bord():
     loggedIn, firstName = getLogin('email_signature', 'signature')
     if not loggedIn:
         return redirect(url_for('login'))
-    return render_template('signature/index.html')
+    
+    
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT ident FROM signature WHERE email_signature = %s", [session['email_signature']])
+    signature = cur.fetchone()
+
+    signature_id = signature[0]
+
+    # Requêtes SQL pour chaque statut
+    cur.execute("SELECT COUNT(*) FROM gestion_signature WHERE statut = 'En attente'")
+    en_attente = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM gestion_signature WHERE signature_id = %s AND statut = 'En cours'", [signature_id])
+    en_cours = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM gestion_signature WHERE signature_id = %s AND statut = 'Terminé'", [signature_id])
+    termine = cur.fetchone()[0]
+    cur.close()
+    return render_template('signature/index.html',firstName=firstName,en_attente=en_attente,en_cours=en_cours,termine=termine)
+
+
 
 @app.route("/liste_gestion_signature")
 def liste_gestion_signature():
