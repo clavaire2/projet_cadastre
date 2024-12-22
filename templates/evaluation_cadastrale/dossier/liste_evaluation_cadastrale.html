@@ -1,0 +1,177 @@
+{% extends 'evaluation_cadastrale/base.html' %}
+
+{% block titre %}
+<title>Cadastre - Dossiers en attente</title>
+
+{% endblock %}
+
+{% block contenu %}
+
+<div class="page-content">
+    <div class="container-fluid">
+
+        <!-- start page title -->
+        <div class="row">
+            <div class="col-12">
+                <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+                    <h4 class="mb-sm-0">Liste des dossier en Attente</h4>
+
+                    <div class="page-title-right">
+                        <ol class="breadcrumb m-0">
+                            <li class="breadcrumb-item"><a href="javascript: void(0);">Liste</a></li>
+                            <li class="breadcrumb-item active">Liste des dossiers en Attente: <b style="color:blue">evaluation_cadastrale</b>
+                            </li>
+                        </ol>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <!-- end page title -->
+
+        <!-- end row -->
+
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card">
+                    <div class="card-header align-items-center d-flex">
+                        <h4 class="card-title mb-0 flex-grow-1">
+                            Liste des dossiers : <b style="color: blue;">evaluation_cadastrale</b>
+                        </h4>
+                    </div>
+                    <!-- end card header -->
+
+                    <div class="card-body">
+                        <div class="live-preview">
+                            <div class="table-responsive table-card">
+                                <table class="table align-middle table-nowrap table-striped mb-0">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th class="text-center">Nom du dossier</th>
+                                        <th class="text-center">Date d'ajout</th>
+                                        <th class="text-center">Date assignation<br>termine N3</th>
+                                        <th class="text-center">Nom N1</th>
+                                        <th class="text-center">Nom N2</th>
+                                        <th class="text-center">Nom N3</th>
+                                        <th class="text-center">Date assignation N4</th>
+                                        <th class="text-center">Votre Nom</th>
+                                        <th class="text-center">Statut</th>
+                                        <th class="text-center">Action</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for dossier in dossiers %}
+                                    <tr>
+                                        <td class="text-center">
+                                            <b style="color: blue;">{{ dossier["nom_dossier"] }}</b>
+                                        </td>
+                                        <td class="text-center">{{ dossier["date_ajout"] }}</td>
+                                        <td class="text-center">{{ dossier["date_temine_n3"] }}</td>
+                                        <td class="text-center">{{ dossier["n1_admin"] }}</td>
+                                        <td class="text-center">{{ dossier["n2_chef_brigade"] }}</td>
+                                        <td class="text-center" style="color: blue;">{{ dossier["n3_brigade"] }}</td>
+                                        <td class="text-center" style="color: blue;">{{ dossier["date_assignation_n4"]
+                                            }}
+                                        </td>
+                                        <td class="text-center" style="color: blue;">{{ dossier["n4_evaluation_cadastrale"] }}
+                                        </td>
+                                        <td class="text-center" style="color: blue;">{{ dossier["statut"] }}</td>
+                                        <td class="text-center">
+                                            <!-- Bouton "Prendre en charge" -->
+                                            <button type="button" class="btn btn-success btn-sm rounded-pill"
+                                                    style="font-size: 14px;"
+                                                    onclick="confirmAssignment({{ dossier['id'] }}, '{{ dossier['nom_dossier'] }}');">
+                                                Prendre en<br>charge ce dossier
+                                            </button>
+
+                                            <!-- Modal -->
+                                            <div id="assignmentModal{{ dossier['id'] }}" class="modal">
+                                                <div class="modal-content">
+                                                    <h3 style="color: #28a745;">Confirmer la prise en charge</h3>
+                                                    <p style="color: #555;">
+                                                        Êtes-vous sûr de vouloir prendre en charge ce dossier
+                                                        (<b>{{ dossier['nom_dossier'] }}</b>) ?
+                                                    </p>
+                                                    <div style="text-align: center;">
+                                                        <!-- Bouton de confirmation -->
+                                                        <form id="assignForm{{ dossier['id'] }}"
+                                                              action="{{ url_for('assigner_dossier_evaluation_cadastrale', id_dossier=dossier['id']) }}"
+                                                              method="POST" style="display: inline;">
+                                                            <button type="submit"
+                                                                    style="background-color: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+                                                                Oui, confirmer
+                                                            </button>
+                                                        </form>
+                                                        <!-- Bouton d'annulation -->
+                                                        <button onclick="closeModal({{ dossier['id'] }})"
+                                                                style="background-color: #ccc; color: black; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+                                                            Annuler
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end card-body -->
+                </div>
+                <!-- end card -->
+            </div>
+            <!-- end col -->
+        </div>
+        <!-- end row -->
+
+        <script type="text/javascript">
+            function confirmAssignment(dossierId, dossierName) {
+                // Afficher le modal spécifique au dossier
+                document.getElementById('assignmentModal' + dossierId).style.display = 'block';
+            }
+
+            function closeModal(dossierId) {
+                // Masquer le modal spécifique
+                document.getElementById('assignmentModal' + dossierId).style.display = 'none';
+            }
+        </script>
+
+        <style>
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 1;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.4);
+                overflow: auto;
+            }
+
+            .modal-content {
+                background-color: white;
+                margin: 15% auto;
+                padding: 20px;
+                border-radius: 10px;
+                width: 50%;
+                text-align: center;
+            }
+
+            .modal-content h3 {
+                margin-bottom: 20px;
+            }
+
+            .modal-content p {
+                margin-bottom: 20px;
+            }
+        </style>
+
+
+    </div>
+    <!-- container-fluid -->
+</div>
+
+{% endblock %}

@@ -4,121 +4,99 @@
 
 <div class="page-content">
     <div class="container-fluid">
-
         <div class="row">
             <div class="col">
-
                 <div class="h-100">
-                    <div class="row mb-3 pb-1">
+                    <div class="row mb-4 pb-2">
                         <div class="col-12">
-                            <div class="d-flex align-items-lg-center flex-lg-row flex-column">
+                            <div class="d-flex align-items-center flex-lg-row flex-column">
                                 <div class="flex-grow-1">
-                                    <h4 class="fs-16 mb-1">Bonjour Chef, {{firstName}}</h4>
-                                    <p class="text-muted mb-0"></p>
+                                    <h4 class="fs-20 mb-2 text-primary">Bonjour, {{firstName}}</h4>
+                                    <b class="text-muted mb-0">Votre tableau de bord actuel : <b style="color:blue">securisation</b></b>
                                 </div>
-                            </div><!-- end card header -->
+                            </div>
                         </div>
-                        <!--end col-->
                     </div>
-                    <!--end row-->
 
                     <div class="row">
+                        <!-- Card 1: Dossier en attente -->
                         <div class="col-xl-4 col-md-6">
-                            <!-- card -->
-                            <div class="card card-animate">
+                            <div class="card card-animate shadow-lg rounded-3">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
-                                        <div class="flex-grow-1 overflow-hidden">
-                                            <p class="text-uppercase fw-medium text-muted text-truncate mb-0">
-                                                Nombre de dossier en attente</p>
+                                        <div class="flex-grow-1">
+                                            <p class="text-uppercase fw-medium text-muted mb-1">Nombre de dossier en attente</p>
                                         </div>
                                     </div>
-                                    <div class="d-flex align-items-end justify-content-between mt-4">
+                                    <div class="d-flex align-items-end justify-content-between mt-3">
                                         <div>
-                                            <h4 class="fs-22 fw-semibold ff-secondary mb-4">{{en_attente}}
-                                            </h4>
-                                            <a href="{{ url_for('liste_gestion_securisation') }}"
-                                                class="text-decoration-underline">Voir plus</a>
+                                            <h4 class="fs-24 fw-bold text-dark mb-3">{{en_attente}}</h4>
+                                            <a href="{{url_for('liste_gestion_securisation') }}" class="text-decoration-none text-success">Voir plus</a>
                                         </div>
-                                        <div class="avatar-sm flex-shrink-0">
-                                            <span class="avatar-title bg-success-subtle rounded fs-3">
-                                                <i class="bx bx-time text-success"></i>
+                                        <div class="avatar-sm">
+                                            <span class="avatar-title bg-success rounded-circle">
+                                                <i class="bx bx-time text-white"></i>
                                             </span>
                                         </div>
                                     </div>
-                                </div><!-- end card body -->
-                            </div><!-- end card -->
-                        </div><!-- end col -->
+                                </div>
+                            </div>
+                        </div>
 
+                        <!-- Card 2: Dossier en cours -->
                         <div class="col-xl-4 col-md-6">
-                            <!-- card -->
-                            <div class="card card-animate">
+                            <div class="card card-animate shadow-lg rounded-3">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
-                                        <div class="flex-grow-1 overflow-hidden">
-                                            <p class="text-uppercase fw-medium text-muted text-truncate mb-0">
-                                                Nombre de dossier en cours</p>
+                                        <div class="flex-grow-1">
+                                            <p class="text-uppercase fw-medium text-muted mb-1">Nombre de dossier en cours</p>
                                         </div>
                                     </div>
-                                    <div class="d-flex align-items-end justify-content-between mt-4">
+                                    <div class="d-flex align-items-end justify-content-between mt-3">
                                         <div>
-                                            <h4 class="fs-22 fw-semibold ff-secondary mb-4">{{en_cours}}</h4>
-                                            <a href="{{ url_for('liste_dossiers_assignes_securisation') }}"
-                                                class="text-decoration-underline">voir plus</a>
+                                            <h4 class="fs-24 fw-bold text-dark mb-3">{{en_cours}}</h4>
+                                            <a href="{{ url_for('dossier_cours_securisation') }}" class="text-decoration-none text-info">Voir plus</a>
                                         </div>
-                                        <div class="avatar-sm flex-shrink-0">
-                                            <span class="avatar-title bg-info-subtle rounded fs-3">
-                                                <i class="bx bx-loader bx-spin text-info"></i>
+                                        <div class="avatar-sm">
+                                            <span class="avatar-title bg-info rounded-circle">
+                                                <i class="bx bx-loader bx-spin text-white"></i>
                                             </span>
                                         </div>
                                     </div>
-                                </div><!-- end card body -->
-                            </div><!-- end card -->
-                        </div><!-- end col -->
+                                </div>
+                            </div>
+                        </div>
 
+                        <!-- Card 3: Dossier validés -->
                         <div class="col-xl-4 col-md-6">
-                            <!-- card -->
-                            <div class="card card-animate">
+                            <div class="card card-animate shadow-lg rounded-3">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
-                                        <div class="flex-grow-1 overflow-hidden">
-                                            <p class="text-uppercase fw-medium text-muted text-truncate mb-0">
-                                                Nombre de dossier validés</p>
+                                        <div class="flex-grow-1">
+                                            <p class="text-uppercase fw-medium text-muted mb-1">Nombre de dossier validés</p>
                                         </div>
-
                                     </div>
-                                    <div class="d-flex align-items-end justify-content-between mt-4">
+                                    <div class="d-flex align-items-end justify-content-between mt-3">
                                         <div>
-                                            <h4 class="fs-22 fw-semibold ff-secondary mb-4">{{termine}}</span>
-                                            </h4>
-                                            <a href="{{ url_for('dossiers_securisation_valide') }}"
-                                                class="text-decoration-underline">Voir plus</a>
+                                            <h4 class="fs-24 fw-bold text-dark mb-3">{{termine}}</h4>
+                                            <a href="{{url_for('dossiers_valides_securisation')}}" class="text-decoration-none text-warning">Voir plus</a>
                                         </div>
-                                        <div class="avatar-sm flex-shrink-0">
-                                            <span class="avatar-title bg-warning-subtle rounded fs-3">
-                                                <i class="bx bx-check-circle text-warning"></i>
+                                        <div class="avatar-sm">
+                                            <span class="avatar-title bg-warning rounded-circle">
+                                                <i class="bx bx-check-circle text-white"></i>
                                             </span>
                                         </div>
                                     </div>
-                                </div><!-- end card body -->
-                            </div><!-- end card -->
-                        </div><!-- end col -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                        <!-- end col -->
-                    </div> <!-- end row-->
-
-
-
-
-                </div> <!-- end .h-100-->
-
-            </div> <!-- end col -->
-
-            <!-- end col -->
+                </div>
+            </div>
         </div>
-
     </div>
-    <!-- container-fluid -->
 </div>
+
 
 {% endblock %}

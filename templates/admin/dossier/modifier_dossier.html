@@ -1,0 +1,99 @@
+{% extends 'admin/base.html' %}
+
+{% block titre %}
+<title>Cadastre - Modifier Dossier</title>
+{% endblock %}
+
+{% block contenu %}
+
+<div class="page-content">
+    <div class="container-fluid">
+
+        <!-- start page title -->
+        <div class="row">
+            <div class="col-12">
+                <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+                    <h4 class="mb-sm-0">Modifier l'un des dossiers </h4>
+                    <div class="page-title-right">
+                        <ol class="breadcrumb m-0">
+                            <li class="breadcrumb-item"><a href="javascript: void(0);">Modifier</a></li>
+                            <li class="breadcrumb-item active"><a href="{{url_for('ajouter_dossier')}}">Ajouter un
+                                dossier</a></li>
+                            <li class="breadcrumb-item active"></li>
+                        </ol>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Début du titre de la page -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header align-items-center d-flex" style="background-color: blue;">
+                        <h2 class="card-title mb-0 flex-grow-1 text-center " style="background-color: white;">Formulaire
+                            d'ajout de dossier</h2>
+                    </div>
+                    <!-- Fin de l'en-tête de la carte -->
+                    <!-- Fin de l'en-tête de la carte -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                    <div style="display: flex; justify-content: center; align-items: center; height: 100%; text-align: center;">
+                        {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}" role="alert"
+                             style="width: 100%; max-width: 600px; margin: 10px; text-align: center;">
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+
+
+                    <form action="{{ url_for('modifier_dossier', id=dossier[0]) }}" method="POST">
+                        <div class="card-body p-4">
+                            <div class="row gy-4">
+                                <!-- Champ Numéro du dossier -->
+                                <div class="col-xxl-4 col-md-6">
+                                    <div class="form-group">
+                                        <label for="basiInput" class="form-label fw-bold">Numéro du dossier</label>
+                                        <input type="text" name="nom" value="{{ dossier[1] }}"
+                                               class="form-control border-1 shadow-sm"
+                                               placeholder="Entrez le numéro du dossier" required>
+                                    </div>
+                                </div>
+                                <!-- Fin col -->
+
+                                <!-- Champ Raison (caché) -->
+                                <div class="col-xxl-4 col-md-6">
+                                    <div class="form-group">
+                                        <input type="hidden" name="raison" value="{{ dossier[2] }}" class="form-control"
+                                               id="labelInput">
+                                    </div>
+                                </div>
+                                <!-- Fin col -->
+                            </div>
+                            <!-- Fin row -->
+
+                            <!-- Bouton et Avertissement -->
+                            <div class="mt-4 d-flex align-items-center">
+                                <button type="submit" class="btn btn-primary px-4 me-3">Modifier</button>
+                                <p class="text-danger fw-bold mb-0">Veuillez vérifier les informations avant de
+                                    soumettre.</p>
+                            </div>
+                        </div>
+                    </form>
+
+
+                </div>
+            </div>
+            <!--end col-->
+        </div>
+        <!--end row-->
+
+
+    </div> <!-- container-fluid -->
+</div><!-- End Page-content -->
+
+{% endblock %}

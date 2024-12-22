@@ -1,7 +1,7 @@
-{% extends 'chef_brigade/base.html' %}
+{% extends 'brigade/base.html' %}
 
 {% block titre %}
-<title>Cadastre - Dossiers en attente</title>
+<title>Cadastre - Dossiers EN cours </title>
 
 {% endblock %}
 
@@ -14,12 +14,12 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-                    <h4 class="mb-sm-0">Liste des dossier</h4>
+                    <h4 class="mb-sm-0">Liste des dossier En cours</h4>
 
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Liste</a></li>
-                            <li class="breadcrumb-item active">Liste des dossiers</li>
+                            <li class="breadcrumb-item active">Liste des dossiers En cours </li>
                         </ol>
                     </div>
 
@@ -34,7 +34,7 @@
             <div class="col-xl-12">
                 <div class="card">
                     <div class="card-header align-items-center d-flex">
-                        <h4 class="card-title mb-0 flex-grow-1">Liste des dossier</h4>
+                        <h4 class="card-title mb-0 flex-grow-1">Liste des dossier en Cours</h4>
 
 
                     </div><!-- end card header -->
@@ -47,10 +47,15 @@
                                     <thead class="table-light">
                                     <tr>
                                         <th class="text-center">Nom du dossier</th>
-                                        <th class="text-center">Date d'ajout du dossier</th>
-                                        <th class="text-center">Statut</th>
-                                        <th class="text-center">Nom de l'ajouteur</th>
-                                        <th class="text-center">Actions</th>
+                                        <th class="text-center">Date d'ajout</th>
+                                        <th class="text-center">date assignation<br> termine N2</th>
+                                        <th class="text-center">Nom N1</th>
+                                        <th class="text-center">Nom N2</th>
+
+                                        <th class="text-center">date assignation N3</th>
+                                        <th class="text-center">Votre Nom</th>
+                                        <th class="text-center">statut</th>
+                                        <th class="text-center">Action</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -58,19 +63,24 @@
                                     <tr>
                                         <td class="text-center"><b style="color: blue">{{ dossier[1] }}</b></td>
                                         <td class="text-center">{{ dossier[2] }}</td>
+                                        <td class="text-center">{{ dossier[3] }}</td>
+                                        <td class="text-center">{{ dossier[6] }}</td>
+                                        <td class="text-center">{{ dossier[7] }}</td>
+                                        <td class="text-center" style="color:blue">{{ dossier[4] }}</td>
+                                        <td class="text-center" style="color:blue">{{ dossier[9] }}</td>
                                         <td class="text-center">
-                                            <span class="badge bg-{{ 'success' if dossier[4] == 'actif' else 'danger' }}">
-                                                {{ dossier[4] }}
-                                            </span>
+                                            <b class="badge bg-success p-1 fs-5">
+                                                {{ dossier[5] }}
+                                            </b>
+
                                         </td>
-                                        <td class="text-center">{{ dossier[5] }}</td>
                                         <td class="text-center">
                                             <!-- Bouton "Prendre en charge" -->
                                             <button type="button"
                                                     class="btn btn-success btn-sm rounded-pill"
                                                     style="font-size: 14px;"
                                                     onclick="confirmAssignment({{ dossier[0] }}, '{{ dossier[1] }}');">
-                                                Prendre en charge ce dossier
+                                                Prendre en <br>charge ce dossier
                                             </button>
 
                                             <!-- Modal -->
@@ -84,7 +94,7 @@
                                                     <div style="text-align: center;">
                                                         <!-- Bouton de confirmation -->
                                                         <form id="assignForm{{ dossier[0] }}"
-                                                              action="{{ url_for('assigner_dossier_chefbrigade', id_dossier=dossier[0]) }}"
+                                                              action="{{ url_for('terminer_dossier_brigade', id_dossier=dossier[0]) }}"
                                                               method="POST" style="display: inline;">
                                                             <button type="submit"
                                                                     style="background-color: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">

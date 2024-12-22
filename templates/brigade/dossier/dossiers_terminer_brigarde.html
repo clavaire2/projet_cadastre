@@ -1,4 +1,4 @@
-{% extends 'chef_brigade/base.html' %}
+{% extends 'brigade/base.html' %}
 
 {% block titre %}
 <title>chef brigade - Dossiers en cours </title>
@@ -14,12 +14,11 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-light">
-                    <h4 class="mb-sm-0">Liste des dossiers en attente de validation</h4>
-
+                    <h4 class="mb-sm-0">Liste des dossiers Terminé </h4>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Accueil</a></li>
-                            <li class="breadcrumb-item active">Dossiers en attente</li>
+                            <li class="breadcrumb-item active">Dossiers  Terminés</li>
                         </ol>
                     </div>
                 </div>
@@ -31,7 +30,7 @@
             <div class="col-xl-12">
                 <div class="card">
                     <div class="card-header align-items-center d-flex">
-                        <h4 class="card-title mb-0 flex-grow-1">Dossiers en attente de validation</h4>
+                        <h4 class="card-title mb-0 flex-grow-1">Dossiers Terminés</h4>
                     </div>
 
                     <div class="card-body">
@@ -59,6 +58,7 @@
                                         <th class="text-center">Durées du <br>traintement dossier</th>
                                         <th class="text-center">Ajouté par N1</th>
                                         <th class="text-center">Traitement N2</th>
+                                        <th class="text-center">Traitement N3</th>
                                         <th class="text-center">Statut</th>
                                     </tr>
                                     </thead>
@@ -67,14 +67,15 @@
                                     <tr>
                                         <td class="text-center"><b class="text-primary">{{dossier[1]}}</b></td>
                                         <td class="text-center">{{dossier[2]}}</td>
-                                        <td class="text-center">{{ dossier[3] }}</td>
-                                        <td class="text-center">{{ dossier[4] }}</td>
-                                        <td class="text-center"> {{ dossier[4]-dossier[3] }}
-                                        <td class="text-center">{{ dossier[6] }}</td>
+                                        <td class="text-center">{{ dossier[4]}}</td>
+                                        <td class="text-center">{{ dossier[5] }}</td>
+                                        <td class="text-center"> {{ dossier[5]-dossier[4] }}
                                         <td class="text-center">{{ dossier[7] }}</td>
+                                        <td class="text-center">{{ dossier[8] }}</td>
+                                        <td class="text-center">{{ dossier[10] }}</td>
                                         <td>
                                         <b style="color: blue;">
-                                            {{ dossier[5] }}
+                                            {{ dossier[6] }}
                                         </b>
                                         </td>
 

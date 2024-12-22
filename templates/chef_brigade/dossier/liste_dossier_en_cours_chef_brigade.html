@@ -1,7 +1,7 @@
 {% extends 'chef_brigade/base.html' %}
 
 {% block titre %}
-<title>Cadastre - Dossiers en attente</title>
+<title>chef brigade - Dossiers en cours </title>
 
 {% endblock %}
 
@@ -10,85 +10,94 @@
 <div class="page-content">
     <div class="container-fluid">
 
-        <!-- start page title -->
+        <!-- Titre de la page -->
         <div class="row">
             <div class="col-12">
-                <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-                    <h4 class="mb-sm-0">Liste des dossier</h4>
+                <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-light">
+                    <h4 class="mb-sm-0">Liste des dossiers en attente de validation</h4>
 
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
-                            <li class="breadcrumb-item"><a href="javascript: void(0);">Liste</a></li>
-                            <li class="breadcrumb-item active">Liste des dossiers</li>
+                            <li class="breadcrumb-item"><a href="javascript: void(0);">Accueil</a></li>
+                            <li class="breadcrumb-item active">Dossiers en attente</li>
                         </ol>
                     </div>
-
                 </div>
             </div>
         </div>
-        <!-- end page title -->
 
-        <!-- end row -->
-
+        <!-- Liste des dossiers -->
         <div class="row">
             <div class="col-xl-12">
                 <div class="card">
                     <div class="card-header align-items-center d-flex">
-                        <h4 class="card-title mb-0 flex-grow-1">Liste des dossier</h4>
-
-
-                    </div><!-- end card header -->
+                        <h4 class="card-title mb-0 flex-grow-1">Dossiers en attente de validation</h4>
+                    </div>
 
                     <div class="card-body">
-
                         <div class="live-preview">
                             <div class="table-responsive table-card">
-                                <table class="table align-middle table-nowrap table-striped mb-0">
+                                 {% with messages = get_flashed_messages(with_categories=true) %}
+                                {% if messages %}
+                                <div>
+                                    {% for category, message in messages %}
+                                    <div class="alert alert-{{ category }}" role="alert">
+                                        {{ message }}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                {% endwith %}
+
+                                <table class="table table-hover align-middle table-striped mb-0">
                                     <thead class="table-light">
                                     <tr>
                                         <th class="text-center">Nom du dossier</th>
-                                        <th class="text-center">Date d'ajout du dossier</th>
+                                        <th class="text-center">Date d'ajout</th>
                                         <th class="text-center">Statut</th>
-                                        <th class="text-center">Nom de l'ajouteur</th>
+                                        <th class="text-center">Ajouté par N1</th>
+                                        <th class="text-center">Traitement N2</th>
                                         <th class="text-center">Actions</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     {% for dossier in dossiers %}
                                     <tr>
-                                        <td class="text-center"><b style="color: blue">{{ dossier[1] }}</b></td>
+                                        <td class="text-center">
+                                            <b class="text-primary">{{ dossier[1] }}</b>
+                                        </td>
                                         <td class="text-center">{{ dossier[2] }}</td>
                                         <td class="text-center">
-                                            <span class="badge bg-{{ 'success' if dossier[4] == 'actif' else 'danger' }}">
+                                            <span class="badge bg-{{ 'success' if dossier[4] == 'actif' else 'warning' }}">
                                                 {{ dossier[4] }}
                                             </span>
                                         </td>
                                         <td class="text-center">{{ dossier[5] }}</td>
+                                        <td class="text-center">{{ dossier[6] }}</td>
                                         <td class="text-center">
-                                            <!-- Bouton "Prendre en charge" -->
+                                            <!-- Bouton "Valider Dossier" -->
                                             <button type="button"
-                                                    class="btn btn-success btn-sm rounded-pill"
+                                                    class="btn btn-outline-success btn-sm rounded-pill"
                                                     style="font-size: 14px;"
-                                                    onclick="confirmAssignment({{ dossier[0] }}, '{{ dossier[1] }}');">
-                                                Prendre en charge ce dossier
+                                                    onclick="confirmValidation({{ dossier[0] }}, '{{ dossier[1] }}');">
+                                                Valider Dossier
                                             </button>
 
                                             <!-- Modal -->
-                                            <div id="assignmentModal{{ dossier[0] }}" class="modal">
+                                            <div id="validationModal{{ dossier[0] }}" class="modal">
                                                 <div class="modal-content">
-                                                    <h3 style="color: #28a745;">Confirmer la prise en charge</h3>
+                                                    <h3 style="color: #28a745;">Confirmer la validation</h3>
                                                     <p style="color: #555;">
-                                                        Êtes-vous sûr de vouloir prendre en charge ce dossier ({{
-                                                        dossier[1] }}) ?
+                                                        Êtes-vous sûr de vouloir valider ce dossier ({{ dossier[1] }}) ?
                                                     </p>
                                                     <div style="text-align: center;">
                                                         <!-- Bouton de confirmation -->
-                                                        <form id="assignForm{{ dossier[0] }}"
-                                                              action="{{ url_for('assigner_dossier_chefbrigade', id_dossier=dossier[0]) }}"
+                                                        <form id="validateForm{{ dossier[0] }}"
+                                                              action="{{ url_for('terminer_dossier_chefbrigade', id_dossier=dossier[0]) }}"
                                                               method="POST" style="display: inline;">
                                                             <button type="submit"
                                                                     style="background-color: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-                                                                Oui, confirmer
+                                                                Oui, Valider
                                                             </button>
                                                         </form>
                                                         <!-- Bouton d'annulation -->
@@ -101,14 +110,14 @@
                                             </div>
 
                                             <script type="text/javascript">
-                                                function confirmAssignment(dossierId, dossierName) {
+                                                function confirmValidation(dossierId, dossierName) {
                                                     // Afficher le modal spécifique au dossier
-                                                    document.getElementById('assignmentModal' + dossierId).style.display = 'block';
+                                                    document.getElementById('validationModal' + dossierId).style.display = 'block';
                                                 }
 
                                                 function closeModal(dossierId) {
                                                     // Masquer le modal spécifique
-                                                    document.getElementById('assignmentModal' + dossierId).style.display = 'none';
+                                                    document.getElementById('validationModal' + dossierId).style.display = 'none';
                                                 }
                                             </script>
 
@@ -150,16 +159,11 @@
                                 </table>
                             </div>
                         </div>
-
-
-                    </div><!-- end card-body -->
-                </div><!-- end card -->
-            </div><!-- end col -->
-        </div><!-- end row -->
-
-
-    </div>
-    <!-- container-fluid -->
+                    </div><!-- Fin card-body -->
+                </div><!-- Fin card -->
+            </div><!-- Fin col -->
+        </div><!-- Fin row -->
+    </div><!-- Fin container-fluid -->
 </div>
 
 {% endblock %}
