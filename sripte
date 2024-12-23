@@ -122,3 +122,106 @@ CREATE TABLE `terminer_brigade` (
   `date_terminer` datetime DEFAULT current_timestamp(),
   `nom_brigade` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `terminer_securisation` (
+  `id` int(11) NOT NULL,
+  `nom_dossier` varchar(255) NOT NULL,
+  `date_creation` datetime DEFAULT current_timestamp(),
+  `date_creation` datetime DEFAULT current_timestamp(),
+  `date_assignation` datetime DEFAULT current_timestamp(),
+  `date_terminer` datetime DEFAULT current_timestamp(),
+  `nom_securisation` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+DROP TABLE IF EXISTS gestion_conversation_fonciere;
+CREATE TABLE IF NOT EXISTS gestion_conversation_fonciere (
+  id int NOT NULL AUTO_INCREMENT,
+  nom_dossier varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  date_ajout datetime DEFAULT CURRENT_TIMESTAMP,
+  date_assignation_termin_n2 datetime DEFAULT NULL,
+  date_temine_n3 datetime DEFAULT NULL,
+  date_assignation_n4 datetime DEFAULT NULL,
+  date_temine_n4 datetime DEFAULT NULL,
+  date_assignation_n5 datetime DEFAULT NULL,
+  date_temine_n5 datetime DEFAULT NULL,
+  date_assignation_n6 datetime DEFAULT NULL,
+  date_temine_n6 datetime DEFAULT NULL,
+  date_assignation_n7 datetime DEFAULT NULL,
+  statut enum('En attente','En cours','Terminé') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'En attente',
+  n1_admin varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  n2_chef_brigade varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  id_chef_brigade varchar(225) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  n3_brigade varchar(225) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  id_brigade varchar(225) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  n4_securisation varchar(225) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  id_securisation varchar(225) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  n5_evaluation_cadastrale varchar(225) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  id_evaluation_cadastrale varchar(225) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  n6_signature varchar(225) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  id_signature varchar(225) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  n7_conversation_fonciere varchar(225) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  id_conversation_fonciere varchar(225) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+DROP TABLE IF EXISTS gestion_conversation_fonciere_terminer;
+CREATE TABLE IF NOT EXISTS gestion_conversation_fonciere_terminer (
+  id int NOT NULL AUTO_INCREMENT,
+  nom_dossier varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  date_ajout datetime DEFAULT CURRENT_TIMESTAMP,
+  date_assignation_termin_n2 datetime DEFAULT NULL,
+  date_temine_n3 datetime DEFAULT NULL,
+  date_assignation_n4 datetime DEFAULT NULL,
+  date_temine_n4 datetime DEFAULT NULL,
+  date_assignation_n5 datetime DEFAULT NULL,
+  date_temine_n5 datetime DEFAULT NULL,
+  date_temine_n6 datetime DEFAULT NULL,
+  date_assignation_n7 datetime DEFAULT NULL,
+  date_temine_n7 datetime DEFAULT NULL,
+  statut enum('En attente','En cours','Terminé') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'En attente',
+  n1_admin varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  n2_chef_brigade varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  id_chef_brigade varchar(225) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  n3_brigade varchar(225) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  id_brigade varchar(225) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  n4_securisation varchar(225) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  id_securisation varchar(225) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  n5_evaluation_cadastrale varchar(225) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  id_evaluation_cadastrale varchar(225) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  n6_signature varchar(225) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  id_signature varchar(225) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  n7_conversation_fonciere varchar(225) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  id_conversation_fonciere varchar(225) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+DROP TABLE IF EXISTS gestion_signature_terminer;
+CREATE TABLE IF NOT EXISTS gestion_signature_terminer (
+  id int NOT NULL AUTO_INCREMENT,
+  nom_dossier varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  date_ajout datetime DEFAULT CURRENT_TIMESTAMP,
+  date_assignation_termin_n2 datetime DEFAULT NULL,
+  date_temine_n3 datetime DEFAULT NULL,
+  date_assignation_n4 datetime DEFAULT NULL,
+  date_temine_n4 datetime DEFAULT NULL,
+  date_assignation_n5 datetime DEFAULT NULL,
+  date_temine_n5 datetime DEFAULT NULL,
+  date_temine_n6 datetime DEFAULT NULL,
+  statut enum('En attente','En cours','Terminé') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'En attente',
+  n1_admin varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  n2_chef_brigade varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  id_chef_brigade varchar(225) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  n3_brigade varchar(225) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  id_brigade varchar(225) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  n4_securisation varchar(225) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  id_securisation varchar(225) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  n5_evaluation_cadastrale varchar(225) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  id_evaluation_cadastrale varchar(225) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  n6_signature varchar(225) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  id_signature varchar(225) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

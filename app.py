@@ -960,15 +960,13 @@ def terminer_dossier_evaluation_cadastrale(id_dossier):
         return redirect(url_for('login'))
 
     try:
-        # Récupérer les informations de l'utilisateur connecté
         loggedIn, firstName = getLogin('email_evaluation_cadastrale', 'evaluation_cadastrale')
 
-        if loggedIn is None or firstName is None:
+        if not loggedIn or not firstName:
             flash("Erreur: les informations utilisateur sont manquantes.", "danger")
             return redirect(url_for('dossiers_valides_evaluation_cadastrale'))
 
         with mysql.connection.cursor() as cur:
-            # Vérifier si le dossier existe et est assigné à l'utilisateur
             cur.execute("""
                 SELECT * FROM gestion_evaluation_cadastrale 
                 WHERE id = %s AND id_evaluation_cadastrale = %s AND statut = 'En cours'
@@ -979,31 +977,28 @@ def terminer_dossier_evaluation_cadastrale(id_dossier):
                 flash("Dossier introuvable ou non assigné.", "warning")
                 return redirect(url_for('dossier_cours_evaluation_cadastrale'))
 
-            # Récupérer les colonnes et créer un dictionnaire pour le dossier
             columns = [desc[0] for desc in cur.description]
             dossier = dict(zip(columns, result))
 
-            # Générer la date actuelle
             date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-            # Insérer dans la table gestion_signature
             cur.execute("""
                 INSERT INTO gestion_signature 
                 (nom_dossier, date_ajout, date_assignation_termin_n2, date_temine_n3, date_assignation_n4, 
                  date_temine_n4, date_assignation_n5, date_temine_n5, date_assignation_n6, statut, n1_admin, 
                  n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade, n4_securisation, id_securisation, 
                  n5_evaluation_cadastrale, id_evaluation_cadastrale, n6_signature, id_signature)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 dossier["nom_dossier"], dossier["date_ajout"], dossier["date_assignation_termin_n2"],
                 dossier["date_temine_n3"], dossier["date_assignation_n4"], dossier["date_temine_n4"],
                 dossier["date_assignation_n5"], date_now, date_now, 'En attente',
                 dossier["n1_admin"], dossier["n2_chef_brigade"], int(dossier["id_chef_brigade"]),
                 dossier["n3_brigade"], int(dossier["id_brigade"]), dossier["n4_securisation"], int(dossier["id_securisation"]),
-                firstName, int(loggedIn), None, None
+                dossier["n5_evaluation_cadastrale"], int(dossier["id_evaluation_cadastrale"]), 
+                firstName, loggedIn
             ))
 
-            # Insérer dans la table gestion_evaluation_cadastrale_terminer
             cur.execute("""
                 INSERT INTO gestion_evaluation_cadastrale_terminer 
                 (nom_dossier, date_ajout, date_assignation_termin_n2, date_temine_n3, date_assignation_n4, 
@@ -1013,25 +1008,21 @@ def terminer_dossier_evaluation_cadastrale(id_dossier):
             """, (
                 dossier["nom_dossier"], dossier["date_ajout"], dossier["date_assignation_termin_n2"],
                 dossier["date_temine_n3"], dossier["date_assignation_n4"], dossier["date_temine_n4"],
-                dossier["date_assignation_n5"], dossier["date_temine_n5"], 'Terminé', dossier["n1_admin"],
+                dossier["date_assignation_n5"], date_now, 'Terminé', dossier["n1_admin"],
                 dossier["n2_chef_brigade"], int(dossier["id_chef_brigade"]), dossier["n3_brigade"], int(dossier["id_brigade"]),
-                dossier["n4_securisation"], int(dossier["id_securisation"]), firstName, int(loggedIn)
+                dossier["n4_securisation"], int(dossier["id_securisation"]), dossier["n5_evaluation_cadastrale"], int(dossier["id_evaluation_cadastrale"])
             ))
 
-            # Supprimer le dossier de la table gestion_evaluation_cadastrale
             cur.execute("DELETE FROM gestion_evaluation_cadastrale WHERE id = %s", (id_dossier,))
-
-            # Confirmer les modifications
             mysql.connection.commit()
 
             flash("Le dossier a été marqué comme terminé avec succès.", "success")
             return redirect(url_for('dossiers_valides_evaluation_cadastrale'))
 
-    except Exception as e:
-        # Log de l'erreur
-        print(f"Erreur : {e}")
-        flash(f"Une erreur est survenue : {str(e)}", "danger")
+    except mysql.connector.Error as e:
+        logging.error(f"Erreur MySQL : {e}")
         mysql.connection.rollback()
+        flash("Une erreur interne est survenue. Veuillez réessayer.", "danger")
         return redirect(url_for('dossiers_valides_evaluation_cadastrale'))
 
 
@@ -1065,6 +1056,7 @@ def inscription_signature():
     if request.method == 'POST':
         name = request.form['name']
         prenom = request.form['prenom']
+        nom_complet=name+" "+prenom
         email = request.form['email']
         numero_telephone = request.form['numero_telephone']
         password = request.form['password']
@@ -1086,9 +1078,9 @@ def inscription_signature():
 
         try:
             cursor = mysql.connection.cursor()
-            query = """INSERT INTO `signature` (name, prenom, email_signature, numero_telephone, password) 
-                       VALUES (%s, %s, %s, %s, %s)"""
-            cursor.execute(query, (name, prenom, email, numero_telephone, hashed_password))
+            query = """INSERT INTO `signature` (nom_complet, email_securisation, numero_telephone, password) 
+                       VALUES (%s, %s, %s, %s)"""
+            cursor.execute(query, (nom_complet, email, numero_telephone, hashed_password))
             mysql.connection.commit()
             return redirect('/')
         except Exception as e:
@@ -1110,16 +1102,16 @@ def signature_fonciere_tableau_de_bord():
     cur.execute("SELECT ident FROM signature WHERE email_signature = %s", [session['email_signature']])
     signature = cur.fetchone()
 
-    signature_id = signature[0]
+    id_signature = signature[0]
 
     # Requêtes SQL pour chaque statut
     cur.execute("SELECT COUNT(*) FROM gestion_signature WHERE statut = 'En attente'")
     en_attente = cur.fetchone()[0]
 
-    cur.execute("SELECT COUNT(*) FROM gestion_signature WHERE signature_id = %s AND statut = 'En cours'", [signature_id])
+    cur.execute("SELECT COUNT(*) FROM gestion_signature WHERE id_signature = %s AND statut = 'En cours'", [id_signature])
     en_cours = cur.fetchone()[0]
 
-    cur.execute("SELECT COUNT(*) FROM gestion_signature WHERE signature_id = %s AND statut = 'Terminé'", [signature_id])
+    cur.execute("SELECT COUNT(*) FROM gestion_signature WHERE id_signature = %s AND statut = 'Terminé'", [id_signature])
     termine = cur.fetchone()[0]
     cur.close()
     return render_template('signature/index.html',firstName=firstName,en_attente=en_attente,en_cours=en_cours,termine=termine)
@@ -1138,7 +1130,7 @@ def liste_gestion_signature():
         return redirect(url_for('login'))
 
     # Récupérer la liste de tous les dossiers dans gestion_securisation
-    cur = mysql.connection.cursor()
+    cur = mysql.connection.cursor(DictCursor) 
     cur.execute("""
         SELECT *
         FROM gestion_signature
@@ -1154,8 +1146,8 @@ def liste_gestion_signature():
         firstName=firstName
     )
 
-@app.route("/assigner_dossier_signature/<int:dossier_id>", methods=["POST"])
-def assigner_dossier_signature(dossier_id):
+@app.route("/assigner_dossier_signature/<int:id_dossier>", methods=["POST"])
+def assigner_dossier_signature(id_dossier):
     # Vérifier si l'utilisateur est connecté comme un membre de la sécurisation
     if 'email_signature' not in session:
         return redirect(url_for('login'))
@@ -1168,15 +1160,11 @@ def assigner_dossier_signature(dossier_id):
 
     # Récupérer l'ID de la personne qui assigne
     cur = mysql.connection.cursor()
-    cur.execute("SELECT ident FROM signature WHERE email_signature = %s", [session['email_signature']])
-    signature_id = cur.fetchone()[0]
-
-    # Assigner le dossier à la personne connectée et mettre à jour le statut
-    cur.execute("""
-        UPDATE gestion_signature
-        SET signature_id = %s, statut = 'En cours'
-        WHERE id = %s
-    """, (signature_id, dossier_id))
+    # Mise à jour du dossier
+    date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    cur.execute(""" UPDATE gestion_signature 
+                    SET date_assignation_n6 = %s, statut = %s, n6_signature = %s, id_signature = %s 
+                    WHERE id = %s""", (date_now, 'En cours', firstName,loggedIn,id_dossier))
     mysql.connection.commit()
     cur.close()
 
@@ -1194,76 +1182,96 @@ def liste_dossiers_assignes_signature():
     if not loggedIn:
         return redirect(url_for('login'))
     # Récupérer les dossiers en cours pour cet utilisateur
-    cur = mysql.connection.cursor()
-    cur.execute("""
-        SELECT gss.id, gss.nom_dossier, gss.date_creation, gss.statut
-        FROM gestion_signature gss
-        JOIN signature s ON gss.signature_id = s.ident
-        WHERE gss.statut = 'En cours' AND s.email_signature = %s
-    """, [session['email_signature']])
+    cur = mysql.connection.cursor(DictCursor)
+    cur.execute("SELECT * FROM gestion_signature WHERE statut='En cours' and  id_signature = %s", (loggedIn,))
     dossiers = cur.fetchall()
     cur.close()
     return render_template( 
-        "signature/dossier/liste_dossiers_assignes_signature.html",
+        "signature/dossier/dossiers_encours_signature.html",
         dossiers=dossiers,
         loggedIn=loggedIn,
         firstName=firstName
     )
     
+
 @app.route('/valider_dossier_signature/<int:id_dossier>', methods=['POST'])
 def valider_dossier_signature(id_dossier):
     # Vérifier si l'utilisateur est connecté et est un membre de la sécurisation
     if 'email_signature' not in session:
         return redirect(url_for('login'))
 
-    # Récupérer l'état de connexion et le prénom
-    loggedIn, firstName = getLogin('email_signature', 'signature')
-    if not loggedIn:
-        return redirect(url_for('login'))
-    
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT ident, CONCAT(name, ' ', prenom) AS nom_signature FROM signature WHERE email_signature = %s", 
-                [session['email_signature']])
-    signature = cur.fetchone()
-    signature_id = signature[0]
-    nom_signature = signature[1]
+    try:
+        loggedIn, firstName = getLogin('email_signature', 'signature')
 
-    # Récupérer le dossier de la table gestion_signature
-    cur = mysql.connection.cursor()
-    
-    
-    cur.execute("""
-        SELECT *
-        FROM gestion_signature
-        WHERE id = %s AND signature_id = %s
-    """, (id_dossier, signature_id))
-    dossier = cur.fetchone()
+        if not loggedIn or not firstName:
+            flash("Erreur: les informations utilisateur sont manquantes.", "danger")
+            return redirect(url_for('login'))
 
-    if dossier:
-        # Mise à jour du statut dans gestion_signature pour marquer le dossier comme terminé
-        cur.execute("""
-            UPDATE gestion_signature
-            SET statut = 'Terminé'
-            WHERE id = %s
-        """, [id_dossier])
+        with mysql.connection.cursor() as cur:
+            # Vérifier si le dossier existe
+            cur.execute("""
+                SELECT * FROM gestion_signature 
+                WHERE id = %s AND id_signature = %s AND statut = 'En cours'
+            """, (id_dossier, loggedIn))
+            result = cur.fetchone()
 
-        # Insertion du dossier dans gestion_evaluation_cadastrale avec le nom du validateur
-       
-        
-        cur.execute("""
-        INSERT INTO gestion_fonciere (nom_dossier, date_creation, date_validation, nom_signature, statut)
-            VALUES (%s, %s, NOW(), %s, 'En attente')
-        """, (dossier[1], dossier[2], nom_signature))
+            if not result:
+                flash("Dossier introuvable ou non assigné.", "warning")
+                return redirect(url_for('liste_dossiers_assignes_signature'))
 
-        # Commit des changements dans la base de données
-        mysql.connection.commit()
-        cur.close()
+            columns = [desc[0] for desc in cur.description]
+            dossier = dict(zip(columns, result))
 
-        # Retourner à la page des dossiers de la sécurisation
+            # Marquer le dossier comme terminé
+            date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            # Insérer dans gestion_conversation_fonciere
+            cur.execute("""
+                INSERT INTO gestion_conversation_fonciere 
+                (nom_dossier, date_ajout, date_assignation_termin_n2, date_temine_n3, date_assignation_n4, 
+                 date_temine_n4, date_assignation_n5, date_temine_n5, date_assignation_n6, date_temine_n6, date_assignation_n7, statut, n1_admin, 
+                 n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade, n4_securisation, id_securisation, 
+                 n5_evaluation_cadastrale, id_evaluation_cadastrale, n6_signature, id_signature, n7_conversation_fonciere, id_conversation_fonciere)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                dossier["nom_dossier"], dossier["date_ajout"], dossier["date_assignation_termin_n2"],
+                dossier["date_temine_n3"], dossier["date_assignation_n4"], dossier["date_temine_n4"],
+                dossier["date_assignation_n5"],dossier["date_temine_n5"],dossier["date_assignation_n6"], date_now, date_now, 'En attente',
+                dossier["n1_admin"], dossier["n2_chef_brigade"], dossier["id_chef_brigade"],
+                dossier["n3_brigade"], dossier["id_brigade"], dossier["n4_securisation"], dossier["id_securisation"],
+                dossier["n5_evaluation_cadastrale"], dossier["id_evaluation_cadastrale"],
+                dossier["n6_signature"], dossier["id_signature"], firstName, loggedIn
+            ))
+
+            # Insérer dans gestion_signature_terminer
+            cur.execute("""
+                INSERT INTO gestion_signature_terminer 
+                (nom_dossier, date_ajout, date_assignation_termin_n2, date_temine_n3, date_assignation_n4, 
+                 date_temine_n4, date_assignation_n5, date_temine_n5, statut, n1_admin, n2_chef_brigade, id_chef_brigade, 
+                 n3_brigade, id_brigade, n4_securisation, id_securisation, n5_evaluation_cadastrale, id_evaluation_cadastrale,
+                 n6_signature, id_signature)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                dossier["nom_dossier"], dossier["date_ajout"], dossier["date_assignation_termin_n2"],
+                dossier["date_temine_n3"], dossier["date_assignation_n4"], dossier["date_temine_n4"],
+                dossier["date_assignation_n5"], date_now, 'Terminé', dossier["n1_admin"],
+                dossier["n2_chef_brigade"], dossier["id_chef_brigade"], dossier["n3_brigade"], dossier["id_brigade"],
+                dossier["n4_securisation"], dossier["id_securisation"], dossier["n5_evaluation_cadastrale"], dossier["id_evaluation_cadastrale"],
+                dossier["n6_signature"], dossier["id_signature"]
+            ))
+
+            # Supprimer le dossier initial
+            cur.execute("DELETE FROM gestion_signature WHERE id = %s", (id_dossier,))
+            mysql.connection.commit()
+
+            flash("Le dossier a été marqué comme terminé avec succès.", "success")
         return redirect(url_for('liste_dossiers_assignes_signature'))
+    except Exception as e:
+        return f"Erreur  : {e}"
+    
+        return redirect(url_for('dossiers_valides_evaluation_cadastrale'))
 
-    # Si le dossier n'est pas trouvé ou ne peut pas être validé
-    return 'Dossier non trouvé ou statut invalide', 400
+
 
 @app.route("/dossiers_signature_valide")
 def dossiers_signature_valide():
@@ -1276,7 +1284,7 @@ def dossiers_signature_valide():
     if not loggedIn:
         return redirect(url_for('login'))
     
-    cur = mysql.connection.cursor()
+    cur = mysql.connection.cursor(DictCursor)
     
     # Identifier le chef de brigade connecté
     cur.execute("SELECT ident FROM signature WHERE email_signature = %s", [session['email_signature']])
@@ -1285,15 +1293,14 @@ def dossiers_signature_valide():
         flash("Erreur : signature introuvable.")
         return redirect(url_for('login'))
     
-    signature_id = signature[0]
     
     # Récupérer les dossiers avec le statut "Terminé" pour la brigade connectée
-    cur.execute("""SELECT * FROM gestion_signature WHERE signature_id = %s AND statut = 'Terminé'""", [signature_id])
+    cur.execute("""SELECT * FROM gestion_signature_terminer WHERE id_signature = %s AND statut = 'Terminé'""", [loggedIn])
     dossiers = cur.fetchall()
     cur.close()
     
     return render_template(
-        "signature/dossier/dossiers_valides.html",
+        "signature/dossier/dossiers_terminer_signature.html",
         dossiers=dossiers,
         loggedIn=loggedIn,
         firstName=firstName
@@ -1326,7 +1333,7 @@ def inscription_conversationfonciere():
         hashed_password = hashlib.md5(password.encode()).hexdigest()
         cursor = mysql.connection.cursor()
         
-        cursor.execute("SELECT * FROM conversation_fonciere WHERE email_conversationfonciere = %s", (email,))
+        cursor.execute("SELECT * FROM conversation_fonciere WHERE email_conversation_fonciere = %s", (email,))
         existing_user = cursor.fetchone()
 
         if existing_user:
@@ -1335,7 +1342,7 @@ def inscription_conversationfonciere():
 
         try:
             cursor = mysql.connection.cursor()
-            query = """INSERT INTO `conversation_fonciere` (name, prenom, email_conversationfonciere, numero_telephone, password) 
+            query = """INSERT INTO `conversation_fonciere` (name, prenom, email_conversation_fonciere, numero_telephone, password) 
                        VALUES (%s, %s, %s, %s, %s)"""
             cursor.execute(query, (name, prenom, email, numero_telephone, hashed_password))
             mysql.connection.commit()
@@ -1346,11 +1353,11 @@ def inscription_conversationfonciere():
 
 @app.route("/conversation_fonciere_tableau_de_bord")
 def conversation_fonciere_tableau_de_bord():
-    if 'email_conversationfonciere' not in session:
+    if 'email_conversation_fonciere' not in session:
         return redirect(url_for('login'))
 
     # Récupérer l'état de connexion et le prénom
-    loggedIn, firstName = getLogin('email_conversationfonciere', 'conversation_fonciere')
+    loggedIn, firstName = getLogin('email_conversation_fonciere', 'conversation_fonciere')
     if not loggedIn:
         return redirect(url_for('login'))
     return render_template('conversation_fonciere/index.html')
@@ -1358,19 +1365,19 @@ def conversation_fonciere_tableau_de_bord():
 @app.route("/liste_gestion_fonciere")
 def liste_gestion_fonciere():
     # Vérifier si l'utilisateur est connecté comme un membre de la sécurisation
-    if 'email_conversationfonciere' not in session:
+    if 'email_conversation_fonciere' not in session:
         return redirect(url_for('login'))
 
     # Récupérer l'état de connexion et le prénom
-    loggedIn, firstName = getLogin('email_conversationfonciere', 'conversation_fonciere')
+    loggedIn, firstName = getLogin('email_conversation_fonciere', 'conversation_fonciere')
     if not loggedIn:
         return redirect(url_for('login'))
 
     # Récupérer la liste de tous les dossiers dans gestion_securisation
-    cur = mysql.connection.cursor()
+    cur = mysql.connection.cursor(DictCursor)
     cur.execute("""
         SELECT *
-        FROM gestion_fonciere
+        FROM gestion_conversation_fonciere
         WHERE statut = 'En attente'
     """)
     dossiers = cur.fetchall()
@@ -1383,29 +1390,25 @@ def liste_gestion_fonciere():
         firstName=firstName
     )
 
-@app.route("/assigner_dossier_fonciere/<int:dossier_id>", methods=["POST"])
-def assigner_dossier_fonciere(dossier_id):
+@app.route("/assigner_dossier_fonciere/<int:id_dossier>", methods=["POST"])
+def assigner_dossier_fonciere(id_dossier):
     # Vérifier si l'utilisateur est connecté comme un membre de la sécurisation
-    if 'email_conversationfonciere' not in session:
+    if 'email_conversation_fonciere' not in session:
         return redirect(url_for('login'))
 
     # Récupérer l'état de connexion et le prénom
-    loggedIn, firstName = getLogin('email_conversationfonciere', 'conversation_fonciere')
+    loggedIn, firstName = getLogin('email_conversation_fonciere', 'conversation_fonciere')
     if not loggedIn:
         return redirect(url_for('login'))
 
 
     # Récupérer l'ID de la personne qui assigne
     cur = mysql.connection.cursor()
-    cur.execute("SELECT ident FROM conversation_fonciere WHERE email_conversationfonciere = %s", [session['email_conversationfonciere']])
-    fonciere_id = cur.fetchone()[0]
-
-    # Assigner le dossier à la personne connectée et mettre à jour le statut
-    cur.execute("""
-        UPDATE gestion_fonciere
-        SET fonciere_id = %s, statut = 'En cours'
-        WHERE id = %s
-    """, (fonciere_id, dossier_id))
+    # Mise à jour du dossier
+    date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    cur.execute(""" UPDATE gestion_conversation_fonciere 
+                    SET date_assignation_n7 = %s, statut = %s, n7_conversation_fonciere = %s, id_conversation_fonciere = %s 
+                    WHERE id = %s""", (date_now, 'En cours', firstName,loggedIn,id_dossier))
     mysql.connection.commit()
     cur.close()
 
@@ -1415,25 +1418,24 @@ def assigner_dossier_fonciere(dossier_id):
 @app.route("/liste_dossiers_assignes_fonciere")
 def liste_dossiers_assignes_fonciere():
     # Vérifier si l'utilisateur est connecté et est un membre de la sécurisation
-    if 'email_conversationfonciere' not in session:
+    if 'email_conversation_fonciere' not in session:
         return redirect(url_for('login'))
 
     # Récupérer l'état de connexion et le prénom
-    loggedIn, firstName = getLogin('email_conversationfonciere', 'conversation_fonciere')
+    loggedIn, firstName = getLogin('email_conversation_fonciere', 'conversation_fonciere')
     if not loggedIn:
         return redirect(url_for('login'))
     # Récupérer les dossiers en cours pour cet utilisateur
-    cur = mysql.connection.cursor()
+    cur = mysql.connection.cursor(DictCursor)
     cur.execute("""
-        SELECT gss.id, gss.nom_dossier, gss.date_creation, gss.statut
-        FROM gestion_fonciere gss
-        JOIN conversation_fonciere s ON gss.fonciere_id = s.ident
-        WHERE gss.statut = 'En cours' AND s.email_conversationfonciere = %s
-    """, [session['email_conversationfonciere']])
+        SELECT *
+        FROM gestion_conversation_fonciere
+        WHERE statut = 'En cours'
+    """)
     dossiers = cur.fetchall()
     cur.close()
     return render_template( 
-        "conversation_fonciere/dossier/liste_dossiers_assignes_fonciere.html",
+        "conversation_fonciere/dossier/dossiers_encours_conversation_fonciere.html",
         dossiers=dossiers,
         loggedIn=loggedIn,
         firstName=firstName
@@ -1441,53 +1443,97 @@ def liste_dossiers_assignes_fonciere():
 
 @app.route("/fin_dossier_fonciere/<int:id_dossier>", methods=["POST"])
 def fin_dossier_fonciere(id_dossier):
-    # Vérifier si l'utilisateur est connecté comme un membre de la sécurisation
-    if 'email_conversationfonciere' not in session:
+    if 'email_conversation_fonciere' not in session:
         return redirect(url_for('login'))
 
-    # Récupérer l'état de connexion et le prénom
-    loggedIn, firstName = getLogin('email_conversationfonciere', 'conversation_fonciere')
-    if not loggedIn:
-        return redirect(url_for('login'))
+    try:
+        loggedIn, firstName = getLogin('email_conversation_fonciere', 'conversation_fonciere')
 
-    # Récupérer l'utilisateur connecté
-    cur = mysql.connection.cursor()
-    cur.execute("""
-        SELECT ident, name, prenom 
-        FROM conversation_fonciere 
-        WHERE email_conversationfonciere = %s
-    """, [session['email_conversationfonciere']])
-    fonciere_user = cur.fetchone()
-    fonciere_id = fonciere_user[0]
-    validateur = f"{fonciere_user[1]} {fonciere_user[2]}"
+        if not loggedIn or not firstName:
+            flash("Erreur: les informations utilisateur sont manquantes.", "danger")
+            return redirect(url_for('login'))
 
-    # Assigner le dossier à la personne connectée, mettre à jour le statut et enregistrer le validateur
-    cur.execute("""
-        UPDATE gestion_fonciere
-        SET fonciere_id = %s, statut = 'Terminé', validateur = %s
-        WHERE id = %s
-    """, (fonciere_id, validateur, id_dossier))
-    mysql.connection.commit()
-    cur.close()
+        with mysql.connection.cursor() as cur:
+            # Vérifier si le dossier existe
+            cur.execute("""
+                SELECT * FROM gestion_conversation_fonciere 
+                WHERE id = %s AND id_conversation_fonciere = %s AND statut = 'En cours'
+            """, (id_dossier, loggedIn))
+            result = cur.fetchone()
 
-    flash("Dossier assigné et validé avec succès.", "success")
-    return redirect(url_for('liste_gestion_fonciere'))
+            if not result:
+                flash("Dossier introuvable ou non assigné.", "warning")
+                return redirect(url_for('liste_dossiers_assignes_fonciere'))
+
+            # Convertir le résultat en dictionnaire
+            columns = [desc[0] for desc in cur.description]
+            dossier = dict(zip(columns, result))
+
+            # Vérifier et remplir les champs manquants avec des valeurs par défaut
+            required_fields = [
+                "nom_dossier", "date_ajout", "date_assignation_termin_n2", "date_temine_n3", 
+                "date_assignation_n4", "date_temine_n4", "date_assignation_n5", "date_temine_n5", 
+                "date_assignation_n6", "date_temine_n6", "date_assignation_n7", "n1_admin", 
+                "n2_chef_brigade", "id_chef_brigade", "n3_brigade", "id_brigade", "n4_securisation", 
+                "id_securisation", "n5_evaluation_cadastrale", "id_evaluation_cadastrale", 
+                "n6_signature", "id_signature", "n7_conversation_fonciere", "id_conversation_fonciere"
+            ]
+
+            # Remplir les champs manquants
+            for field in required_fields:
+                if field not in dossier or dossier[field] is None:
+                    dossier[field] = "" if isinstance(dossier.get(field, ""), str) else 0
+
+            # Marquer le dossier comme terminé
+            date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            # Insérer dans gestion_conversation_fonciere_terminer
+            cur.execute("""
+                INSERT INTO gestion_conversation_fonciere_terminer 
+                (nom_dossier, date_ajout, date_assignation_termin_n2, date_temine_n3, date_assignation_n4, 
+                 date_temine_n4, date_assignation_n5, date_temine_n5, date_assignation_n6, date_temine_n6, 
+                 date_assignation_n7, date_temine_n7, statut, n1_admin, n2_chef_brigade, id_chef_brigade, 
+                 n3_brigade, id_brigade, n4_securisation, id_securisation, n5_evaluation_cadastrale, 
+                 id_evaluation_cadastrale, n6_signature, id_signature, n7_conversation_fonciere, id_conversation_fonciere)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                dossier["nom_dossier"], dossier["date_ajout"], dossier["date_assignation_termin_n2"], 
+                dossier["date_temine_n3"], dossier["date_assignation_n4"], dossier["date_temine_n4"], 
+                dossier["date_assignation_n5"], dossier["date_temine_n5"], dossier["date_assignation_n6"], 
+                dossier["date_temine_n6"], dossier["date_assignation_n7"], date_now, 'Terminé', 
+                dossier["n1_admin"], dossier["n2_chef_brigade"], dossier["id_chef_brigade"], 
+                dossier["n3_brigade"], dossier["id_brigade"], dossier["n4_securisation"], 
+                dossier["id_securisation"], dossier["n5_evaluation_cadastrale"], dossier["id_evaluation_cadastrale"], 
+                dossier["n6_signature"], dossier["id_signature"], dossier["n7_conversation_fonciere"], 
+                dossier["id_conversation_fonciere"]
+            ))
+
+            # Supprimer le dossier initial
+            cur.execute("DELETE FROM gestion_conversation_fonciere WHERE id = %s", (id_dossier,))
+            mysql.connection.commit()
+
+            flash("Le dossier a été marqué comme terminé avec succès.", "success")
+        return redirect(url_for('dossiers_fonciere_valide'))
+
+    except Exception as e:
+        flash(f"Erreur : {e}", "danger")
+        return redirect(url_for('liste_dossiers_assignes_fonciere'))
 
 @app.route("/dossiers_fonciere_valide")
 def dossiers_fonciere_valide():
     # Vérifier si l'utilisateur est connecté
-    if 'email_conversationfonciere' not in session:
+    if 'email_conversation_fonciere' not in session:
         return redirect(url_for('login'))
 
     # Récupérer les informations de la brigade connectée
-    loggedIn, firstName = getLogin('email_conversationfonciere', 'conversation_fonciere')
+    loggedIn, firstName = getLogin('email_conversation_fonciere', 'conversation_fonciere')
     if not loggedIn:
         return redirect(url_for('login'))
     
     cur = mysql.connection.cursor()
     
     # Identifier le chef de brigade connecté
-    cur.execute("SELECT ident FROM conversation_fonciere WHERE email_conversationfonciere = %s", [session['email_conversationfonciere']])
+    cur.execute("SELECT ident FROM conversation_fonciere WHERE email_conversation_fonciere = %s", [session['email_conversation_fonciere']])
     conversation_fonciere = cur.fetchone()
     if not conversation_fonciere:
         flash("Erreur : conversation_fonciere introuvable.")
@@ -1501,7 +1547,7 @@ def dossiers_fonciere_valide():
     cur.close()
     
     return render_template(
-        "conversation_fonciere/dossier/dossiers_valides.html",
+        "conversation_fonciere/dossier/dossiers_terminer_conversation_fonciere.html",
         dossiers=dossiers,
         loggedIn=loggedIn,
         firstName=firstName
@@ -1534,11 +1580,9 @@ def login():
             session['email_securisation'] = email
             return redirect(url_for('securisation_tableau_de_bord'))
 
-        elif is_valid(email, "email_conversationfonciere", password, "conversation_fonciere"):
-            session['email_conversationfonciere'] = email
+        elif is_valid(email, "email_conversation_fonciere", password, "conversation_fonciere"):
+            session['email_conversation_fonciere'] = email
             return redirect(url_for('conversation_fonciere_tableau_de_bord'))
-
-
         elif is_valid(email, "email_evaluation_cadastrale", password, "evaluation_cadastrale"):
             session['email_evaluation_cadastrale'] = email
             return redirect(url_for('evaluation_cadastrale_tableau_de_bord'))
@@ -1569,7 +1613,7 @@ def forgot_password():
             "securisation": "email_securisation",
             "evaluation_cadastrale": "email_evaluation_cadastrale",
             "signature": "email_signature",
-            "conversation_fonciere": "email_conversationfonciere"
+            "conversation_fonciere": "email_conversation_fonciere"
         }
 
         cursor = mysql.connection.cursor()
@@ -1628,7 +1672,7 @@ def reset_password(table, token):
         "securisation": "email_securisation",
         "evaluation_cadastrale": "email_evaluation_cadastrale",
         "signature": "email_signature",
-        "conversation_fonciere": "email_conversationfonciere"
+        "conversation_fonciere": "email_conversation_fonciere"
     }
 
     if table not in email_columns:
