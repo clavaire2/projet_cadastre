@@ -1530,7 +1530,7 @@ def dossiers_fonciere_valide():
     if not loggedIn:
         return redirect(url_for('login'))
     
-    cur = mysql.connection.cursor()
+    cur = mysql.connection.cursor(DictCursor)
     
     # Identifier le chef de brigade connecté
     cur.execute("SELECT ident FROM conversation_fonciere WHERE email_conversation_fonciere = %s", [session['email_conversation_fonciere']])
@@ -1539,10 +1539,8 @@ def dossiers_fonciere_valide():
         flash("Erreur : conversation_fonciere introuvable.")
         return redirect(url_for('login'))
     
-    fonciere_id = conversation_fonciere[0]
     
-    # Récupérer les dossiers avec le statut "Terminé" pour la brigade connectée
-    cur.execute("""SELECT * FROM gestion_fonciere WHERE fonciere_id = %s AND statut = 'Terminé'""", [fonciere_id])
+    cur.execute("""SELECT * FROM gestion_conversation_fonciere_terminer WHERE id_conversation_fonciere = %s AND statut = 'Terminé'""", [loggedIn])
     dossiers = cur.fetchall()
     cur.close()
     
