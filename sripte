@@ -178,6 +178,7 @@ CREATE TABLE IF NOT EXISTS gestion_conversation_fonciere_terminer (
   date_temine_n4 datetime DEFAULT NULL,
   date_assignation_n5 datetime DEFAULT NULL,
   date_temine_n5 datetime DEFAULT NULL,
+  date_assignation_n6 datetime DEFAULT NULL,
   date_temine_n6 datetime DEFAULT NULL,
   date_assignation_n7 datetime DEFAULT NULL,
   date_temine_n7 datetime DEFAULT NULL,
