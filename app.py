@@ -1111,7 +1111,7 @@ def signature_fonciere_tableau_de_bord():
     cur.execute("SELECT COUNT(*) FROM gestion_signature WHERE id_signature = %s AND statut = 'En cours'", [id_signature])
     en_cours = cur.fetchone()[0]
 
-    cur.execute("SELECT COUNT(*) FROM gestion_signature WHERE id_signature = %s AND statut = 'Terminé'", [id_signature])
+    cur.execute("SELECT COUNT(*) FROM gestion_signature_terminer WHERE id_signature = %s AND statut = 'Terminé'", [id_signature])
     termine = cur.fetchone()[0]
     cur.close()
     return render_template('signature/index.html',firstName=firstName,en_attente=en_attente,en_cours=en_cours,termine=termine)
@@ -1247,14 +1247,14 @@ def valider_dossier_signature(id_dossier):
             cur.execute("""
                 INSERT INTO gestion_signature_terminer 
                 (nom_dossier, date_ajout, date_assignation_termin_n2, date_temine_n3, date_assignation_n4, 
-                 date_temine_n4, date_assignation_n5, date_temine_n5, statut, n1_admin, n2_chef_brigade, id_chef_brigade, 
+                 date_temine_n4, date_assignation_n5, date_temine_n5,date_temine_n6, statut, n1_admin, n2_chef_brigade, id_chef_brigade, 
                  n3_brigade, id_brigade, n4_securisation, id_securisation, n5_evaluation_cadastrale, id_evaluation_cadastrale,
                  n6_signature, id_signature)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 dossier["nom_dossier"], dossier["date_ajout"], dossier["date_assignation_termin_n2"],
                 dossier["date_temine_n3"], dossier["date_assignation_n4"], dossier["date_temine_n4"],
-                dossier["date_assignation_n5"], date_now, 'Terminé', dossier["n1_admin"],
+                dossier["date_assignation_n5"],dossier["date_temine_n5"], date_now, 'Terminé', dossier["n1_admin"],
                 dossier["n2_chef_brigade"], dossier["id_chef_brigade"], dossier["n3_brigade"], dossier["id_brigade"],
                 dossier["n4_securisation"], dossier["id_securisation"], dossier["n5_evaluation_cadastrale"], dossier["id_evaluation_cadastrale"],
                 dossier["n6_signature"], dossier["id_signature"]
