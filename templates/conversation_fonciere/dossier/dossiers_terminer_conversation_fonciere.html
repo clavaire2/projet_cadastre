@@ -20,7 +20,7 @@
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Liste</a></li>
-                            <li class="breadcrumb-item active">Liste des dossiers Terminer: <b style="color:blue">Conversation_fonciere</b>
+                            <li class="breadcrumb-item active">Liste des dossiers Terminer: <b style="color:blue">Conversation Fonciere</b>
                             </li>
                         </ol>
                     </div>
@@ -37,7 +37,7 @@
                 <div class="card">
                     <div class="card-header align-items-center d-flex">
                         <h4 class="card-title mb-0 flex-grow-1">
-                            Liste des dossiers : <b style="color: blue;">Conversation_fonciere</b>
+                            Liste des dossiers : <b style="color: blue;">Conversation Fonciere</b>
                         </h4>
                     </div>
                     <!-- end card header -->
@@ -59,14 +59,14 @@
                                     <thead class="table-light">
                                     <tr>
                                         <th class="text-center">Nom du dossier</th>
-                                        <th class="text-center">Durées Global <br> de N1-N4 </th>
-                                        <th class="text-center">Date assignation<br>termine N3</th>
+                                        <th class="text-center">Durées Global <br> de N1-N7 </th>
+                                        <th class="text-center">Date <br>assignation</th>
                                         <th class="text-center">Nom N1</th>
                                         <th class="text-center">Nom N2</th>
                                         <th class="text-center">Nom N3</th>
                                         <th class="text-center">Nom N4</th>
                                         <th class="text-center">Nom N5</th>
-                                        <th class="text-center">Date assignation N4</th>
+                                        <th class="text-center">Nom N6</th>
                                         <th class="text-center">Votre Nom</th>
                                         <th>Durées du dossier</th>
                                         <th class="text-center">Statut</th>
@@ -79,13 +79,13 @@
                                             <b style="color: blue;">{{ dossier["nom_dossier"] }}</b>
                                         </td>
                                         <td class="text-center" style="color: blue;">{{ dossier["date_temine_n7"] - dossier["date_ajout"] }}</td>
-                                        <td class="text-center">{{ dossier["date_temine_n3"] }}</td>
+                                        <td class="text-center">{{ dossier["date_assignation_n7"] }}</td>
                                         <td class="text-center">{{ dossier["n1_admin"] }}</td>
                                         <td class="text-center">{{ dossier["n2_chef_brigade"] }}</td>
                                         <td class="text-center" style="color: blue;">{{ dossier["n3_brigade"] }}</td>
                                         <td class="text-center" style="color: blue;">{{ dossier["n4_securisation"] }}</td>
                                         <td class="text-center" style="color: blue;">{{ dossier["n5_evaluation_cadastrale"] }}</td>
-                                        <td class="text-center" style="color: blue;">{{ dossier["date_assignation_n4"] }}</td>
+                                        <td class="text-center" style="color: blue;">{{ dossier["n6_signature"] }}</td>
                                         <td class="text-center" style="color: blue;">{{ dossier["n7_conversation_fonciere"] }}</td>
                                         <td class="text-center" style="color: blue;">{{ dossier["date_temine_n7"] - dossier["date_assignation_n7"] }}</td>
                                         <td class="text-center" style="color: blue;">{{ dossier["statut"] }}</td>

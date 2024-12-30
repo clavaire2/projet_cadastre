@@ -1,9 +1,9 @@
-@app.route("/securisation_tableau_de_bord")
-def securisation_tableau_de_bord():
+@app.route("/conversation_fonciere_tableau_de_bord")
+def conversation_fonciere_tableau_de_bord():
     if 'email_evaluation_cadastrale' not in  session:
         return redirect(url_for('login'))
     else:
-        loggedIn, firstName = getLogin('email_evaluation_cadastrale', 'securisation')
+        loggedIn, firstName = getLogin('email_evaluation_cadastrale', 'conversation_fonciere')
         cur = mysql.connection.cursor()
         cur.execute("SELECT COUNT(*) FROM gestion_evaluation_cadastrale WHERE statut = 'En attente'")
         en_attente = cur.fetchone()[0]
@@ -12,7 +12,7 @@ def securisation_tableau_de_bord():
         cur.execute("SELECT COUNT(*) FROM gestion_evaluation_cadastrale_terminer WHERE id_evaluation_cadastrale = %s AND statut = 'Terminé'", [loggedIn])
         termine = cur.fetchone()[0]
         cur.close()
-        return render_template('securisation/index.html', firstName=firstName,
+        return render_template('conversation_fonciere/index.html', firstName=firstName,
                                 en_attente=en_attente, en_cours=en_cours, termine=termine
                                )
 
@@ -21,7 +21,7 @@ def securisation_tableau_de_bord():
 def liste_gestion_evaluation_cadastrale():
     if 'email_evaluation_cadastrale' in session:  # Vérifie si l'utilisateur est connecté
         # Récupération des informations de connexion
-        loggedIn, firstName = getLogin('email_evaluation_cadastrale', 'securisation')
+        loggedIn, firstName = getLogin('email_evaluation_cadastrale', 'conversation_fonciere')
 
         # Connexion à la base de données
         cur = mysql.connection.cursor(DictCursor)  # Active le mode dictionnaire pour des résultats clé-valeur
@@ -35,7 +35,7 @@ def liste_gestion_evaluation_cadastrale():
 
         # Rendu du template avec les données
         return render_template(
-            'securisation/dossier/liste_evaluation_cadastrale.html',
+            'conversation_fonciere/dossier/liste_evaluation_cadastrale.html',
             dossiers=dossiers,
             loggedIn=loggedIn,
             firstName=firstName
@@ -51,7 +51,7 @@ def assigner_dossier_evaluation_cadastrale(id_dossier):
     if 'email_evaluation_cadastrale' not in session:
         return redirect(url_for('login'))
 
-    loggedIn, firstName = getLogin('email_evaluation_cadastrale', 'securisation')
+    loggedIn, firstName = getLogin('email_evaluation_cadastrale', 'conversation_fonciere')
     cur = mysql.connection.cursor()
     # Mise à jour du dossier
     date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -72,12 +72,12 @@ def dossier_cours_evaluation_cadastrale():
         flash("Vous devez être connecté pour accéder à cette page.", "danger")
         return redirect(url_for('login'))
     else:
-        loggedIn, firstName = getLogin('email_evaluation_cadastrale', 'securisation')
+        loggedIn, firstName = getLogin('email_evaluation_cadastrale', 'conversation_fonciere')
         # print(loggedIn)
         cur = mysql.connection.cursor(DictCursor)
         cur.execute("SELECT * FROM gestion_evaluation_cadastrale WHERE statut='En cours' and  id_evaluation_cadastrale = %s", (loggedIn,))
         dossiers = cur.fetchall()
-        return render_template('securisation/dossier/liste_dossier_en_cours_evaluation_cadastrale.html',
+        return render_template('conversation_fonciere/dossier/liste_dossier_en_cours_evaluation_cadastrale.html',
                                dossiers=dossiers, loggedIn=loggedIn, firstName=firstName)
 
 
@@ -88,7 +88,7 @@ def terminer_dossier_evaluation_cadastrale(id_dossier):
 
     try:
         # Récupérer les informations de l'utilisateur connecté
-        loggedIn, firstName = getLogin('email_evaluation_cadastrale', 'securisation')
+        loggedIn, firstName = getLogin('email_evaluation_cadastrale', 'conversation_fonciere')
 
         with mysql.connection.cursor() as cur:  # Utilisation d'un curseur classique
             # Vérifier si le dossier existe et est assigné à l'utilisateur
@@ -164,7 +164,7 @@ def dossiers_valides_evaluation_cadastrale():
         # duree_dossier=calculer_difference(dossiers[4], dossiers[3])
         print(dossiers)
         cur.close()
-        return render_template('securisation/dossier/dossiers_terminer_evaluation_cadastrale.html',
+        return render_template('conversation_fonciere/dossier/dossiers_terminer_evaluation_cadastrale.html',
                                dossiers=dossiers, firstName=firstName, loggedIn=loggedIn
                                )
 

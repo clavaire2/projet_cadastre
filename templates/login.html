@@ -1,213 +1,173 @@
 <!doctype html>
-<html lang="en" data-layout="vertical" data-topbar="light" data-sidebar="dark" data-sidebar-size="lg" data-sidebar-image="none" data-preloader="disable" data-theme="default" data-theme-colors="default">
+<html lang="fr">
 
-
-<!-- Mirrored from themesbrand.com/velzon/html/master/auth-signup-cover.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 03 Dec 2024 23:56:54 GMT -->
 <head>
-
-    <meta charset="utf-8" />
+    <meta charset="utf-8"/>
     <title>Cadastre - Connexion</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
-    <meta content="Themesbrand" name="author" />
-    <!-- App favicon -->
+    <meta name="description" content="Plateforme de gestion cadastrale professionnelle"/>
+    <meta name="author" content="Themesbrand"/>
     <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
 
-    <!-- jsvectormap css -->
-    <link href="{{ url_for('static', filename='libs/jsvectormap/jsvectormap.min.css') }}" rel="stylesheet"
-        type="text/css">
+    <!-- Stylesheets -->
+    <link href="{{ url_for('static', filename='libs/jsvectormap/jsvectormap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='libs/swiper/swiper-bundle.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/icons.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/app.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/custom.min.css') }}" rel="stylesheet">
 
-    <!-- Swiper slider css -->
-    <link href="{{ url_for('static', filename='libs/swiper/swiper-bundle.min.css') }}" rel="stylesheet" type="text/css">
-
-    <!-- Layout config Js -->
+    <!-- Scripts -->
     <script src="{{ url_for('static', filename='js/layout.js') }}"></script>
-
-    <!-- Bootstrap Css -->
-    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet" type="text/css">
-
-    <!-- Icons Css -->
-    <link href="{{ url_for('static', filename='css/icons.min.css') }}" rel="stylesheet" type="text/css">
-
-    <!-- App Css -->
-    <link href="{{ url_for('static', filename='css/app.min.css') }}" rel="stylesheet" type="text/css">
-
-    <!-- Custom Css -->
-    <link href="{{ url_for('static', filename='css/custom.min.css') }}" rel="stylesheet" type="text/css">
-
 </head>
 
 <body>
-
-    <!-- auth-page wrapper -->
-    <div class="auth-page-wrapper auth-bg-cover py-5 d-flex justify-content-center align-items-center min-vh-100">
-        <div class="bg-overlay"></div>
-        <!-- auth-page content -->
-        <div class="auth-page-content overflow-hidden pt-lg-5">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="card overflow-hidden m-0 card-bg-fill galaxy-border-none">
-                            <div class="row justify-content-center g-0">
-                                <div class="col-lg-6">
-                                    <div class="p-lg-5 p-4 auth-one-bg h-100">
-                                        <div class="bg-overlay"></div>
-                                        <div class="position-relative h-100 d-flex flex-column">
-                                            <div class="mb-4">
-                                                <a href="index.html" class="d-block">
-                                                    <img src="{{ url_for('static', filename='images/logo-light.png') }}" alt="" height="18">
-                                                </a>
+<div class="auth-page-wrapper auth-bg-cover py-5 d-flex justify-content-center align-items-center min-vh-100">
+    <div class="bg-overlay"></div>
+    <div class="auth-page-content overflow-hidden pt-lg-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card overflow-hidden m-0">
+                        <div class="row justify-content-center g-0">
+                            <div class="col-lg-6">
+                                <div class="p-lg-5 p-4 auth-one-bg h-100">
+                                    <div class="position-relative h-100 d-flex flex-column">
+                                        <div class="mb-4">
+                                            <a href="index.html">
+                                                <img src="{{ url_for('static', filename='images/logo-light.png') }}"
+                                                     alt="Logo" height="18">
+                                            </a>
+                                        </div>
+                                        <div class="mt-auto text-center text-white-50">
+                                            <div id="qoutescarouselIndicators" class="carousel slide"
+                                                 data-bs-ride="carousel">
+                                                <div class="carousel-inner pb-5">
+                                                    <div class="carousel-item active">
+                                                        <p class="fs-15 fst-italic">" Plateforme intuitive et simple à
+                                                            utiliser. Merci ! "</p>
+                                                    </div>
+                                                    <div class="carousel-item">
+                                                        <p class="fs-15 fst-italic">" Support client exceptionnel et
+                                                            design remarquable. "</p>
+                                                    </div>
+                                                    <div class="carousel-item">
+                                                        <p class="fs-15 fst-italic">" Gestion efficace et
+                                                            fonctionnalités robustes. "</p>
+                                                    </div>
+                                                </div>
+                                                <div class="carousel-indicators">
+                                                    <button type="button" data-bs-target="#qoutescarouselIndicators"
+                                                            data-bs-slide-to="0" class="active"
+                                                            aria-label="Témoignage 1"></button>
+                                                    <button type="button" data-bs-target="#qoutescarouselIndicators"
+                                                            data-bs-slide-to="1" aria-label="Témoignage 2"></button>
+                                                    <button type="button" data-bs-target="#qoutescarouselIndicators"
+                                                            data-bs-slide-to="2" aria-label="Témoignage 3"></button>
+                                                </div>
                                             </div>
-                                            <div class="mt-auto">
-                                                <div class="mb-3">
-                                                    <i class="ri-double-quotes-l display-4 text-success"></i>
-                                                </div>
-
-                                                <div id="qoutescarouselIndicators" class="carousel slide" data-bs-ride="carousel">
-                                                    <div class="carousel-indicators">
-                                                        <button type="button" data-bs-target="#qoutescarouselIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-                                                        <button type="button" data-bs-target="#qoutescarouselIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
-                                                        <button type="button" data-bs-target="#qoutescarouselIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
-                                                    </div>
-                                                    <div class="carousel-inner text-center text-white-50 pb-5">
-                                                        <div class="carousel-item active">
-                                                            <p class="fs-15 fst-italic">" Great! Clean code, clean design, easy for customization. Thanks very much! "</p>
-                                                        </div>
-                                                        <div class="carousel-item">
-                                                            <p class="fs-15 fst-italic">" The theme is really great with an amazing customer support."</p>
-                                                        </div>
-                                                        <div class="carousel-item">
-                                                            <p class="fs-15 fst-italic">" Great! Clean code, clean design, easy for customization. Thanks very much! "</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <!-- end carousel -->
-
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-lg-6">
-                                    <div class="p-lg-5 p-4">
-                                        <div>
-                                            <h5 class="text-primary">Connectez vous</h5>
-                                            <p class="text-muted">Entrez bien les informations</p>
-                                        </div>
-
-                                        <div class="mt-4">
-                                            <form class="needs-validation" method="POST"  action="{{ url_for('login') }}">
-
-                                                <div class="mb-3">
-                                                    <label for="useremail" class="form-label">Email <span class="text-danger">*</span></label>
-                                                    <input type="email" class="form-control" name="email" id="useremail" placeholder="Entez votre Email" required>
-                                                    <div class="invalid-feedback">
-                                                        Veuillez entrer votre email
-                                                    </div>
-                                                </div>
-                                                
-
-                                                <div class="mb-3">
-                                                    <label class="form-label" for="password-input">Mot de passe</label>
-                                                    <div class="position-relative auth-pass-inputgroup">
-                                                        <input type="password" name="password" class="form-control pe-5 password-input" placeholder="Entez le mot de passe"   pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" required>
-                                                        <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon material-shadow-none" type="button" id="password-addon"><i class="ri-eye-fill align-middle"></i></button>
-                                                        <div class="invalid-feedback">
-                                                            Veuillez entrer le mot de passe
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="float-end">
-                                                        <a href="/forgot_password" class="text-muted">Mot de passe oublié ?</a>
-                                                    </div>
-                                                </div>
-
-                                                <!-- <div id="password-contain" class="p-3 bg-light mb-2 rounded">
-                                                    <h5 class="fs-13">Password must contain:</h5>
-                                                    <p id="pass-length" class="invalid fs-12 mb-2">Minimum <b>8 characters</b></p>
-                                                    <p id="pass-lower" class="invalid fs-12 mb-2">At <b>lowercase</b> letter (a-z)</p>
-                                                    <p id="pass-upper" class="invalid fs-12 mb-2">At least <b>uppercase</b> letter (A-Z)</p>
-                                                    <p id="pass-number" class="invalid fs-12 mb-0">A least <b>number</b> (0-9)</p>
-                                                </div> -->
-
-                                                <div class="mt-4">
-                                                    <button class="btn btn-success w-100" type="submit">Connexion</button>
-                           
-                                            </form>
-                                        </div>
-                                        
-
-                                        <div class="mt-5 text-center">
-                                            <p class="mb-0">Already have an account ? <a href="auth-signin-cover.html" class="fw-semibold text-primary text-decoration-underline"> Signin</a> </p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                            <div class="col-lg-6">
+                                <div class="p-lg-5 p-4">
+                                    <div>
+                                        <h5 class="text-primary">Connectez-vous</h5>
+                                        <p class="text-muted">Veuillez saisir vos informations d'identification.</p>
+                                    </div>
+                                    <div class="mt-4">
+                                        <form class="needs-validation" method="POST" action="{{ url_for('login') }}">
+                                            <div class="mb-3">
+                                                <label for="useremail" class="form-label">Adresse email <span
+                                                        class="text-danger">*</span></label>
+                                                <input type="email" class="form-control" name="email" id="useremail"
+                                                       placeholder="Entrez votre adresse email" required>
+                                                <div class="invalid-feedback">Veuillez fournir une adresse email
+                                                    valide.
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="password-input" class="form-label">Mot de passe</label>
+                                                <div class="position-relative auth-pass-inputgroup">
+                                                    <input type="password" name="password"
+                                                           class="form-control pe-5 password-input"
+                                                           placeholder="Entrez votre mot de passe" id="password-input" required>
+                                                    <button type="button"
+                                                            class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-toggle"
+                                                            style="height: 100%; width: 40px;">
+                                                        <i id="toggle-icon" class="ri-eye-fill"></i>
+                                                    </button>
+                                                    <div class="invalid-feedback">Veuillez fournir un mot de passe
+                                                        valide.
+                                                    </div>
+                                                </div>
+                                                <div class="float-end">
+                                                    <a href="/forgot_password" class="text-muted">Mot de passe oublié
+                                                        ?</a>
+                                                </div>
+                                            </div>
+                                            <div class="mt-4">
+                                                <button class="btn btn-success w-100" type="submit">Connexion</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="mt-5 text-center">
+                                        <p>Pas encore inscrit ? <a href="auth-signup-cover.html"
+                                                                   class="fw-semibold text-primary">Créer un compte</a>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <!-- end card -->
                     </div>
-                    <!-- end col -->
-
                 </div>
-                <!-- end row -->
             </div>
-            <!-- end container -->
         </div>
-        <!-- end auth page content -->
+    </div>
+    <script>
+        // Sélection des éléments
+        const passwordInput = document.getElementById('password-input');
+        const toggleIcon = document.getElementById('toggle-icon');
 
-        <!-- footer -->
-        <footer class="footer galaxy-border-none">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="text-center">
-                            <p class="mb-0">&copy;
-                                <script>document.write(new Date().getFullYear())</script> Velzon. Crafted with <i class="mdi mdi-heart text-danger"></i> by Themesbrand
-                            </p>
-                        </div>
+        // Ajout de l'événement pour basculer le type du champ mot de passe
+        document.querySelector('.password-toggle').addEventListener('click', () => {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('ri-eye-fill');
+                toggleIcon.classList.add('ri-eye-off-fill');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('ri-eye-off-fill');
+                toggleIcon.classList.add('ri-eye-fill');
+            }
+        });
+    </script>
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="text-center">
+                        <p>&copy;
+                            <script>document.write(new Date().getFullYear())</script>
+                            Cadastre. Tous droits réservés.
+                        </p>
                     </div>
                 </div>
             </div>
-        </footer>
-        <!-- end Footer -->
-    </div>
-    <!-- end auth-page-wrapper -->
+        </div>
+    </footer>
+</div>
 
-    <!-- JAVASCRIPT -->
-    <script src="{{ url_for('static', filename='libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+<!-- Scripts -->
+<script src="{{ url_for('static', filename='libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ url_for('static', filename='libs/simplebar/simplebar.min.js') }}"></script>
+<script src="{{ url_for('static', filename='libs/node-waves/waves.min.js') }}"></script>
+<script src="{{ url_for('static', filename='libs/feather-icons/feather.min.js') }}"></script>
+<script src="{{ url_for('static', filename='libs/swiper/swiper-bundle.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Simplebar -->
-    <script src="{{ url_for('static', filename='libs/simplebar/simplebar.min.js') }}"></script>
-
-    <!-- Node Waves -->
-    <script src="{{ url_for('static', filename='libs/node-waves/waves.min.js') }}"></script>
-
-    <!-- Feather Icons -->
-    <script src="{{ url_for('static', filename='libs/feather-icons/feather.min.js') }}"></script>
-
-    <!-- Lord Icon -->
-    <script src="{{ url_for('static', filename='js/pages/plugins/lord-icon-2.1.0.js') }}"></script>
-
-    <!-- Plugins -->
-    <script src="{{ url_for('static', filename='js/plugins.js') }}"></script>
-
-    <!-- ApexCharts -->
-    <script src="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.js') }}"></script>
-
-    <!-- Vector Map -->
-    <script src="{{ url_for('static', filename='libs/jsvectormap/jsvectormap.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='libs/jsvectormap/maps/world-merc.js') }}"></script>
-
-    <!-- Swiper Slider -->
-    <script src="{{ url_for('static', filename='libs/swiper/swiper-bundle.min.js') }}"></script>
-
-    <!-- Dashboard Init -->
-    <script src="{{ url_for('static', filename='js/pages/dashboard-ecommerce.init.js') }}"></script>
-
-    <!-- App JS -->
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 
-
-<!-- Mirrored from themesbrand.com/velzon/html/master/auth-signup-cover.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 03 Dec 2024 23:56:54 GMT -->
 </html>

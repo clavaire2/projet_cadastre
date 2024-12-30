@@ -5,42 +5,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e81d13a9-a9db-4b7b-8612-6db47c272984" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/aaa.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aaa.py" beforeDir="false" afterPath="$PROJECT_DIR$/aaa.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/admin/dossier/ajout_dossier.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/dossier/ajout_dossier.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/admin/dossier/liste_dossier.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/dossier/liste_dossier.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/admin/dossier/modifier_dossier.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/dossier/modifier_dossier.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/admin/includes/navbar.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/includes/navbar.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/brigade/dossier/dossiers_assignes.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/brigade/dossier/dossiers_en_attente.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/brigade/dossier/dossiers_en_cours.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/brigade/dossier/dossiers_valides.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/brigade/includes/header.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/brigade/includes/header.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/brigade/includes/navbar.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/brigade/includes/navbar.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/brigade/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/brigade/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/chef_brigade/dossier/dossiers_assignes.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/chef_brigade/dossier/dossiers_terminer.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/chef_brigade/dossier/dossiers_terminer.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/chef_brigade/dossier/dossiers_valides.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/chef_brigade/dossier/liste_chef_brigade.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/chef_brigade/dossier/liste_chef_brigade.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/chef_brigade/includes/header.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/chef_brigade/includes/header.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/chef_brigade/includes/navbar.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/chef_brigade/includes/navbar.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/chef_brigade/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/chef_brigade/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/evaluation_cadastrale/dossier/dossiers_valides.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/evaluation_cadastrale/dossier/liste_dossiers_assignes.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/evaluation_cadastrale/dossier/liste_gestion_eveluation_cadastrale.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/evaluation_cadastrale/includes/footer.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/evaluation_cadastrale/includes/footer.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/evaluation_cadastrale/includes/header.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/evaluation_cadastrale/includes/header.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/evaluation_cadastrale/includes/navbar.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/evaluation_cadastrale/includes/navbar.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/evaluation_cadastrale/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/evaluation_cadastrale/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/securisation/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/securisation/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/securisation/dossier/dossiers_valides.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/securisation/dossier/liste_dossiers_assignes.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/securisation/dossier/liste_gestion_securisation.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/securisation/includes/footer.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/securisation/includes/footer.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/securisation/includes/header.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/securisation/includes/header.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/securisation/includes/navbar.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/securisation/includes/navbar.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/securisation/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/securisation/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/conversation_fonciere/dossier/dossiers_encours_conversation_fonciere.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/conversation_fonciere/dossier/dossiers_encours_conversation_fonciere.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/conversation_fonciere/dossier/dossiers_terminer_conversation_fonciere.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/conversation_fonciere/dossier/dossiers_terminer_conversation_fonciere.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/conversation_fonciere/dossier/liste_gestion_fonciere.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/conversation_fonciere/dossier/liste_gestion_fonciere.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/conversation_fonciere/includes/footer.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/conversation_fonciere/includes/footer.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/conversation_fonciere/includes/header.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/conversation_fonciere/includes/header.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/conversation_fonciere/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/conversation_fonciere/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/evaluation_cadastrale/dossier/dossiers_terminer_evaluation_cadastrale.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/evaluation_cadastrale/dossier/dossiers_terminer_evaluation_cadastrale.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/evaluation_cadastrale/dossier/liste_evaluation_cadastrale.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/evaluation_cadastrale/dossier/liste_evaluation_cadastrale.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/signature/dossier/dossiers_encours_signature.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/signature/dossier/dossiers_encours_signature.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/signature/dossier/dossiers_terminer_signature.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/signature/dossier/dossiers_terminer_signature.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/signature/dossier/liste_gestion_signature.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/signature/dossier/liste_gestion_signature.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/signature/includes/footer.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/signature/includes/footer.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/signature/includes/header.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/signature/includes/header.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/signature/includes/navbar.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/signature/includes/navbar.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/signature/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/signature/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -124,22 +107,22 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/app.py</url>
-          <line>87</line>
+          <line>88</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/app.py</url>
-          <line>249</line>
+          <line>250</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/app.py</url>
-          <line>751</line>
+          <line>763</line>
           <option name="timeStamp" value="6" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/app.py</url>
-          <line>957</line>
+          <line>961</line>
           <option name="timeStamp" value="9" />
         </line-breakpoint>
       </breakpoints>

@@ -1,8 +1,8 @@
 {% extends 'signature/base.html' %}
 {% block titre %}
-    <title>Cadastre - Dossiers assignés</title>
+<title>Cadastre - Dossiers assignés</title>
 
-    {% endblock %}
+{% endblock %}
 {% block contenu %}
 
 <div class="page-content">
@@ -34,11 +34,21 @@
                 <div class="card">
                     <div class="card-header d-flex align-items-center">
                         <h4 class="card-title mb-0 flex-grow-1">
-                            Liste des dossiers : <b class="text-primary">gestion_signature</b>
+                            Liste des dossiers : <b class="text-primary">Gestion Signature</b>
                         </h4>
                     </div>
                     <!-- end card header -->
-
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                    <div>
+                        {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}" role="alert">
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% endwith %}
                     <div class="card-body">
                         <div class="table-responsive">
                             <table class="table table-striped table-bordered align-middle mb-0">
@@ -68,7 +78,7 @@
                                     <td class="text-primary">{{dossier["n4_securisation"] }}</td>
                                     <td class="text-primary">{{dossier["n6_signature"] }}</td>
                                     <td class="text-primary">{{ dossier["date_assignation_n6"] }}</td>
-                                    <td class="text-primary">{{ dossier["n5_evaluation_cadastrale"] }}</td>
+                                    <td class="text-primary">{{ dossier["n6_signature"] }}</td>
                                     <td class="text-primary">{{ dossier["statut"] }}</td>
                                     <td>
                                         <!-- Bouton Terminer Dossier -->

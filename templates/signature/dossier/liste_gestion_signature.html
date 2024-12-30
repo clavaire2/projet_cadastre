@@ -20,7 +20,7 @@
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Liste</a></li>
-                            <li class="breadcrumb-item active">Liste des dossiers en Attente: <b style="color:blue">gestion_signature</b>
+                            <li class="breadcrumb-item active">Liste des dossiers en Attente: <b style="color:blue">Gestion Signature</b>
                             </li>
                         </ol>
                     </div>
@@ -37,7 +37,7 @@
                 <div class="card">
                     <div class="card-header align-items-center d-flex">
                         <h4 class="card-title mb-0 flex-grow-1">
-                            Liste des dossiers : <b style="color: blue;">gestion_signature</b>
+                            Liste des dossiers : <b style="color: blue;">Gestion Signature</b>
                         </h4>
                     </div>
                     <!-- end card header -->
@@ -48,7 +48,7 @@
                                 <table class="table align-middle table-nowrap table-striped mb-0">
                                     <thead class="table-light">
                                     <tr>
-                                        <th class="text-center">Nom du dossier</th>
+                                        <th class="text-center">Nom du <br>dossier</th>
                                         <th class="text-center">Date d'ajout</th>
                                         <th class="text-center">Date assignation<br>termine N3</th>
                                         <th class="text-center">Nom N1</th>
@@ -56,7 +56,7 @@
                                         <th class="text-center">Nom N3</th>
                                         <th class="text-center">Nom N4</th>
                                         <th class="text-center">Nom N5</th>
-                                        <th class="text-center">Date assignation N4</th>
+                                        <th class="text-center">Date <br>assignation N4</th>
                                         <th class="text-center">Votre Nom</th>
                                         <th class="text-center">Statut</th>
                                         <th class="text-center">Action</th>
@@ -72,20 +72,16 @@
                                         <td class="text-center">{{ dossier["date_temine_n3"] }}</td>
                                         <td class="text-center">{{ dossier["n1_admin"] }}</td>
                                         <td class="text-center">{{ dossier["n2_chef_brigade"] }}</td>
-                                        <td class="text-center" style="color: blue;">{{ dossier["n3_brigade"] }}</td>
-                                        <td class="text-center" style="color: blue;">{{ dossier["date_assignation_n4"]
-                                            }}
-                                        </td>
-                                        <td class="text-center" style="color: blue;">{{ dossier["n4_evaluation_cadastrale"] }}
-                                        </td>
-                                        <td class="text-center" style="color: blue;">{{ dossier["n5_evaluation_cadastrale"] }}
-                                        </td>
-                                        <td class="text-center" style="color: blue;">{{ dossier["statut"] }}</td>
+                                        <td class="text-center" style="color: blue;">{{dossier["n3_brigade"] }}</td>
+                                        <td class="text-center" style="color: blue;">{{dossier["n4_securisation"] }}</td>
+                                        <td class="text-center" style="color: blue;">{{dossier["n5_evaluation_cadastrale"] }}</td>
+                                        <td class="text-center" style="color: blue;">{{dossier["date_assignation_n4"]}}</td>
+                                        <td class="text-center" style="color: blue;">{{dossier["n6_signature"]}}</td>
+                                        <td class="text-center" style="color: blue;">{{dossier["statut"]}}</td>
                                         <td class="text-center">
-                                            <!-- Bouton "Prendre en charge" -->
-                                            <button type="button" class="btn btn-success btn-sm rounded-pill"
-                                                    style="font-size: 14px;"
-                                                    onclick="confirmAssignment({{ dossier['id'] }}, '{{ dossier['nom_dossier'] }}');">
+
+                                            <button type="button" class="btn btn-success btn-sm rounded-pill" style="font-size: 9px;"
+                                                    onclick="confirmAssignment({{dossier['id'] }}, '{{dossier['nom_dossier'] }}');">
                                                 Prendre en<br>charge ce dossier
                                             </button>
 
