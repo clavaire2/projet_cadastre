@@ -40,6 +40,7 @@
                                             </a>
                                         </div>
                                         <div class="mt-auto text-center text-white-50">
+
                                             <div id="qoutescarouselIndicators" class="carousel slide"
                                                  data-bs-ride="carousel">
                                                 <div class="carousel-inner pb-5">
@@ -73,6 +74,17 @@
                             <div class="col-lg-6">
                                 <div class="p-lg-5 p-4">
                                     <div>
+                                        {% with messages = get_flashed_messages(with_categories=true) %}
+                                        {% if messages %}
+                                        <div>
+                                            {% for category, message in messages %}
+                                            <div class="alert alert-{{ category }}" role="alert">
+                                                {{ message }}
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                        {% endwith %}
                                         <h5 class="text-primary">Connectez-vous</h5>
                                         <p class="text-muted">Veuillez saisir vos informations d'identification.</p>
                                     </div>
@@ -92,7 +104,8 @@
                                                 <div class="position-relative auth-pass-inputgroup">
                                                     <input type="password" name="password"
                                                            class="form-control pe-5 password-input"
-                                                           placeholder="Entrez votre mot de passe" id="password-input" required>
+                                                           placeholder="Entrez votre mot de passe" id="password-input"
+                                                           required>
                                                     <button type="button"
                                                             class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-toggle"
                                                             style="height: 100%; width: 40px;">

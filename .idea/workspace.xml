@@ -4,27 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e81d13a9-a9db-4b7b-8612-6db47c272984" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/aaa.py" beforeDir="false" afterPath="$PROJECT_DIR$/aaa.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/conversation_fonciere/dossier/dossiers_encours_conversation_fonciere.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/conversation_fonciere/dossier/dossiers_encours_conversation_fonciere.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/conversation_fonciere/dossier/dossiers_terminer_conversation_fonciere.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/conversation_fonciere/dossier/dossiers_terminer_conversation_fonciere.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/conversation_fonciere/dossier/liste_gestion_fonciere.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/conversation_fonciere/dossier/liste_gestion_fonciere.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/conversation_fonciere/includes/footer.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/conversation_fonciere/includes/footer.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/conversation_fonciere/includes/header.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/conversation_fonciere/includes/header.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/conversation_fonciere/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/conversation_fonciere/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/evaluation_cadastrale/dossier/dossiers_terminer_evaluation_cadastrale.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/evaluation_cadastrale/dossier/dossiers_terminer_evaluation_cadastrale.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/evaluation_cadastrale/dossier/liste_evaluation_cadastrale.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/evaluation_cadastrale/dossier/liste_evaluation_cadastrale.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/login.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/signature/dossier/dossiers_encours_signature.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/signature/dossier/dossiers_encours_signature.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/signature/dossier/dossiers_terminer_signature.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/signature/dossier/dossiers_terminer_signature.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/signature/dossier/liste_gestion_signature.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/signature/dossier/liste_gestion_signature.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/signature/includes/footer.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/signature/includes/footer.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/signature/includes/header.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/signature/includes/header.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/signature/includes/navbar.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/signature/includes/navbar.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/signature/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/signature/index.html" afterDir="false" />
-    </list>
+    <list default="true" id="e81d13a9-a9db-4b7b-8612-6db47c272984" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -48,13 +28,14 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.app.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.app.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "main"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration name="app" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="projet_cadastre" />
@@ -87,7 +68,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-babbdf50b680-746f403e7f0c-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-241.15989.155" />
+        <option value="bundled-python-sdk-09665e90c3a7-d3b881c8e49f-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-233.15026.15" />
       </set>
     </attachedChunks>
   </component>
