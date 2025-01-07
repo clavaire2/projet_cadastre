@@ -1,0 +1,159 @@
+{% extends 'admin/base.html' %}
+
+{% block titre %}
+<title>Résultat de Recherche - Cadastre</title>
+{% endblock %}
+
+{% block contenu %}
+<div class="page-content">
+    <div class="container-fluid">
+
+        <!-- Titre de la page -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="page-title-box d-flex align-items-center justify-content-between">
+                    <h4 class="mb-0 text-primary">Résultat de la recherche</h4>
+                    <div class="page-title-right">
+                        <ol class="breadcrumb m-0">
+                            <li class="breadcrumb-item"><a href="#">Accueil</a></li>
+                            <li class="breadcrumb-item active">Recherche</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenu principal -->
+        <div class="row justify-content-center">
+            <div class="col-xl-8 col-lg-10 col-md-12">
+                <div class="card shadow-lg border-0 rounded">
+                    <div class="card-header bg-primary text-white py-4">
+                        <h5 class="card-title mb-0 fs-3" style="color: black">
+                            Résultats de recherche pour :
+                            <span class="fw-bold text-white fs-4">{{ nom_dossier }}</span>
+                        </h5>
+                    </div>
+
+                    <style>
+                        .card-header {
+                            font-size: 1.5rem;  /* Augmenter la taille de la police */
+                            padding-top: 1rem;  /* Ajouter un peu d'espace en haut */
+                            padding-bottom: 1rem;  /* Ajouter un peu d'espace en bas */
+                            text-align: center;  /* Centrer le titre */
+                        }
+
+                        .card-title {
+                            font-size: 2rem;  /* Augmenter la taille du titre */
+                            font-weight: 500;
+                        }
+
+                        .fw-bold {
+                            font-weight: 700;  /* Rendre le texte du nom du dossier plus gras */
+                        }
+
+                        .fs-3 {
+                            font-size: 1.75rem;
+                        }
+
+                        .fs-4 {
+                            font-size: 1.5rem;
+                        }
+
+                        .text-white {
+                            color: #fff !important;  /* Assurer que le texte est bien blanc */
+                        }
+                    </style>
+
+                    <div class="card-body">
+                        {% if error %}
+                        <div class="alert alert-danger" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill"></i> {{ error }}
+                        </div>
+                        {% elif dossiers %}
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover align-middle">
+                                <thead class="table-dark">
+                                <tr>
+                                    <th class="text-center">Propriété</th>
+                                    <th class="text-center">Valeur</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for dossier in dossiers %}
+                                <tr>
+                                    <th colspan="2" class="text-center bg-info text-white rounded-top">
+                                        <strong>Niveau dossier : {{ dossier['table'] }}</strong>
+                                        <br> {{max_date}}
+                                    </th>
+                                </tr>
+                                {% for key, value in dossier.items() %}
+                                {% if key != 'table' %}
+                                <tr class="table-row">
+                                    <td class="text-start p-3"><strong>{{ key | replace('_', ' ') | capitalize
+                                        }}</strong></td>
+                                    <td class="text-center p-3">
+                                        {{ value if value else '<span class="text-muted">N/A</span>'|safe }}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info text-center" role="alert">
+                            <i class="bi bi-info-circle-fill"></i> Aucun dossier trouvé pour le terme de recherche
+                            <b>{{ nom_dossier }}</b>.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .table th, .table td {
+        vertical-align: middle;
+        padding: 1rem;
+    }
+    .table-row:hover {
+        background-color: #f1f1f1;
+    }
+    .table th {
+        font-size: 1.1rem;
+        text-transform: uppercase;
+    }
+    .table td {
+        font-size: 1rem;
+    }
+    .card-header {
+        border-radius: 10px 10px 0 0;
+    }
+    .card-body {
+        border-radius: 0 0 10px 10px;
+        background-color: #f9f9f9;
+    }
+    .alert {
+        border-radius: 10px;
+        font-size: 1.1rem;
+    }
+    .table-responsive {
+        margin-top: 20px;
+    }
+    .card {
+        border: 2px solid #ddd;
+        border-radius: 10px;
+    }
+    .table-bordered {
+        border: 1px solid #ddd;
+    }
+    .table-bordered th, .table-bordered td {
+        border: 1px solid #ddd;
+    }
+</style>
+
+{% endblock %}

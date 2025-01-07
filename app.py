@@ -73,10 +73,43 @@ def is_valid(email, email_t, password, table):
             return True
     return False
 
+
+from datetime import datetime
+
+def get_pending_count(table_name, statut):
+    cur = mysql.connection.cursor()
+    current_year = datetime.now().year
+    query = f"""
+        SELECT COUNT(*) 
+        FROM {table_name} 
+        WHERE statut = %s 
+        AND YEAR(date_ajout) = %s
+    """
+    cur.execute(query, (statut, current_year))
+    result = cur.fetchone()
+    return result[0] if result else 0
+
+
+def get_objectif_count(colonne):
+    cur = mysql.connection.cursor()
+    query = f"SELECT {colonne} FROM objectifs_direction"
+    cur.execute(query)
+    result = cur.fetchone()
+    return result[0] if result else 0
+
+
+def get_count(table_name):
+    cur = mysql.connection.cursor()
+    query = f"SELECT COUNT(*) FROM {table_name}"
+    cur.execute(query)
+    result = cur.fetchone()
+    return result[0] if result else 0
+
+
+
 @app.route('/logout')
 def logout():
     session.clear()
-
     return redirect(url_for('login'))
 
 
@@ -121,16 +154,179 @@ def inscription_admin():
     return render_template('admin/connexion/cree_compte.html')
 
 
+
+
+
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
+@app.route("/rechercher", methods=["GET", "POST"])
+def rechercher_dossier():
+    if request.method == "POST":
+        nom_dossier = request.form.get("nom_dossier")
+        if not nom_dossier:
+            return render_template(
+                "admin/dossier/recherche_trouver.html",
+                error="Veuillez saisir un nom de dossier.",
+                dossiers=None
+            )
+
+        tables = [
+            "gestion_chef_brigade", "gestion_brigade", "gestion_securisation",
+            "gestion_evaluation_cadastrale", "gestion_signature", "gestion_conversation_fonciere",
+            "gestion_conversation_fonciere_terminer"
+        ]
+        dossiers = []
+
+        # Fonction pour formater le nom de la table
+        def format_table_name(table_name):
+            table_name = table_name.replace("gestion_", "")  # Enlever 'gestion_'
+            table_name = table_name.replace("_", " ").capitalize()  # Remplacer le _ par un espace et mettre en majuscule
+            return table_name
+
+        cur = mysql.connection.cursor()
+        try:
+            for table in tables:
+                query = f"SELECT * FROM {table} WHERE nom_dossier LIKE %s"
+                cur.execute(query, (f"%{nom_dossier}%",))
+                results = cur.fetchall()
+                columns = [desc[0] for desc in cur.description]  # Récupérer les noms des colonnes
+
+                for result in results:
+                    dossier = {"table": format_table_name(table)}  # Formater le nom de la table ici
+                    for idx, column in enumerate(columns):
+                        dossier[column] = result[idx] if idx < len(result) else None  # Ajouter uniquement les colonnes existantes
+                    dossiers.append(dossier)
+
+            # Fonction pour extraire les dates et trouver la date maximale
+            def get_max_date(row):
+                dates = []
+
+                # Parcourir les clés du dictionnaire pour trouver les colonnes "date"
+                for column, value in row.items():
+                    if column.lower().startswith('date_') and isinstance(value, datetime):
+                        dates.append(value)
+
+                # Trouver la date maximale
+                if dates:
+                    return max(dates)
+                return None
+
+            # Calculer la différence en mois, jours, heures, minutes et secondes pour chaque dossier
+            for dossier in dossiers:
+                max_date = get_max_date(dossier)
+                if max_date and 'date_ajout' in dossier and isinstance(dossier['date_ajout'], datetime):
+                    # Calculer la différence
+                    delta = relativedelta(max_date, dossier['date_ajout'])
+
+                    # Calcul des mois, jours, heures, minutes et secondes
+                    mois = delta.years * 12 + delta.months
+                    jours = delta.days
+                    heures = max_date.hour - dossier['date_ajout'].hour
+                    minutes = max_date.minute - dossier['date_ajout'].minute
+                    secondes = max_date.second - dossier['date_ajout'].second
+
+                    # Corriger les heures, minutes et secondes négatives
+                    if secondes < 0:
+                        secondes += 60
+                        minutes -= 1
+                    if minutes < 0:
+                        minutes += 60
+                        heures -= 1
+                    if heures < 0:
+                        heures += 24
+                        jours -= 1
+
+                    dossier['duree_mois'] = mois
+                    dossier['duree_jours'] = jours
+                    dossier['duree_heures'] = heures
+                    dossier['duree_minutes'] = minutes
+                    dossier['duree_secondes'] = secondes
+
+            return render_template(
+                "admin/dossier/recherche_trouver.html",
+                dossiers=dossiers,
+                nom_dossier=nom_dossier,
+                error=None
+            )
+        except Exception as e:
+            return render_template(
+                "admin/dossier/recherche_trouver.html",
+                error=f"Erreur : {str(e)}",
+                dossiers=None
+            )
+        finally:
+            cur.close()
+    return render_template("admin/dossier/recherche_trouver.html", dossiers=None, error=None)
+
 @app.route("/admin_tableau_de_bord")
 def admin_tableau_de_bord():
+    # Vérification de la session pour s'assurer que l'administrateur est connecté
     if 'email_admin' not in session:
         return redirect(url_for('login'))
-
-    # Récupérer les informations du chef de brigade connecté
+    # Obtenir les informations de connexion de l'administrateur
     loggedIn, firstName = getLogin('email_admin', 'admin')
-    if not loggedIn:
-        return redirect(url_for('login'))
-    return render_template('admin/index.html', firstName=firstName)
+
+    liste_table_gestion=["gestion_chef_brigade", "gestion_brigade",
+                         "gestion_securisation", "gestion_evaluation_cadastrale",
+                         "gestion_signature", "gestion_conversation_fonciere"]
+
+    liste_table_terminer=["gestion_chef_brigade_terminer", "gestion_brigade_terminer",
+                          "gestion_securisation_terminer", "gestion_evaluation_cadastrale_terminer",
+                          "gestion_signature_terminer", "gestion_conversation_fonciere_terminer"]
+
+    liste_table_terminer_ter=["gestion_conversation_fonciere_terminer"]
+    attente_liste    = [get_pending_count(row, 'En attente') for row in liste_table_gestion]
+    en_cours_liste = [get_pending_count(row, "En cours")   for row in liste_table_gestion]
+    terminer_liste = [get_pending_count(row, "Terminé")   for row in liste_table_terminer]
+    terminer_liste_ter = [get_pending_count(row, "Terminé")   for row in liste_table_terminer_ter]
+
+    print(terminer_liste_ter)
+    nombre_attente   =  sum(attente_liste)
+    nombre_cours     =  sum(en_cours_liste)
+    nombre_terminer  =  sum(terminer_liste_ter)
+
+
+    liste_table    = ["chef_brigade", "brigade", "securisation",
+                      "evaluation_cadastrale","signature", "conversation_fonciere"]
+
+    liste_personnel  = [get_count(row) for row in liste_table]
+    nombre_personnel = sum(liste_personnel)
+    combined_data    = zip(liste_table, attente_liste, en_cours_liste, terminer_liste, liste_personnel)
+
+    directions = [
+        {
+            "name": objectif,
+            "termine": terminer,
+            "objectif": get_objectif_count(objectif)
+        } for objectif, terminer in  zip(liste_table,terminer_liste )
+
+    ]
+
+    # Calcul du pourcentage de réalisation
+    for direction in directions:
+        direction["pourcentage"] = (direction["termine"] / direction["objectif"]) * 100
+
+    # Identifier la meilleure direction
+    meilleure_direction = max(directions, key=lambda x: x["pourcentage"])
+
+
+
+    return render_template(
+        'admin/index.html',
+        firstName=firstName,
+        nombre_attente=nombre_attente,
+        nombre_cours=nombre_cours,
+        nombre_terminer=nombre_terminer,
+        liste_table=liste_table,
+        combined_data=combined_data,
+        nombre_personnel=nombre_personnel,
+        directions=directions,
+        meilleure_direction=meilleure_direction)
+
 
 @app.route('/ajouter_dossier', methods=['GET', 'POST'])
 def ajouter_dossier():
@@ -285,6 +481,8 @@ def inscription_chefbrigade():
 
 @app.route("/chef_brigade_tableau_de_bord")
 def chef_brigade_tableau_de_bord():
+    import datetime
+    annee_actuelle = datetime.datetime.now().year
     loggedIn, firstName = getLogin('email_chefbrigade', 'chef_brigade')
     if 'email_chefbrigade' not in  session:
         return redirect(url_for('login'))
@@ -294,7 +492,19 @@ def chef_brigade_tableau_de_bord():
         en_attente = cur.fetchone()[0]
         cur.execute("SELECT COUNT(*) FROM gestion_chef_brigade WHERE id_chef_brigade = %s AND statut = 'En cours'", [loggedIn])
         en_cours = cur.fetchone()[0]
-        cur.execute("SELECT COUNT(*) FROM gestion_chef_brigade_terminer WHERE id_chef_brigade = %s AND statut = 'Terminé'", [loggedIn])
+        # Requête avec filtre d'année dynamique
+        requete = """
+            SELECT COUNT(*) 
+            FROM gestion_chef_brigade_terminer 
+            WHERE id_chef_brigade = %s 
+              AND statut = 'Terminé' 
+              AND YEAR(date_ajout) = %s
+        """
+
+        # Exécution de la requête avec les paramètres
+        cur.execute(requete, [loggedIn, annee_actuelle])
+
+        # Récupérer le résultat
         termine = cur.fetchone()[0]
         cur.close()
         return render_template('chef_brigade/index.html', firstName=firstName, en_attente=en_attente, en_cours=en_cours, termine=termine)
@@ -304,7 +514,7 @@ def liste_gestion_chef_brigade():
     if 'email_chefbrigade' in session:
         loggedIn, firstName = getLogin('email_chefbrigade', 'chef_brigade')
         cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM gestion_chef_brigade where statut='En attente'")
+        cur.execute("SELECT * FROM gestion_chef_brigade where statut='En attente' ORDER BY id DESC")
         dossiers = cur.fetchall()
         cur.close()
         return render_template('chef_brigade/dossier/liste_chef_brigade.html', dossiers=dossiers,loggedIn=loggedIn, firstName=firstName)
@@ -344,7 +554,7 @@ def dossier_cours_chef_brigade():
         loggedIn, firstName = getLogin('email_chefbrigade', 'chef_brigade')
         print(loggedIn)
         cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM gestion_chef_brigade WHERE statut='En cours' and  id_chef_brigade = %s", (loggedIn,))
+        cur.execute("SELECT * FROM gestion_chef_brigade WHERE statut='En cours' and  id_chef_brigade = %s ORDER BY id DESC", (loggedIn,))
         dossiers = cur.fetchall()
         return render_template('chef_brigade/dossier/liste_dossier_en_cours_chef_brigade.html',
                                dossiers=dossiers, loggedIn=loggedIn, firstName=firstName)
@@ -396,17 +606,18 @@ def terminer_dossier_chefbrigade(id_dossier):
 
             # Supprimer le dossier de la table gestion_chef_brigade
             cur.execute("DELETE FROM gestion_chef_brigade WHERE id = %s", (id_dossier,))
+            flash("Le dossier a été validé avec succès.", "success")
             mysql.connection.commit()
-            return redirect(url_for('dossier_cours_chef_brigade'))
+            return redirect(url_for('dossiers_valides'))
 
         except Exception as e:
             mysql.connection.rollback()  # Annuler les modifications en cas d'erreur
             flash(f"Erreur lors de la terminaison du dossier : {str(e)}", "danger")
-            return redirect(url_for('dossier_cours_chef_brigade'))
+            return redirect(url_for('dossiers_valides'))
 
     except Exception as e:
         flash(f"Erreur inattendue : {str(e)}", "danger")
-        return redirect(url_for('dossier_cours_chef_brigade'))
+        return redirect(url_for('dossiers_valides'))
 
     finally:
         if cur:
@@ -423,7 +634,7 @@ def dossiers_valides():
         cur = mysql.connection.cursor()
         cur.execute("SELECT ident FROM chef_brigade WHERE email_chefbrigade = %s", [session['email_chefbrigade']])
         chef_brigade = cur.fetchone()
-        cur.execute("""SELECT *FROM gestion_chef_brigade_terminer WHERE id_chef_brigade = %s AND statut = 'Terminé'""", [loggedIn])
+        cur.execute("""SELECT *FROM gestion_chef_brigade_terminer WHERE id_chef_brigade = %s AND statut = 'Terminé' ORDER BY id DESC limit 50""", [loggedIn])
         dossiers = cur.fetchall()
         # duree_dossier=calculer_difference(dossiers[4], dossiers[3])
         print(dossiers)
@@ -475,6 +686,8 @@ def inscription_brigade():
 
 @app.route("/brigade_tableau_de_bord")
 def brigade_tableau_de_bord():
+    import datetime
+    annee_actuelle = datetime.datetime.now().year
     if 'email_brigade' not in  session:
         return redirect(url_for('login'))
     else:
@@ -484,7 +697,8 @@ def brigade_tableau_de_bord():
         en_attente = cur.fetchone()[0]
         cur.execute("SELECT COUNT(*) FROM gestion_brigade WHERE id_brigade = %s AND statut = 'En cours'", [loggedIn])
         en_cours = cur.fetchone()[0]
-        cur.execute("SELECT COUNT(*) FROM gestion_brigade_terminer WHERE id_brigade = %s AND statut = 'Terminé'", [loggedIn])
+        cur.execute("SELECT COUNT(*) FROM gestion_brigade_terminer WHERE id_brigade = %s AND statut = 'Terminé'"
+                    "AND YEAR(date_ajout) = %s",  [loggedIn, annee_actuelle])
         termine = cur.fetchone()[0]
         cur.close()
         return render_template('brigade/index.html', firstName=firstName,
@@ -497,7 +711,7 @@ def liste_gestion_brigade():
     if 'email_brigade' in session:
         loggedIn, firstName = getLogin('email_brigade', 'brigade')
         cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM gestion_brigade where statut='En attente'")
+        cur.execute("SELECT * FROM gestion_brigade where statut='En attente' ORDER BY id DESC")
         dossiers = cur.fetchall()
         cur.close()
         return render_template('brigade/dossier/liste_brigade.html',
@@ -558,8 +772,7 @@ def terminer_dossier_brigade(id_dossier):
             # Vérifier si le dossier existe et est assigné à l'utilisateur
             cur.execute("""
                 SELECT * FROM gestion_brigade 
-                WHERE id = %s AND id_brigade = %s AND statut = 'En cours'
-            """, (id_dossier, loggedIn))
+                WHERE id = %s AND id_brigade = %s AND statut = 'En cours' """, (id_dossier, loggedIn))
             dossier = cur.fetchone()
 
             if not dossier:
@@ -616,7 +829,7 @@ def dossiers_valides_brigade():
         cur = mysql.connection.cursor()
         cur.execute("SELECT ident FROM brigade WHERE email_brigade = %s", [session['email_brigade']])
         chef_brigade = cur.fetchone()
-        cur.execute("""SELECT *FROM gestion_brigade_terminer WHERE id_brigade = %s AND statut = 'Terminé'""", [loggedIn])
+        cur.execute("""SELECT *FROM gestion_brigade_terminer WHERE id_brigade = %s AND statut = 'Terminé' ORDER BY id DESC limit 50""", [loggedIn])
         dossiers = cur.fetchall()
         # duree_dossier=calculer_difference(dossiers[4], dossiers[3])
         print(dossiers)
@@ -667,6 +880,8 @@ def inscription_securisation():
 
 @app.route("/securisation_tableau_de_bord")
 def securisation_tableau_de_bord():
+    import datetime
+    annee_actuelle = datetime.datetime.now().year
     if 'email_securisation' not in  session:
         return redirect(url_for('login'))
     else:
@@ -676,7 +891,8 @@ def securisation_tableau_de_bord():
         en_attente = cur.fetchone()[0]
         cur.execute("SELECT COUNT(*) FROM gestion_securisation WHERE id_securisation = %s AND statut = 'En cours'", [loggedIn])
         en_cours = cur.fetchone()[0]
-        cur.execute("SELECT COUNT(*) FROM gestion_securisation_terminer WHERE id_securisation = %s AND statut = 'Terminé'", [loggedIn])
+        cur.execute("SELECT COUNT(*) FROM gestion_securisation_terminer WHERE id_securisation = %s AND statut = 'Terminé'"
+                    "AND YEAR(date_ajout) = %s", [loggedIn, annee_actuelle])
         termine = cur.fetchone()[0]
         cur.close()
         return render_template('securisation/index.html', firstName=firstName,
@@ -824,7 +1040,7 @@ def dossiers_valides_securisation():
     else :
         loggedIn, firstName = getLogin('email_securisation', 'securisation')
         cur = mysql.connection.cursor(DictCursor)
-        cur.execute("""SELECT *FROM gestion_securisation_terminer WHERE id_securisation = %s AND statut = 'Terminé'""", [loggedIn])
+        cur.execute("""SELECT *FROM gestion_securisation_terminer WHERE id_securisation = %s AND statut = 'Terminé'  ORDER BY id DESC limit 50""", [loggedIn])
         dossiers = cur.fetchall()
         # duree_dossier=calculer_difference(dossiers[4], dossiers[3])
         print(dossiers)
@@ -877,6 +1093,8 @@ def inscription_evaluationcadastrale():
 
 @app.route("/evaluation_cadastrale_tableau_de_bord")
 def evaluation_cadastrale_tableau_de_bord():
+    import datetime
+    annee_actuelle = datetime.datetime.now().year
     if 'email_evaluation_cadastrale' not in  session:
         return redirect(url_for('login'))
     else:
@@ -886,7 +1104,8 @@ def evaluation_cadastrale_tableau_de_bord():
         en_attente = cur.fetchone()[0]
         cur.execute("SELECT COUNT(*) FROM gestion_evaluation_cadastrale WHERE id_evaluation_cadastrale = %s AND statut = 'En cours'", [loggedIn])
         en_cours = cur.fetchone()[0]
-        cur.execute("SELECT COUNT(*) FROM gestion_evaluation_cadastrale_terminer WHERE id_evaluation_cadastrale = %s AND statut = 'Terminé'", [loggedIn])
+        cur.execute("SELECT COUNT(*) FROM gestion_evaluation_cadastrale_terminer WHERE id_evaluation_cadastrale = %s AND statut = 'Terminé'"
+                    "AND YEAR(date_ajout) = %s", [loggedIn, annee_actuelle])
         termine = cur.fetchone()[0]
         cur.close()
         return render_template('evaluation_cadastrale/index.html', firstName=firstName,
@@ -1091,6 +1310,8 @@ def inscription_signature():
 
 @app.route("/signature_fonciere_tableau_de_bord")
 def signature_fonciere_tableau_de_bord():
+    import datetime
+    annee_actuelle = datetime.datetime.now().year
     if 'email_signature' not in session:
         return redirect(url_for('login'))
 
@@ -1113,7 +1334,7 @@ def signature_fonciere_tableau_de_bord():
     cur.execute("SELECT COUNT(*) FROM gestion_signature WHERE id_signature = %s AND statut = 'En cours'", [id_signature])
     en_cours = cur.fetchone()[0]
 
-    cur.execute("SELECT COUNT(*) FROM gestion_signature_terminer WHERE id_signature = %s AND statut = 'Terminé'", [id_signature])
+    cur.execute("SELECT COUNT(*) FROM gestion_signature_terminer WHERE id_signature = %s AND statut = 'Terminé' AND YEAR(date_ajout) = %s", [id_signature,annee_actuelle])
     termine = cur.fetchone()[0]
     cur.close()
     return render_template('signature/index.html',firstName=firstName,en_attente=en_attente,en_cours=en_cours,termine=termine)
@@ -1218,7 +1439,7 @@ def valider_dossier_signature(id_dossier):
 
             if not result:
                 flash("Dossier introuvable ou non assigné.", "warning")
-                return redirect(url_for('liste_dossiers_assignes_signature'))
+                return redirect(url_for('dossiers_signature_valide'))
 
             columns = [desc[0] for desc in cur.description]
             dossier = dict(zip(columns, result))
@@ -1283,11 +1504,10 @@ def valider_dossier_signature(id_dossier):
             mysql.connection.commit()
 
             flash("Le dossier a été marqué comme terminé avec succès.", "success")
-        return redirect(url_for('liste_dossiers_assignes_signature'))
+        return redirect(url_for('dossiers_signature_valide'))
     except Exception as e:
         return f"Erreur  : {e}"
-    
-        return redirect(url_for('dossiers_valides_evaluation_cadastrale'))
+        return redirect(url_for('dossiers_signature_valide'))
 
 
 
@@ -1370,6 +1590,8 @@ def inscription_conversationfonciere():
 
 @app.route("/conversation_fonciere_tableau_de_bord")
 def conversation_fonciere_tableau_de_bord():
+    import datetime
+    annee_actuelle = datetime.datetime.now().year
     if 'email_conversation_fonciere' not in  session:
         return redirect(url_for('login'))
     else:
@@ -1379,7 +1601,8 @@ def conversation_fonciere_tableau_de_bord():
         en_attente = cur.fetchone()[0]
         cur.execute("SELECT COUNT(*) FROM gestion_conversation_fonciere WHERE id_evaluation_cadastrale = %s AND statut = 'En cours'", [loggedIn])
         en_cours = cur.fetchone()[0]
-        cur.execute("SELECT COUNT(*) FROM gestion_conversation_fonciere_terminer WHERE id_evaluation_cadastrale = %s AND statut = 'Terminé'", [loggedIn])
+        cur.execute("SELECT COUNT(*) FROM gestion_conversation_fonciere_terminer WHERE id_evaluation_cadastrale = %s AND statut = 'Terminé' "
+                    "AND YEAR(date_ajout) = %s", [loggedIn, annee_actuelle])
         termine = cur.fetchone()[0]
         cur.close()
         return render_template('conversation_fonciere/index.html', firstName=firstName,
@@ -1429,14 +1652,14 @@ def assigner_dossier_fonciere(id_dossier):
     cur = mysql.connection.cursor()
     # Mise à jour du dossier
     date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    cur.execute(""" UPDATE gestion_conversation_fonciere 
+    cur.execute("""UPDATE gestion_conversation_fonciere 
                     SET date_assignation_n7 = %s, statut = %s, n7_conversation_fonciere = %s, id_conversation_fonciere = %s 
                     WHERE id = %s""", (date_now, 'En cours', firstName,loggedIn,id_dossier))
     mysql.connection.commit()
     cur.close()
 
     flash("Dossier assigné avec succès.", "success")
-    return redirect(url_for('liste_gestion_fonciere'))
+    return redirect(url_for('liste_dossiers_assignes_fonciere'))
 
 @app.route("/liste_dossiers_assignes_fonciere")
 def liste_dossiers_assignes_fonciere():
@@ -1674,10 +1897,10 @@ def forgot_password():
             msg.body = f"Bonjour, cliquez sur le lien suivant pour réinitialiser votre mot de passe : {reset_link}"
             mail.send(msg)
 
-            flash("Un email avec un lien de réinitialisation a été envoyé à votre adresse email.")
+            flash("Un e-mail contenant un lien de réinitialisation a été envoyé à votre adresse.", "success")
             return redirect('/')
-        
-        flash("Cet email n'existe pas dans notre système.")
+
+        flash("Nous n'avons pas trouvé cette adresse e-mail dans notre système. Veuillez vérifier et réessayer.", 'danger')
         return redirect('/forgot_password')
 
     return render_template('mot_de passe_oublier/mot_de_passe_oublier.html')
