@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `admin` (
   PRIMARY KEY (`ident`),
   UNIQUE KEY `email_admin` (`email_admin`),
   UNIQUE KEY `numero_telephone` (`numero_telephone`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Déchargement des données de la table `admin`
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS `brigade` (
   PRIMARY KEY (`ident`),
   UNIQUE KEY `email_brigade` (`email_brigade`),
   UNIQUE KEY `numero_telephone` (`numero_telephone`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Déchargement des données de la table `brigade`
@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS `chef_brigade` (
   PRIMARY KEY (`ident`),
   UNIQUE KEY `email_chefbrigade` (`email_chefbrigade`),
   UNIQUE KEY `numero_telephone` (`numero_telephone`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Déchargement des données de la table `chef_brigade`
@@ -124,7 +124,7 @@ CREATE TABLE IF NOT EXISTS `conversation_fonciere` (
   PRIMARY KEY (`ident`),
   UNIQUE KEY `email_conversationfonciere` (`email_conversation_fonciere`),
   UNIQUE KEY `numero_telephone` (`numero_telephone`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Déchargement des données de la table `conversation_fonciere`
@@ -168,7 +168,7 @@ CREATE TABLE IF NOT EXISTS `evaluation_cadastrale` (
   PRIMARY KEY (`ident`),
   UNIQUE KEY `email_evaluationcadastrale` (`email_evaluation_cadastrale`),
   UNIQUE KEY `numero_telephone` (`numero_telephone`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Déchargement des données de la table `evaluation_cadastrale`
@@ -436,7 +436,7 @@ CREATE TABLE IF NOT EXISTS `gestion_evaluation_cadastrale_terminer` (
   `n5_evaluation_cadastrale` varchar(255) DEFAULT NULL,
   `id_evaluation_cadastrale` int DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Déchargement des données de la table `gestion_evaluation_cadastrale_terminer`
@@ -464,7 +464,7 @@ CREATE TABLE IF NOT EXISTS `gestion_fonciere` (
   `fonciere_id` int DEFAULT NULL,
   `validateur` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Déchargement des données de la table `gestion_fonciere`
@@ -655,7 +655,7 @@ CREATE TABLE IF NOT EXISTS `securisation` (
   PRIMARY KEY (`ident`),
   UNIQUE KEY `email_securisation` (`email_securisation`),
   UNIQUE KEY `numero_telephone` (`numero_telephone`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Déchargement des données de la table `securisation`
@@ -684,7 +684,7 @@ CREATE TABLE IF NOT EXISTS `signature` (
   PRIMARY KEY (`ident`),
   UNIQUE KEY `email_signature` (`email_signature`),
   UNIQUE KEY `numero_telephone` (`numero_telephone`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Déchargement des données de la table `signature`
@@ -708,7 +708,7 @@ CREATE TABLE IF NOT EXISTS `terminer_brigade` (
   `date_assignation` datetime DEFAULT CURRENT_TIMESTAMP,
   `date_terminer` datetime DEFAULT CURRENT_TIMESTAMP,
   `nom_brigade` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

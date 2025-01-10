@@ -3,6 +3,13 @@ from flask import *
 from flask_mysqldb import MySQL
 import  hashlib
 from credentials  import*
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+from flask_mail import Mail, Message
+from datetime import datetime, timedelta
+from MySQLdb.cursors import DictCursor
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 
 app = Flask(__name__)
@@ -12,9 +19,7 @@ app.config['MYSQL_USER'] = my_user
 app.config['MYSQL_PASSWORD'] = my_password
 app.config['MYSQL_DB'] =  my_db
 app.config['MYSQL_CURSORCLASS'] =my_CURSORCLASS
-from flask_mail import Mail, Message
-from datetime import datetime, timedelta
-from MySQLdb.cursors import DictCursor
+
 
 
 
@@ -28,11 +33,9 @@ mail = Mail(app)
 mysql = MySQL()
 mysql.init_app(app)
 
-from datetime import datetime
+
 now = datetime.now()
 date_now= now.strftime("%Y-%m-%d %H:%M:%S")
-
-from datetime import datetime
 
 
 def calculer_difference(date1_str, date2_str):
@@ -157,11 +160,7 @@ def inscription_admin():
 
 
 
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
 
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
 
 @app.route("/rechercher", methods=["GET", "POST"])
 def rechercher_dossier():
@@ -413,33 +412,100 @@ def liste_dossier():
         cur = mysql.connection.cursor()
         cur.execute("SELECT * FROM dossier  ORDER BY `dossier`.`id` DESC")  # Vous pouvez ajuster cette requête si vous avez des filtres
         dossiers = cur.fetchall()  # Récupérer tous les résultats sous forme de liste
-        cur.close()
-        return render_template('admin/dossier/liste_dossier.html',dossiers=dossiers,firstName=firstName)
+        
+        cur.execute("SELECT ident, nom_complet FROM chef_brigade")
+        chef_brigades = cur.fetchall()
+        return render_template('admin/dossier/liste_dossier.html',dossiers=dossiers,firstName=firstName,chef_brigades=chef_brigades)
 
+
+# @app.route('/valider_dossier_a/<int:dossier_id>', methods=['POST'])
+# def valider_dossier_a(dossier_id):
+#     if 'email_admin' not in session:
+#         return redirect(url_for('login'))
+#     else:
+#         loggedIn, firstName = getLogin('email_admin', 'admin')
+#         cur = mysql.connection.cursor()
+#         cur.execute("SELECT nom_dossier FROM dossier WHERE id = %s", (dossier_id,))
+#         dossier = cur.fetchone()
+#         if dossier:
+#             cur.execute("""
+#                 INSERT INTO gestion_chef_brigade (nom_dossier, date_ajout, date_assignation, statut, n1_admin, n2_chef_brigade,id_chef_brigade)
+#                 VALUES (%s, %s, %s,%s,%s,%s,%s)""", (dossier[0], date_now, date_now, 'En attente',firstName, None, None)
+#                         )
+
+#             cur.execute("DELETE FROM dossier WHERE id = %s", (dossier_id,))
+#             mysql.connection.commit()
+#         cur.close()
+#         flash('Dossier Assigner avec succès!', 'succès')
+#         return redirect(url_for('liste_dossier'))
 
 @app.route('/valider_dossier_a/<int:dossier_id>', methods=['POST'])
 def valider_dossier_a(dossier_id):
     if 'email_admin' not in session:
         return redirect(url_for('login'))
-    else:
-        loggedIn, firstName = getLogin('email_admin', 'admin')
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT nom_dossier FROM dossier WHERE id = %s", (dossier_id,))
-        dossier = cur.fetchone()
-        if dossier:
-            cur.execute("""
-                INSERT INTO gestion_chef_brigade (nom_dossier, date_ajout, date_assignation, statut, n1_admin, n2_chef_brigade,id_chef_brigade)
-                VALUES (%s, %s, %s,%s,%s,%s,%s)""", (dossier[0], date_now, date_now, 'En attente',firstName, None, None)
-                        )
 
-            cur.execute("DELETE FROM dossier WHERE id = %s", (dossier_id,))
-            mysql.connection.commit()
-        cur.close()
-        flash('Dossier Assigner avec succès!', 'succès')
+    try:
+        # Obtenir les informations de connexion
+        loggedIn, firstName = getLogin('email_admin', 'admin')
+        print(f"Debug: loggedIn={loggedIn}, firstName={firstName}, dossier_id={dossier_id}")
+        
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT * FROM dossier WHERE id = %s", (dossier_id,))
+        dossier = cur.fetchone()
+        print(f"Debug: dossier={dossier}")
+
+        if not dossier:
+            flash("Dossier introuvable.", "warning")
+            return redirect(url_for('liste_dossier'))
+
+        # Générer la date actuelle
+        date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        # Récupérer les informations du chef_brigade depuis le formulaire
+        chef_brigade_id = request.form['chef_brigade_id']
+        cur.execute("SELECT nom_complet FROM chef_brigade WHERE ident = %s", (chef_brigade_id,))
+        chef_brigade = cur.fetchone()
+        print(f"Debug: chef_brigade={chef_brigade}")
+
+        if not chef_brigade:
+            flash("Chef brigade introuvable.", "warning")
+            return redirect(url_for('liste_dossier'))
+
+        chef_brigade_name = chef_brigade[0]
+
+        # Assigner le dossier à un chef_brigade et le mettre en cours
+        cur.execute("""
+            INSERT INTO gestion_chef_brigade 
+            (nom_dossier, date_ajout, date_assignation, statut, n1_admin, n2_chef_brigade, id_chef_brigade)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (
+            dossier[1], date_now, date_now, 'En cours', firstName, chef_brigade_name, chef_brigade_id
+        ))
+
+        # Insérer dans la table dossier_terminer
+        cur.execute("""
+            INSERT INTO dossier_terminer 
+            (nom_dossier, date_ajout, date_assignation, date_terminer, statut, n1_admin)
+            VALUES (%s, %s, %s, NOW(), %s, %s)
+        """, (
+            dossier[1], dossier[2], date_now, 'Terminé', firstName
+        ))
+
+        # Supprimer le dossier de la table dossier
+        cur.execute("DELETE FROM dossier WHERE id = %s", (dossier_id,))
+        
+        mysql.connection.commit()
+        flash("Le dossier a été assigné avec succès.", "success")
         return redirect(url_for('liste_dossier'))
 
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f"Erreur lors de l'assignation du dossier : {str(e)}", "danger")
+        return redirect(url_for('liste_dossier'))
 
-
+    finally:
+        if cur:
+            cur.close()
 
 ############ chef brigade
 @app.route("/inscription_chefbrigade",methods=['POST', 'GET'])
@@ -488,9 +554,7 @@ def chef_brigade_tableau_de_bord():
         return redirect(url_for('login'))
     else:
         cur = mysql.connection.cursor()
-        cur.execute("SELECT COUNT(*) FROM gestion_chef_brigade WHERE statut = 'En attente'")
-        en_attente = cur.fetchone()[0]
-        cur.execute("SELECT COUNT(*) FROM gestion_chef_brigade WHERE id_chef_brigade = %s AND statut = 'En cours'", [loggedIn])
+        cur.execute("SELECT COUNT(*) FROM gestion_chef_brigade WHERE id_chef_brigade = %s AND statut='En cours'", [loggedIn])
         en_cours = cur.fetchone()[0]
         # Requête avec filtre d'année dynamique
         requete = """
@@ -507,74 +571,67 @@ def chef_brigade_tableau_de_bord():
         # Récupérer le résultat
         termine = cur.fetchone()[0]
         cur.close()
-        return render_template('chef_brigade/index.html', firstName=firstName, en_attente=en_attente, en_cours=en_cours, termine=termine)
+        return render_template('chef_brigade/index.html', firstName=firstName,  en_cours=en_cours, termine=termine)
+    
 
 @app.route('/liste_gestion_chef_brigade')
 def liste_gestion_chef_brigade():
-    if 'email_chefbrigade' in session:
-        loggedIn, firstName = getLogin('email_chefbrigade', 'chef_brigade')
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM gestion_chef_brigade where statut='En attente' ORDER BY id DESC")
-        dossiers = cur.fetchall()
-        cur.close()
-        return render_template('chef_brigade/dossier/liste_chef_brigade.html', dossiers=dossiers,loggedIn=loggedIn, firstName=firstName)
-    else :
-        return redirect(url_for('login'))
-
-
-@app.route("/assigner_dossier_chefbrigade/<int:id_dossier>", methods=['POST'])
-def assigner_dossier_chefbrigade(id_dossier):
-    # Vérification de la session
     if 'email_chefbrigade' not in session:
         return redirect(url_for('login'))
-
+    
     loggedIn, firstName = getLogin('email_chefbrigade', 'chef_brigade')
     cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM gestion_chef_brigade WHERE id = %s", (id_dossier,))
-    dossier = cur.fetchone()
-    # Mise à jour du dossier
-    date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    cur.execute(""" UPDATE gestion_chef_brigade 
-                    SET date_assignation = %s, statut = %s, n2_chef_brigade = %s, id_chef_brigade = %s 
-                    WHERE id = %s""", (date_now, 'En cours', firstName,loggedIn,id_dossier)
-                )
-
-    mysql.connection.commit()
+    cur.execute("SELECT * FROM gestion_chef_brigade WHERE id_chef_brigade = %s AND statut='En cours' ORDER BY id DESC", (loggedIn,))
+    dossiers = cur.fetchall()
+    
+    cur.execute("SELECT ident, nom_complet FROM brigade")
+    brigades = cur.fetchall()
     cur.close()
-    flash("Le dossier a été pris en charge avec succès. Merci pour votre engagement.", "success")
-    return redirect(url_for('dossier_cours_chef_brigade'))
+    
+    cur.close()
+    return render_template('chef_brigade/dossier/liste_chef_brigade.html', dossiers=dossiers, loggedIn=loggedIn, firstName=firstName, brigades=brigades)
 
 
-@app.route("/dossiers_cours_chef_brigade", methods=['POST', 'GET'])
-def dossier_cours_chef_brigade():
-    if 'email_chefbrigade' not in session:
-        flash("Vous devez être connecté pour accéder à cette page.", "danger")
-        return redirect(url_for('login'))
-    else:
-        loggedIn, firstName = getLogin('email_chefbrigade', 'chef_brigade')
-        print(loggedIn)
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM gestion_chef_brigade WHERE statut='En cours' and  id_chef_brigade = %s ORDER BY id DESC", (loggedIn,))
-        dossiers = cur.fetchall()
-        return render_template('chef_brigade/dossier/liste_dossier_en_cours_chef_brigade.html',
-                               dossiers=dossiers, loggedIn=loggedIn, firstName=firstName)
+# @app.route("/assigner_dossier_chefbrigade/<int:id_dossier>", methods=['POST'])
+# def assigner_dossier_chefbrigade(id_dossier):
+#     # Vérification de la session
+#     if 'email_chefbrigade' not in session:
+#         return redirect(url_for('login'))
+
+#     loggedIn, firstName = getLogin('email_chefbrigade', 'chef_brigade')
+#     cur = mysql.connection.cursor()
+#     cur.execute("SELECT * FROM gestion_chef_brigade WHERE id = %s", (id_dossier,))
+#     dossier = cur.fetchone()
+#     # Mise à jour du dossier
+#     date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+#     cur.execute(""" UPDATE gestion_chef_brigade 
+#                     SET date_assignation = %s, statut = %s, n2_chef_brigade = %s, id_chef_brigade = %s 
+#                     WHERE id = %s""", (date_now, 'En cours', firstName,loggedIn,id_dossier)
+#                 )
+
+#     mysql.connection.commit()
+#     cur.close()
+#     flash("Le dossier a été pris en charge avec succès. Merci pour votre engagement.", "success")
+#     return redirect(url_for('dossier_cours_chef_brigade'))
 
 
-
-@app.route('/terminer_dossier_chefbrigade/<int:id_dossier>', methods=['POST'])
-def terminer_dossier_chefbrigade(id_dossier):
+@app.route('/assigner_dossier_chefbrigade/<int:id_dossier>', methods=['POST'])
+def assigner_dossier_chefbrigade(id_dossier):
     if 'email_chefbrigade' not in session:
         return redirect(url_for('login'))
 
     try:
         # Obtenir les informations de connexion
         loggedIn, firstName = getLogin('email_chefbrigade', 'chef_brigade')
+        print(f"Debug: loggedIn={loggedIn}, firstName={firstName}, id_dossier={id_dossier}")
+        
         cur = mysql.connection.cursor()
         cur.execute("""
             SELECT * FROM gestion_chef_brigade 
-            WHERE id = %s AND id_chef_brigade = %s AND statut = 'En cours'
-        """, (id_dossier, loggedIn))
+            WHERE id = %s
+        """, (id_dossier,))
         dossier = cur.fetchone()
+        print(f"Debug: dossier={dossier}")
 
         if not dossier:
             flash("Dossier introuvable ou non assigné.", "warning")
@@ -583,45 +640,132 @@ def terminer_dossier_chefbrigade(id_dossier):
         # Générer la date actuelle
         date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-        try:
-            # Insérer dans la table gestion_brigade
-            cur.execute("""
-                INSERT INTO gestion_brigade 
-                (nom_dossier, date_ajout, date_assignation_termin_n2, date_assignation_n3, statut, n1_admin, n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (
-                dossier[1], dossier[2], date_now, date_now, 'En attente',
-                dossier[6], firstName, loggedIn, None, None
-            ))
+        # Assigner le dossier à un brigade
+        brigade_id = request.form['brigade_id']  # ID du brigade sélectionné
+        cur.execute("SELECT nom_complet FROM brigade WHERE ident = %s", (brigade_id,))
+        brigade = cur.fetchone()
+        print(f"Debug: brigade={brigade}")
 
-            # Insérer dans la table gestion_chef_brigade_terminer
-            cur.execute("""
-                INSERT INTO gestion_chef_brigade_terminer 
-                (nom_dossier, date_ajout, date_assignation, date_terminer, statut, n1_admin, n2_chef_brigade, id_chef_brigade)
-                VALUES (%s, %s, %s, NOW(), %s, %s, %s, %s)
-            """, (
-                dossier[1], dossier[2], dossier[3], 'Terminé',
-                dossier[6], firstName, loggedIn
-            ))
+        if not brigade:
+            flash("Brigade introuvable.", "warning")
+            return redirect(url_for('liste_gestion_chef_brigade'))
 
-            # Supprimer le dossier de la table gestion_chef_brigade
-            cur.execute("DELETE FROM gestion_chef_brigade WHERE id = %s", (id_dossier,))
-            flash("Le dossier a été validé avec succès.", "success")
-            mysql.connection.commit()
-            return redirect(url_for('dossiers_valides'))
+        brigade_name = brigade[0]
 
-        except Exception as e:
-            mysql.connection.rollback()  # Annuler les modifications en cas d'erreur
-            flash(f"Erreur lors de la terminaison du dossier : {str(e)}", "danger")
-            return redirect(url_for('dossiers_valides'))
+        cur.execute("""
+            INSERT INTO gestion_brigade 
+            (nom_dossier, date_ajout, date_assignation_termin_n2, date_assignation_n3, statut, n1_admin, n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            dossier[1], dossier[2], date_now, date_now, 'En cours',
+            dossier[5], firstName, loggedIn, brigade_name, brigade_id
+        ))
+
+        # Insérer dans la table gestion_chef_brigade_terminer
+        cur.execute("""
+            INSERT INTO gestion_chef_brigade_terminer 
+            (nom_dossier, date_ajout, date_assignation, date_terminer, statut, n1_admin, n2_chef_brigade, id_chef_brigade)
+            VALUES (%s, %s, %s, NOW(), %s, %s, %s, %s)
+        """, (
+            dossier[1], dossier[2], dossier[3], 'Terminé',
+            dossier[5], firstName, loggedIn
+        ))
+
+        # Supprimer le dossier de la table gestion_chef_brigade
+        cur.execute("DELETE FROM gestion_chef_brigade WHERE id = %s", (id_dossier,))
+        
+        mysql.connection.commit()
+        flash("Le dossier a été assigné avec succès.", "success")
+        return redirect(url_for('dossiers_valides'))
 
     except Exception as e:
-        flash(f"Erreur inattendue : {str(e)}", "danger")
-        return redirect(url_for('dossiers_valides'))
+        mysql.connection.rollback()
+        flash(f"Erreur lors de l'assignation du dossier : {str(e)}", "danger")
+        return redirect(url_for('liste_gestion_chef_brigade'))
 
     finally:
         if cur:
             cur.close()
+
+
+# @app.route("/dossiers_cours_chef_brigade", methods=['POST', 'GET'])
+# def dossier_cours_chef_brigade():
+#     if 'email_chefbrigade' not in session:
+#         flash("Vous devez être connecté pour accéder à cette page.", "danger")
+#         return redirect(url_for('login'))
+#     else:
+#         loggedIn, firstName = getLogin('email_chefbrigade', 'chef_brigade')
+#         print(loggedIn)
+#         cur = mysql.connection.cursor()
+#         cur.execute("SELECT * FROM gestion_chef_brigade WHERE statut='En cours' and  id_chef_brigade = %s ORDER BY id DESC", (loggedIn,))
+#         dossiers = cur.fetchall()
+        
+        
+#         return render_template('chef_brigade/dossier/liste_dossier_en_cours_chef_brigade.html',
+#                                dossiers=dossiers, loggedIn=loggedIn, firstName=firstName)
+
+
+# @app.route('/terminer_dossier_chefbrigade/<int:id_dossier>', methods=['POST'])
+# def terminer_dossier_chefbrigade(id_dossier):
+#     if 'email_chefbrigade' not in session:
+#         return redirect(url_for('login'))
+
+#     try:
+#         # Obtenir les informations de connexion
+#         loggedIn, firstName = getLogin('email_chefbrigade', 'chef_brigade')
+#         cur = mysql.connection.cursor()
+#         cur.execute("""
+#             SELECT * FROM gestion_chef_brigade 
+#             WHERE id = %s AND id_chef_brigade = %s AND statut = 'En cours'
+#         """, (id_dossier, loggedIn))
+#         dossier = cur.fetchone()
+
+#         if not dossier:
+#             flash("Dossier introuvable ou non assigné.", "warning")
+#             return redirect(url_for('dossier_cours_chef_brigade'))
+
+#         # Générer la date actuelle
+#         date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+#         try:
+#             # Insérer dans la table gestion_brigade
+#             cur.execute("""
+#                 INSERT INTO gestion_brigade 
+#                 (nom_dossier, date_ajout, date_assignation_termin_n2, date_assignation_n3, statut, n1_admin, n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade)
+#                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+#             """, (
+#                 dossier[1], dossier[2], date_now, date_now, 'En attente',
+#                 dossier[6], firstName, loggedIn, None, None
+#             ))
+
+#             # Insérer dans la table gestion_chef_brigade_terminer
+#             cur.execute("""
+#                 INSERT INTO gestion_chef_brigade_terminer 
+#                 (nom_dossier, date_ajout, date_assignation, date_terminer, statut, n1_admin, n2_chef_brigade, id_chef_brigade)
+#                 VALUES (%s, %s, %s, NOW(), %s, %s, %s, %s)
+#             """, (
+#                 dossier[1], dossier[2], dossier[3], 'Terminé',
+#                 dossier[6], firstName, loggedIn
+#             ))
+
+#             # Supprimer le dossier de la table gestion_chef_brigade
+#             cur.execute("DELETE FROM gestion_chef_brigade WHERE id = %s", (id_dossier,))
+#             flash("Le dossier a été validé avec succès.", "success")
+#             mysql.connection.commit()
+#             return redirect(url_for('dossiers_valides'))
+
+#         except Exception as e:
+#             mysql.connection.rollback()  # Annuler les modifications en cas d'erreur
+#             flash(f"Erreur lors de la terminaison du dossier : {str(e)}", "danger")
+#             return redirect(url_for('dossiers_valides'))
+
+#     except Exception as e:
+#         flash(f"Erreur inattendue : {str(e)}", "danger")
+#         return redirect(url_for('dossiers_valides'))
+
+#     finally:
+#         if cur:
+#             cur.close()
 
 
 @app.route('/dossiers_valides_teminer')
@@ -693,32 +837,29 @@ def brigade_tableau_de_bord():
     else:
         loggedIn, firstName = getLogin('email_brigade', 'brigade')
         cur = mysql.connection.cursor()
-        cur.execute("SELECT COUNT(*) FROM gestion_brigade WHERE statut = 'En attente'")
-        en_attente = cur.fetchone()[0]
-        cur.execute("SELECT COUNT(*) FROM gestion_brigade WHERE id_brigade = %s AND statut = 'En cours'", [loggedIn])
+        cur.execute("SELECT COUNT(*) FROM gestion_brigade WHERE id_brigade = %s AND statut='En cours'", [loggedIn])
         en_cours = cur.fetchone()[0]
         cur.execute("SELECT COUNT(*) FROM gestion_brigade_terminer WHERE id_brigade = %s AND statut = 'Terminé'"
                     "AND YEAR(date_ajout) = %s",  [loggedIn, annee_actuelle])
         termine = cur.fetchone()[0]
         cur.close()
         return render_template('brigade/index.html', firstName=firstName,
-                                en_attente=en_attente, en_cours=en_cours, termine=termine
+                                en_cours=en_cours, termine=termine
                                )
 
 
 @app.route('/liste_gestion_brigade')
 def liste_gestion_brigade():
-    if 'email_brigade' in session:
-        loggedIn, firstName = getLogin('email_brigade', 'brigade')
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM gestion_brigade where statut='En attente' ORDER BY id DESC")
-        dossiers = cur.fetchall()
-        cur.close()
-        return render_template('brigade/dossier/liste_brigade.html',
-                               dossiers=dossiers,loggedIn=loggedIn,
-                               firstName=firstName)
-    else :
+    if 'email_brigade' not in session:
         return redirect(url_for('login'))
+    
+    loggedIn, firstName = getLogin('email_brigade', 'brigade')
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM gestion_brigade WHERE id_brigade = %s AND statut='En cours' ORDER BY id DESC", (loggedIn,))
+    dossiers = cur.fetchall()
+    
+    cur.close()
+    return render_template('brigade/dossier/liste_brigade.html', dossiers=dossiers, loggedIn=loggedIn, firstName=firstName)
 
 
 @app.route("/assigner_dossier_brigade/<int:id_dossier>", methods=['POST'])

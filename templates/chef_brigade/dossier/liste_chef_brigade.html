@@ -144,6 +144,55 @@
                                             </style>
                                         </td>
 
+                                        <td class="text-center">
+                                            <!-- Bouton "Assigner Dossier" -->
+                                            <button type="button"
+                                                    class="btn btn-outline-primary btn-sm rounded-pill"
+                                                    style="font-size: 14px;"
+                                                    onclick="showAssignModal({{ dossier[0] }}, '{{ dossier[1] }}');">
+                                                Assigner Dossier
+                                            </button>
+                                        
+                                            <!-- Modal -->
+                                            <div id="assignModal{{ dossier[0] }}" class="modal">
+                                                <div class="modal-content">
+                                                    <h3 style="color: #007bff;">Assigner le dossier</h3>
+                                                    <p style="color: #555;">
+                                                        Sélectionnez un brigade pour assigner ce dossier ({{ dossier[1] }}).
+                                                    </p>
+                                                    <form id="assignForm{{ dossier[0] }}"
+                                                          action="{{ url_for('assigner_dossier_chefbrigade', id_dossier=dossier[0]) }}"
+                                                          method="POST" style="display: inline;">
+                                                        <select name="brigade_id" required>
+                                                            {% for brigade in brigades %}
+                                                            <option value="{{ brigade[0] }}">{{ brigade[1] }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                        <button type="submit"
+                                                                style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+                                                            Assigner
+                                                        </button>
+                                                    </form>
+                                                    <button onclick="closeAssignModal({{ dossier[0] }})"
+                                                            style="background-color: #ccc; color: black; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+                                                        Annuler
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        
+                                            <script type="text/javascript">
+                                                function showAssignModal(dossierId, dossierName) {
+                                                    document.getElementById('assignModal' + dossierId).style.display = 'block';
+                                                }
+                                        
+                                                function closeAssignModal(dossierId) {
+                                                    document.getElementById('assignModal' + dossierId).style.display = 'none';
+                                                }
+                                            </script>
+                                        </td>
+
+                                        
+
                                     </tr>
                                     {% endfor %}
                                     </tbody>
