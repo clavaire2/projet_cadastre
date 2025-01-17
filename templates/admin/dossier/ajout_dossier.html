@@ -1,7 +1,7 @@
 {% extends 'admin/base.html' %}
 
 {% block titre %}
-<title>Cadastre - Ajout de dossiers</title>
+<title>Cadastre - Ajout de dossier</title>
 {% endblock %}
 
 {% block contenu %}
@@ -9,65 +9,50 @@
 <div class="page-content">
     <div class="container-fluid">
 
-        <!-- start page title -->
+        <!-- Titre de la page -->
         <div class="row">
             <div class="col-12">
-                <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-                    <h4 class="mb-sm-0">Ajouter un dossier pour les gestion</h4>
-
+                <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-light shadow-sm p-3 rounded">
+                    <h4 class="mb-0">Ajout d'un dossier</h4>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
-                            <li class="breadcrumb-item"><a href="javascript: void(0);">Formulaire</a></li>
-                            <li class="breadcrumb-item active">Ajouter un dossier</li>
+                            <li class="breadcrumb-item"><a href="#">Accueil</a></li>
+                            <li class="breadcrumb-item active">Ajout de dossier</li>
                         </ol>
                     </div>
-
                 </div>
             </div>
         </div>
 
-        <!-- Début du titre de la page -->
-<div class="row">
-    <div class="col-lg-12">
-        <div class="card shadow-sm border-0">
-            <div class="card-header align-items-center d-flex" style="background-color: blue;">
-                <h2 class="card-title mb-0 flex-grow-1 text-center " style="background-color: white;">Formulaire d'ajout de dossier</h2>
-            </div>
-            <!-- Fin de l'en-tête de la carte -->
-
-            <form action="{{ url_for('ajouter_dossier') }}" method="POST">
-                <div class="card-body p-4">
-                    <div class="row gy-4">
-                        <div class="col-xxl-3 col-md-6">
-                            <div class="form-group">
+        <!-- Formulaire d'ajout -->
+        <div class="row mt-4">
+            <div class="col-lg-8 mx-auto">
+                <div class="card shadow-lg border-0">
+                    <div class="card-header text-white text-center" style="background: linear-gradient(90deg, #0056b3, #007bff);">
+                        <h2 class="card-title mb-0">Formulaire d'ajout de dossier</h2>
+                    </div>
+                    <form action="{{ url_for('ajouter_dossier') }}" method="POST">
+                        <div class="card-body p-5">
+                            <!-- Champ numéro du dossier -->
+                            <div class="mb-4">
                                 <label for="basiInput" class="form-label fw-bold">Numéro du dossier</label>
-                                <input type="text" name="nom" class="form-control border-1 shadow-sm" id="basiInput" placeholder="Entrez le numéro" required>
+                                <input type="text" name="nom" class="form-control shadow-sm rounded" id="basiInput" placeholder="Entrez le numéro du dossier" required>
                             </div>
-                        </div>
-                        <!--end col-->
-                        <div class="col-xxl-3 col-md-6">
-                            <div>
-                                <input hidden type="text" name="raison" class="form-control" id="labelInput">
+                            <!-- Champ caché (raison) -->
+                            <input type="hidden" name="raison" class="form-control" id="labelInput">
+                            <!-- Bouton de soumission -->
+                            <div class="d-flex justify-content-end mt-4">
+                                <button type="submit" class="btn btn-primary px-5 py-2 shadow-sm">Ajouter</button>
                             </div>
+                            <!-- Message d'avertissement -->
+                            <p class="text-danger mt-3 fw-bold text-center">Veuillez vérifier attentivement les informations avant de soumettre.</p>
                         </div>
-                    </div>
-                    <!--end row-->
-
-                    <div class="mt-3">
-                        <button type="submit" class="btn btn-success px-4">Ajouter</button>
-                    </div>
-                    <p class="text-danger mt-3 fw-bold">Veuillez vous assurer de bien remplir le dossier.</p>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
-    </div>
-    <!--end col-->
-</div>
-<!--end row-->
 
-
-
-    </div> <!-- container-fluid -->
-</div><!-- End Page-content -->
+    </div> <!-- Fin container-fluid -->
+</div> <!-- Fin page-content -->
 
 {% endblock %}

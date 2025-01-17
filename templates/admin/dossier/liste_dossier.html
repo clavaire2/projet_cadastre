@@ -1,228 +1,141 @@
 {% extends 'admin/base.html' %}
 
-
 {% block titre %}
 <title>Cadastre - Liste de dossiers</title>
 {% endblock %}
 
-
 {% block contenu %}
-
 <div class="page-content">
     <div class="container-fluid">
 
         <!-- start page title -->
         <div class="row">
             <div class="col-12">
-                <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-                    <h4 class="mb-sm-0">Liste des dossier</h4>
-
+                <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                    <h4 class="mb-sm-0 text-primary">Liste des dossiers</h4>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Liste</a></li>
                             <li class="breadcrumb-item active">Liste des dossiers</li>
                         </ol>
                     </div>
-
                 </div>
             </div>
         </div>
         <!-- end page title -->
 
-        <!-- end row -->
-
+        <!-- Liste des dossiers -->
         <div class="row">
             <div class="col-xl-12">
-                <div class="card">
-                    <div class="card-header align-items-center d-flex">
-                        <h4 class="card-title mb-0 flex-grow-1">Liste des dossier</h4>
-
-
-                    </div><!-- end card header -->
-
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="card-title mb-0">Liste des dossiers</h4>
+                    </div>
                     <div class="card-body">
-
-                        <div class="live-preview">
-                            <div class="table-responsive table-card">
-                                {% with messages = get_flashed_messages(with_categories=true) %}
-                                {% if messages %}
-                                <div>
-                                    {% for category, message in messages %}
-                                    <div class="alert alert-{{ category }}" role="alert">
-                                        {{ message }}
-                                    </div>
-                                    {% endfor %}
+                        <div class="table-responsive">
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                            <div>
+                                {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                 </div>
-                                {% endif %}
-                                {% endwith %}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% endwith %}
 
-                                <table class="table align-middle table-nowrap table-striped-columns mb-0">
-                                    <thead class="table-light">
+                            <table class="table table-striped table-hover align-middle">
+                                <thead class="table-light">
                                     <tr>
-
                                         <th>ID</th>
                                         <th>Nom du dossier</th>
                                         <th>Date de Création</th>
                                         <th>Statut</th>
                                         <th>Nom de l'ajouteur</th>
-                                        <th>Ajouter</th>
-                                        <th>Modifier</th>
-                                        <th>Supprimer</th>
+                                        <th>Actions</th>
                                     </tr>
-                                    </thead>
-                                    <tbody>
+                                </thead>
+                                <tbody>
                                     {% for dossier in dossiers %}
                                     <tr>
                                         <td>{{ dossier[0] }}</td>
                                         <td>{{ dossier[1] }}</td>
                                         <td>{{ dossier[2] }}</td>
-                                        <td>{{ dossier[3] }}</td>
+                                        <td><span class="badge bg-info">{{ dossier[3] }}</span></td>
                                         <td>{{ dossier[4] }}</td>
-                                        <td class="text-center">
-                    <!-- Bouton "Assigner Dossier" -->
-                    <button type="button"
-                            class="btn btn-outline-primary btn-sm rounded-pill"
-                            style="font-size: 14px;"
-                            onclick="showAssignModal({{ dossier[0] }}, '{{ dossier[1] }}');">
-                        Assigner Dossier
-                    </button>
-
-                    <!-- Modal -->
-                    <div id="assignModal{{ dossier[0] }}" class="modal">
-                        <div class="modal-content">
-                            <h3 style="color: #007bff;">Assigner le dossier</h3>
-                            <p style="color: #555;">
-                                Sélectionnez un chef brigade pour assigner ce dossier ({{ dossier[1] }}).
-                            </p>
-                            <form action="{{ url_for('valider_dossier_a', dossier_id=dossier[0]) }}" method="POST" style="display: inline;">
-                                <select name="chef_brigade_id" required>
-                                    {% for chef_brigade in chef_brigades %}
-                                    <option value="{{ chef_brigade[0] }}">{{ chef_brigade[1] }}</option>
-                                    {% endfor %}
-                                </select>
-                                <button type="submit"
-                                        style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-                                    Assigner
-                                </button>
-                            </form>
-                            <button onclick="closeAssignModal({{ dossier[0] }})"
-                                    style="background-color: #ccc; color: black; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-                                Annuler
-                            </button>
-                        </div>
-                    </div>
-
-                    <script type="text/javascript">
-                        function showAssignModal(dossierId, dossierName) {
-                            document.getElementById('assignModal' + dossierId).style.display = 'block';
-                        }
-
-                        function closeAssignModal(dossierId) {
-                            document.getElementById('assignModal' + dossierId).style.display = 'none';
-                        }
-                    </script>
-                </td>
                                         <td>
-                                            <a href="{{ url_for('modifier_dossier', id=dossier[0]) }}">
-                                                <button type="submit"
-                                                        style="background-color: green; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
-                                                    Modifier
-                                                </button>
-                                            </a>
-                                        </td>
-                                        <td>
-                                            <!-- Lien de suppression avec confirmation -->
-                                            <a href="#" onclick="return confirmDelete({{ dossier[0] }});">
-                                                <button type="button"
-                                                        style="background-color: red; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
-                                                    Supprimer
-                                                </button>
-                                            </a>
+                                            <!-- Bouton Assigner -->
+                                            <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#assignModal{{ dossier[0] }}">
+                                                Assigner
+                                            </button>
 
-                                            <!-- Modal -->
-                                            <div id="confirmationModal{{ dossier[0] }}" class="modal">
-                                                <div class="modal-content">
-                                                    <h3 style="color: #E74C3C;">Êtes-vous sûr de vouloir supprimer ce
-                                                        dossier ({{ dossier[1] }}) ?</h3>
-                                                    <p style="color: #555;">Cette action est irréversible. Voulez-vous
-                                                        vraiment continuer ?</p>
-                                                    <div style="text-align: center;">
-                                                        <button id="confirmBtn{{ dossier[0] }}"
-                                                                style="background-color: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-                                                            Oui, Supprimer
-                                                        </button>
-                                                        <button onclick="closeModal({{ dossier[0] }})"
-                                                                style="background-color: #ccc; color: black; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-                                                            Annuler
-                                                        </button>
+                                            <!-- Modal d'assignation -->
+                                            <div class="modal fade" id="assignModal{{ dossier[0] }}" tabindex="-1">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title">Assigner le dossier</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <p>Sélectionnez un chef de brigade pour Assigner le dossier <strong>{{ dossier[1] }}</strong>.</p>
+                                                            <form action="{{ url_for('valider_dossier_a', dossier_id=dossier[0]) }}" method="POST">
+                                                                <select name="chef_brigade_id" class="form-select mb-3" required>
+                                                                    <option value="">Veuillez sélectionner un Chef de Brigade</option>
+                                                                    {% for chef_brigade in chef_brigades %}
+                                                                    <option value="{{ chef_brigade[0] }}">{{ chef_brigade[1] }}</option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                                <button type="submit" class="btn btn-primary">Assigner</button>
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                            </form>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            <script type="text/javascript">
-                                                function confirmDelete(dossierId) {
-                                                    document.getElementById('confirmationModal' + dossierId).style.display = 'block';
-                                                    // Empêche le lien de s'exécuter immédiatement
-                                                    return false;
-                                                }
+                                            <!-- Bouton Modifier -->
+                                            <a href="{{ url_for('modifier_dossier', id=dossier[0]) }}" class="btn btn-success btn-sm">
+                                                Modifier
+                                            </a>
 
-                                                function closeModal(dossierId) {
-                                                    document.getElementById('confirmationModal' + dossierId).style.display = 'none';
-                                                }
+                                            <!-- Bouton Supprimer -->
+                                            <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ dossier[0] }}">
+                                                Supprimer
+                                            </button>
 
-                                                // Confirmer la suppression
-                                                document.querySelector('#confirmBtn{{ dossier[0] }}').addEventListener('click', function() {
-                                                    window.location.href = "{{ url_for('supprimer_dossier', id=dossier[0]) }}"; // Redirige vers la suppression du dossier
-                                                });
-                                            </script>
-
-                                            <style>
-                                                .modal {
-                                                    display: none;
-                                                    position: fixed;
-                                                    z-index: 1;
-                                                    left: 0;
-                                                    top: 0;
-                                                    width: 100%;
-                                                    height: 100%;
-                                                    background-color: rgba(0, 0, 0, 0.4);
-                                                    overflow: auto;
-                                                }
-
-                                                .modal-content {
-                                                    background-color: white;
-                                                    margin: 15% auto;
-                                                    padding: 20px;
-                                                    border-radius: 10px;
-                                                    width: 50%;
-                                                    text-align: center;
-                                                }
-
-                                                .modal-content h3 {
-                                                    margin-bottom: 20px;
-                                                }
-
-                                                .modal-content p {
-                                                    margin-bottom: 20px;
-                                                }
-                                            </style>
+                                            <!-- Modal de confirmation de suppression -->
+                                            <div class="modal fade" id="deleteModal{{ dossier[0] }}" tabindex="-1">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title text-danger">Confirmation de suppression</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <p>Voulez-vous vraiment supprimer le dossier <strong>{{ dossier[1] }}</strong> ?</p>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <a href="{{ url_for('supprimer_dossier', id=dossier[0]) }}" class="btn btn-danger">Oui, Supprimer</a>
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </td>
-
                                     </tr>
                                     {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                </div><!-- end card-body -->
-            </div><!-- end card -->
-        </div><!-- end col -->
-    </div><!-- end row -->
-
-
-</div>
-<!-- container-fluid -->
+                </div>
+            </div>
+        </div>
+        <!-- end row -->
+    </div>
 </div>
 
 {% endblock %}

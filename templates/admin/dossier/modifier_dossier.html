@@ -5,95 +5,82 @@
 {% endblock %}
 
 {% block contenu %}
-
 <div class="page-content">
     <div class="container-fluid">
 
         <!-- start page title -->
         <div class="row">
             <div class="col-12">
-                <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-                    <h4 class="mb-sm-0">Modifier l'un des dossiers </h4>
+                <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                    <h4 class="mb-sm-0 text-primary">Modifier un dossier</h4>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Modifier</a></li>
-                            <li class="breadcrumb-item active"><a href="{{url_for('ajouter_dossier')}}">Ajouter un
-                                dossier</a></li>
-                            <li class="breadcrumb-item active"></li>
+                            <li class="breadcrumb-item active">Modifier un dossier</li>
                         </ol>
                     </div>
-
                 </div>
             </div>
         </div>
+        <!-- end page title -->
 
-        <!-- Début du titre de la page -->
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header align-items-center d-flex" style="background-color: blue;">
-                        <h2 class="card-title mb-0 flex-grow-1 text-center " style="background-color: white;">Formulaire
-                            d'ajout de dossier</h2>
+        <!-- Formulaire de modification -->
+        <div class="row justify-content-center mt-5">
+            <div class="col-lg-8 col-md-10 col-sm-9">
+                <div class="card shadow-sm border-primary">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h4 class="card-title mb-0 ", style="color: white">Formulaire de modification</h4>
                     </div>
-                    <!-- Fin de l'en-tête de la carte -->
-                    <!-- Fin de l'en-tête de la carte -->
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                    <div style="display: flex; justify-content: center; align-items: center; height: 100%; text-align: center;">
-                        {% for category, message in messages %}
-                        <div class="alert alert-{{ category }}" role="alert"
-                             style="width: 100%; max-width: 600px; margin: 10px; text-align: center;">
-                            {{ message }}
-                        </div>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-                    {% endwith %}
-
-
-                    <form action="{{ url_for('modifier_dossier', id=dossier[0]) }}" method="POST">
-                        <div class="card-body p-4">
+                    <div class="card-body">
+                        <h2 class="text-danger mb-0" style="font-size: 1rem;">
+                                    Veuillez vérifier les informations avant de soumettre.
+                                </h2>
+                        <br>
+                        <form action="{{ url_for('modifier_dossier', id=dossier[0]) }}" method="POST">
                             <div class="row gy-4">
-                                <!-- Champ Numéro du dossier -->
-                                <div class="col-xxl-4 col-md-6">
+                                <div class="col-md-5">
                                     <div class="form-group">
-                                        <label for="basiInput" class="form-label fw-bold">Numéro du dossier</label>
+                                        <label for="dossierNom" class="form-label">Nom du dossier</label>
                                         <input type="text" name="nom" value="{{ dossier[1] }}"
-                                               class="form-control border-1 shadow-sm"
-                                               placeholder="Entrez le numéro du dossier" required>
+                                               class="form-control form-control-lg border-4 shadow-sm rounded" id="dossierNom" required>
                                     </div>
                                 </div>
-                                <!-- Fin col -->
 
-                                <!-- Champ Raison (caché) -->
-                                <div class="col-xxl-4 col-md-6">
+                                <div class="col-md-12">
                                     <div class="form-group">
-                                        <input type="hidden" name="raison" value="{{ dossier[2] }}" class="form-control"
-                                               id="labelInput">
+                                        <label for="dossierRaison" class="form-label">Raison</label>
+                                        <input type="hidden" name="raison" value="{{ dossier[2] }}" class="form-control">
                                     </div>
                                 </div>
-                                <!-- Fin col -->
                             </div>
-                            <!-- Fin row -->
 
-                            <!-- Bouton et Avertissement -->
-                            <div class="mt-4 d-flex align-items-center">
-                                <button type="submit" class="btn btn-primary px-4 me-3">Modifier</button>
-                                <p class="text-danger fw-bold mb-0">Veuillez vérifier les informations avant de
-                                    soumettre.</p>
+                            <div class="mt-2 d-flex justify-content-between align-items-center">
+                                <button type="submit" class="btn btn-primary btn-lg px-5 py-2">Modifier</button>
+                                <button type="submit" class="btn btn-primary btn-lg px-5 py-2">
+                                   <a href="{{url_for('liste_dossier')}}" style="color:white">Annuler</a>
+                                </button>
                             </div>
+                        </form>
+
+                        <!-- Flash messages -->
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                        <div class="mt-3">
+                            {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                            {% endfor %}
                         </div>
-                    </form>
-
-
+                        {% endif %}
+                        {% endwith %}
+                    </div>
                 </div>
             </div>
-            <!--end col-->
         </div>
-        <!--end row-->
 
-
-    </div> <!-- container-fluid -->
-</div><!-- End Page-content -->
+    </div>
+</div>
 
 {% endblock %}
