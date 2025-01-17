@@ -1,8 +1,7 @@
 {% extends 'chef_brigade/base.html' %}
 
 {% block titre %}
-<title>Cadastre - Dossiers en attente</title>
-
+<title>Cadastre - Gestion des dossiers</title>
 {% endblock %}
 
 {% block contenu %}
@@ -10,53 +9,44 @@
 <div class="page-content">
     <div class="container-fluid">
 
-        <!-- start page title -->
+        <!-- Titre de la page -->
         <div class="row">
             <div class="col-12">
-                <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-                    <h4 class="mb-sm-0">Liste des dossier</h4>
-
+                <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-light shadow-sm rounded">
+                    <h4 class="mb-sm-0 text-primary">Gestion des dossiers</h4>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
-                            <li class="breadcrumb-item"><a href="javascript: void(0);">Liste</a></li>
-                            <li class="breadcrumb-item active">Liste des dossiers</li>
+                            <li class="breadcrumb-item"><a href="#">Accueil</a></li>
+                            <li class="breadcrumb-item active">Dossiers</li>
                         </ol>
                     </div>
-
                 </div>
             </div>
         </div>
-        <!-- end page title -->
 
-        <!-- end row -->
-
+        <!-- Liste des dossiers -->
         <div class="row">
             <div class="col-xl-12">
-                <div class="card">
-                    <div class="card-header align-items-center d-flex">
-                        <h4 class="card-title mb-0 flex-grow-1">Liste des dossier</h4>
-
-
-                    </div><!-- end card header -->
-
+                <div class="card shadow-sm">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h5 class="card-title text-dark mb-0">Liste des dossiers</h5>
+                    </div>
                     <div class="card-body">
-
-                        <div class="live-preview">
-                            <div class="table-responsive table-card">
-                                <table class="table align-middle table-nowrap table-striped mb-0">
-                                    <thead class="table-light">
+                        <div class="table-responsive">
+                            <table class="table align-middle table-striped table-hover">
+                                <thead class="table-light">
                                     <tr>
-                                        <th class="text-center">Nom du dossier</th>
-                                        <th class="text-center">Date d'ajout du dossier</th>
+                                        <th class="text-center">Nom</th>
+                                        <th class="text-center">Date d'ajout</th>
                                         <th class="text-center">Statut</th>
-                                        <th class="text-center">Nom de l'ajouteur</th>
+                                        <th class="text-center">Ajouté par</th>
                                         <th class="text-center">Actions</th>
                                     </tr>
-                                    </thead>
-                                    <tbody>
+                                </thead>
+                                <tbody>
                                     {% for dossier in dossiers %}
                                     <tr>
-                                        <td class="text-center"><b style="color: blue">{{ dossier[1] }}</b></td>
+                                        <td class="text-center text-primary font-weight-bold">{{ dossier[1] }}</td>
                                         <td class="text-center">{{ dossier[2] }}</td>
                                         <td class="text-center">
                                             <span class="badge bg-{{ 'success' if dossier[4] == 'actif' else 'danger' }}">
@@ -65,150 +55,97 @@
                                         </td>
                                         <td class="text-center">{{ dossier[5] }}</td>
                                         <td class="text-center">
-                                            <!-- Bouton "Prendre en charge" -->
-                                            <button type="button"
-                                                    class="btn btn-success btn-sm rounded-pill"
-                                                    style="font-size: 14px;"
-                                                    onclick="confirmAssignment({{ dossier[0] }}, '{{ dossier[1] }}');">
-                                                Prendre en charge ce dossier
-                                            </button>
+                                        
 
-                                            <!-- Modal -->
+                                            <!-- Modal de confirmation -->
                                             <div id="assignmentModal{{ dossier[0] }}" class="modal">
                                                 <div class="modal-content">
-                                                    <h3 style="color: #28a745;">Confirmer la prise en charge</h3>
-                                                    <p style="color: #555;">
-                                                        Êtes-vous sûr de vouloir prendre en charge ce dossier ({{
-                                                        dossier[1] }}) ?
-                                                    </p>
-                                                    <div style="text-align: center;">
-                                                        <!-- Bouton de confirmation -->
-                                                        <form id="assignForm{{ dossier[0] }}"
-                                                              action="{{ url_for('assigner_dossier_chefbrigade', id_dossier=dossier[0]) }}"
-                                                              method="POST" style="display: inline;">
-                                                            <button type="submit"
-                                                                    style="background-color: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-                                                                Oui, confirmer
-                                                            </button>
-                                                        </form>
-                                                        <!-- Bouton d'annulation -->
-                                                        <button onclick="closeModal({{ dossier[0] }})"
-                                                                style="background-color: #ccc; color: black; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-                                                            Annuler
-                                                        </button>
-                                                    </div>
+                                                    <h4 class="text-success">Confirmer la prise en charge</h4>
+                                                    <p>Êtes-vous sûr de vouloir prendre en charge ce dossier <strong>{{ dossier[1] }}</strong> ?</p>
+                                                    <form action="{{ url_for('assigner_dossier_chefbrigade', id_dossier=dossier[0]) }}" method="POST">
+                                                        <button type="submit" class="btn btn-success">Oui, confirmer</button>
+                                                    </form>
+                                                    <button type="button" class="btn btn-secondary" onclick="toggleModal('assignmentModal{{ dossier[0] }}')">Annuler</button>
                                                 </div>
                                             </div>
 
-                                            <script type="text/javascript">
-                                                function confirmAssignment(dossierId, dossierName) {
-                                                    // Afficher le modal spécifique au dossier
-                                                    document.getElementById('assignmentModal' + dossierId).style.display = 'block';
-                                                }
-
-                                                function closeModal(dossierId) {
-                                                    // Masquer le modal spécifique
-                                                    document.getElementById('assignmentModal' + dossierId).style.display = 'none';
-                                                }
-                                            </script>
-
-                                            <style>
-                                                .modal {
-                                                    display: none;
-                                                    position: fixed;
-                                                    z-index: 1;
-                                                    left: 0;
-                                                    top: 0;
-                                                    width: 100%;
-                                                    height: 100%;
-                                                    background-color: rgba(0, 0, 0, 0.4);
-                                                    overflow: auto;
-                                                }
-
-                                                .modal-content {
-                                                    background-color: white;
-                                                    margin: 15% auto;
-                                                    padding: 20px;
-                                                    border-radius: 10px;
-                                                    width: 50%;
-                                                    text-align: center;
-                                                }
-
-                                                .modal-content h3 {
-                                                    margin-bottom: 20px;
-                                                }
-
-                                                .modal-content p {
-                                                    margin-bottom: 20px;
-                                                }
-                                            </style>
-                                        </td>
-
-                                        <td class="text-center">
-                                            <!-- Bouton "Assigner Dossier" -->
+                                            <!-- Action: Assigner Dossier -->
                                             <button type="button"
                                                     class="btn btn-outline-primary btn-sm rounded-pill"
-                                                    style="font-size: 14px;"
-                                                    onclick="showAssignModal({{ dossier[0] }}, '{{ dossier[1] }}');">
+                                                    onclick="toggleModal('assignModal{{ dossier[0] }}')">
                                                 Assigner Dossier
                                             </button>
-                                        
-                                            <!-- Modal -->
+
+                                            <!-- Modal d'assignation -->
                                             <div id="assignModal{{ dossier[0] }}" class="modal">
                                                 <div class="modal-content">
-                                                    <h3 style="color: #007bff;">Assigner le dossier</h3>
-                                                    <p style="color: #555;">
-                                                        Sélectionnez un brigade pour assigner ce dossier ({{ dossier[1] }}).
-                                                    </p>
-                                                    <form id="assignForm{{ dossier[0] }}"
-                                                          action="{{ url_for('assigner_dossier_chefbrigade', id_dossier=dossier[0]) }}"
-                                                          method="POST" style="display: inline;">
-                                                        <select name="brigade_id" required>
+                                                    <h4 class="text-primary">Assigner le dossier</h4>
+                                                    <p>Sélectionnez une brigade pour ce dossier <strong>{{ dossier[1] }}</strong>.</p>
+                                                    <form action="{{ url_for('assigner_dossier_chefbrigade', id_dossier=dossier[0]) }}" method="POST">
+                                                        <select name="brigade_id" class="form-select mb-3" required>
+                                                            <option value=""> </option>
                                                             {% for brigade in brigades %}
                                                             <option value="{{ brigade[0] }}">{{ brigade[1] }}</option>
                                                             {% endfor %}
                                                         </select>
-                                                        <button type="submit"
-                                                                style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-                                                            Assigner
-                                                        </button>
+                                                        <button type="submit" class="btn btn-primary">Assigner</button>
                                                     </form>
-                                                    <button onclick="closeAssignModal({{ dossier[0] }})"
-                                                            style="background-color: #ccc; color: black; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-                                                        Annuler
-                                                    </button>
+                                                    <button type="button" class="btn btn-secondary" onclick="toggleModal('assignModal{{ dossier[0] }}')">Annuler</button>
                                                 </div>
                                             </div>
-                                        
-                                            <script type="text/javascript">
-                                                function showAssignModal(dossierId, dossierName) {
-                                                    document.getElementById('assignModal' + dossierId).style.display = 'block';
-                                                }
-                                        
-                                                function closeAssignModal(dossierId) {
-                                                    document.getElementById('assignModal' + dossierId).style.display = 'none';
-                                                }
-                                            </script>
                                         </td>
-
-                                        
-
                                     </tr>
                                     {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
+                                </tbody>
+                            </table>
                         </div>
-
-
-                    </div><!-- end card-body -->
-                </div><!-- end card -->
-            </div><!-- end col -->
-        </div><!-- end row -->
-
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </div>
-    <!-- container-fluid -->
 </div>
+
+<!-- Scripts JavaScript -->
+<script>
+    function toggleModal(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
+    }
+</script>
+
+<!-- Styles CSS -->
+<style>
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1050;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+    }
+
+    .modal-content {
+        background-color: #fff;
+        margin: 15% auto;
+        padding: 20px;
+        border-radius: 10px;
+        width: 40%;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-content h4 {
+        margin-bottom: 15px;
+    }
+
+    .modal-content button {
+        margin: 5px;
+    }
+</style>
 
 {% endblock %}

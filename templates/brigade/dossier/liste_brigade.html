@@ -2,11 +2,9 @@
 
 {% block titre %}
 <title>Cadastre - Dossiers en attente</title>
-
 {% endblock %}
 
 {% block contenu %}
-
 <div class="page-content">
     <div class="container-fluid">
 
@@ -14,96 +12,78 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-                    <h4 class="mb-sm-0">Liste des dossier en Attente</h4>
+                    <h4 class="mb-sm-0">Liste des dossiers en attente</h4>
 
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Liste</a></li>
-                            <li class="breadcrumb-item active">Liste des dossiers en Attente</li>
+                            <li class="breadcrumb-item active">Dossiers en attente</li>
                         </ol>
                     </div>
-
                 </div>
             </div>
         </div>
         <!-- end page title -->
 
-        <!-- end row -->
-
         <div class="row">
             <div class="col-xl-12">
-                <div class="card">
-                    <div class="card-header align-items-center d-flex">
-                        <h4 class="card-title mb-0 flex-grow-1">Liste des dossier</h4>
-
-
+                <div class="card shadow-sm">
+                    <div class="card-header d-flex align-items-center">
+                        <h4 class="card-title mb-0 flex-grow-1">Dossiers en attente</h4>
                     </div><!-- end card header -->
 
                     <div class="card-body">
-
-                        <div class="live-preview">
-                            <div class="table-responsive table-card">
-                                <table class="table align-middle table-nowrap table-striped mb-0">
-                                    <thead class="table-light">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-hover text-center mb-0">
+                                <thead class="table-primary">
                                     <tr>
-                                        <th class="text-center">Nom du dossier</th>
-                                        <th class="text-center">Date d'ajout</th>
-                                        <th class="text-center">date assignation<br> termine N2</th>
-                                        <th class="text-center">Nom N1</th>
-                                        <th class="text-center">Nom N2</th>
-
-                                        <th class="text-center">date assignation N3</th>
-                                        <th class="text-center">Votre Nom</th>
-                                        <th class="text-center">statut</th>
-                                        <th class="text-center">Action</th>
+                                        <th>Nom du dossier</th>
+                                        <th>Date d'ajout</th>
+                                        <th>Date assignation N2</th>
+                                        <th>Chef</th>
+                                        <th>Chef Brigarde</th>
+                                        <th>Date assignation <br>Brigarde</th>
+                                        <th>Votre Nom <br>Brigarde</th>
+                                        <th>Statut</th>
+                                        <th>Action</th>
                                     </tr>
-                                    </thead>
-                                    <tbody>
+                                </thead>
+                                <tbody>
                                     {% for dossier in dossiers %}
                                     <tr>
-                                        <td class="text-center"><b style="color: blue">{{ dossier[1] }}</b></td>
-                                        <td class="text-center">{{ dossier[2] }}</td>
-                                        <td class="text-center">{{ dossier[3] }}</td>
-                                        <td class="text-center">{{ dossier[6] }}</td>
-                                        <td class="text-center">{{ dossier[7] }}</td>
-                                        <td class="text-center" style="color:blue">{{ dossier[4] }}</td>
-                                        <td class="text-center" style="color:blue">{{ dossier[9] }}</td>
-                                        <td class="text-center">
-                                            <b class="badge bg-{{ 'success' if dossier[4] == 'actif' else 'danger' }} p-1 fs-5">
+                                        <td><b class="text-primary">{{ dossier[1] }}</b></td>
+                                        <td>{{ dossier[2] }}</td>
+                                        <td>{{ dossier[3] }}</td>
+                                        <td>{{ dossier[6] }}</td>
+                                        <td>{{ dossier[7] }}</td>
+                                        <td class="text-primary">{{ dossier[4] }}</td>
+                                        <td class="text-primary">{{ dossier[9] }}</td>
+                                        <td>
+                                            <b class="badge bg-{{ 'success' if dossier[4] == 'actif' else 'danger' }} p-1 fs-6">
                                                 {{ dossier[5] }}
                                             </b>
-
                                         </td>
-                                        <td class="text-center">
+                                        <td>
                                             <!-- Bouton "Prendre en charge" -->
-                                            <button type="button"
-                                                    class="btn btn-success btn-sm rounded-pill"
-                                                    style="font-size: 14px;"
+                                            <button type="button" class="btn btn-success btn-sm rounded-pill"
                                                     onclick="confirmAssignment({{ dossier[0] }}, '{{ dossier[1] }}');">
-                                                Prendre en <br>charge ce dossier
+                                                Terminer Dossier
                                             </button>
 
                                             <!-- Modal -->
                                             <div id="assignmentModal{{ dossier[0] }}" class="modal">
                                                 <div class="modal-content">
                                                     <h3 style="color: #28a745;">Confirmer la prise en charge</h3>
-                                                    <p style="color: #555;">
-                                                        Êtes-vous sûr de vouloir prendre en charge ce dossier ({{
-                                                        dossier[1] }}) ?
-                                                    </p>
+                                                    <p>Êtes-vous sûr de vouloir prendre en charge ce dossier ({{ dossier[1] }}) ?</p>
                                                     <div style="text-align: center;">
-                                                        <!-- Bouton de confirmation -->
                                                         <form id="assignForm{{ dossier[0] }}"
                                                               action="{{ url_for('assigner_dossier_brigade', id_dossier=dossier[0]) }}"
                                                               method="POST" style="display: inline;">
-                                                            <button type="submit"
-                                                                    style="background-color: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+                                                            <button type="submit" class="btn btn-success px-4 py-2 rounded">
                                                                 Oui, confirmer
                                                             </button>
                                                         </form>
-                                                        <!-- Bouton d'annulation -->
-                                                        <button onclick="closeModal({{ dossier[0] }})"
-                                                                style="background-color: #ccc; color: black; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+                                                        <button onclick="closeModal({{ dossier[0] }})" class="btn btn-secondary px-4 py-2 rounded">
                                                             Annuler
                                                         </button>
                                                     </div>
@@ -112,12 +92,10 @@
 
                                             <script type="text/javascript">
                                                 function confirmAssignment(dossierId, dossierName) {
-                                                    // Afficher le modal spécifique au dossier
                                                     document.getElementById('assignmentModal' + dossierId).style.display = 'block';
                                                 }
 
                                                 function closeModal(dossierId) {
-                                                    // Masquer le modal spécifique
                                                     document.getElementById('assignmentModal' + dossierId).style.display = 'none';
                                                 }
                                             </script>
@@ -153,23 +131,16 @@
                                                 }
                                             </style>
                                         </td>
-
                                     </tr>
                                     {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
+                                </tbody>
+                            </table>
                         </div>
-
-
                     </div><!-- end card-body -->
                 </div><!-- end card -->
             </div><!-- end col -->
         </div><!-- end row -->
 
-
-    </div>
-    <!-- container-fluid -->
+    </div><!-- container-fluid -->
 </div>
-
 {% endblock %}

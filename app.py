@@ -122,41 +122,43 @@ def logout():
 
 @app.route("/inscription_admin",methods=['POST', 'GET'])
 def inscription_admin():
-    if request.method == 'POST':
-        name = request.form['name']
-        prenom = request.form['prenom']
-        nom_complet = name + ' ' +  prenom
-        email = request.form['email']
-        numero_telephone = request.form['numero_telephone']
-        password = request.form['password']
-        confirm_password = request.form['confirm_password']
+    if 'email_admin' not in session:
+        return redirect(url_for('login'))
+    else:
+        loggedIn, firstName = getLogin('email_admin', 'admin')
+        if request.method == 'POST':
+            name = request.form['name']
+            prenom = request.form['prenom']
+            nom_complet = name + ' ' +  prenom
+            email = request.form['email']
+            numero_telephone = request.form['numero_telephone']
+            password = request.form['password']
+            confirm_password = request.form['confirm_password']
 
-        # Vérification de la confirmation de mot de passe
-        if password != confirm_password:
-            return "Les mots de passe ne correspondent pas. Veuillez réessayer."
+            # Vérification de la confirmation de mot de passe
+            if password != confirm_password:
+                return "Les mots de passe ne correspondent pas. Veuillez réessayer."
 
-        hashed_password = hashlib.md5(password.encode()).hexdigest()
-        cursor = mysql.connection.cursor()
-        
-        cursor.execute("SELECT * FROM admin WHERE email_admin = %s", (email,))
-        existing_user = cursor.fetchone()
-
-        if existing_user:
-            flash("Cet email est déjà utilisé. Veuillez en utiliser un autre.", "danger")
-            return redirect('inscription_admin')
-
-        try:
+            hashed_password = hashlib.md5(password.encode()).hexdigest()
             cursor = mysql.connection.cursor()
-            query = """INSERT INTO `admin` (nom_complet, email_admin, numero_telephone, password) 
-                       VALUES (%s, %s, %s, %s)"""
-            cursor.execute(query, (name, prenom, email, numero_telephone, hashed_password))
-            mysql.connection.commit()
-            return redirect('login')
-        except Exception as e:
-            return f"Erreur lors de l'inscription : {e}"
-    return render_template('admin/connexion/cree_compte.html')
+            
+            cursor.execute("SELECT * FROM admin WHERE email_admin = %s", (email,))
+            existing_user = cursor.fetchone()
 
+            if existing_user:
+                flash("Cet email est déjà utilisé. Veuillez en utiliser un autre.", "danger")
+                return redirect('inscription_admin')
 
+            try:
+                cursor = mysql.connection.cursor()
+                query = """INSERT INTO `admin` (nom_complet, email_admin, numero_telephone, password) 
+                        VALUES (%s, %s, %s, %s)"""
+                cursor.execute(query, (name, prenom, email, numero_telephone, hashed_password))
+                mysql.connection.commit()
+                return redirect('login')
+            except Exception as e:
+                return f"Erreur lors de l'inscription : {e}"
+        return render_template('admin/connexion/cree_compte.html', firstName=firstName)
 
 
 
@@ -260,6 +262,8 @@ def rechercher_dossier():
         finally:
             cur.close()
     return render_template("admin/dossier/recherche_trouver.html", dossiers=None, error=None)
+
+
 
 @app.route("/admin_tableau_de_bord")
 def admin_tableau_de_bord():
@@ -418,27 +422,6 @@ def liste_dossier():
         return render_template('admin/dossier/liste_dossier.html',dossiers=dossiers,firstName=firstName,chef_brigades=chef_brigades)
 
 
-# @app.route('/valider_dossier_a/<int:dossier_id>', methods=['POST'])
-# def valider_dossier_a(dossier_id):
-#     if 'email_admin' not in session:
-#         return redirect(url_for('login'))
-#     else:
-#         loggedIn, firstName = getLogin('email_admin', 'admin')
-#         cur = mysql.connection.cursor()
-#         cur.execute("SELECT nom_dossier FROM dossier WHERE id = %s", (dossier_id,))
-#         dossier = cur.fetchone()
-#         if dossier:
-#             cur.execute("""
-#                 INSERT INTO gestion_chef_brigade (nom_dossier, date_ajout, date_assignation, statut, n1_admin, n2_chef_brigade,id_chef_brigade)
-#                 VALUES (%s, %s, %s,%s,%s,%s,%s)""", (dossier[0], date_now, date_now, 'En attente',firstName, None, None)
-#                         )
-
-#             cur.execute("DELETE FROM dossier WHERE id = %s", (dossier_id,))
-#             mysql.connection.commit()
-#         cur.close()
-#         flash('Dossier Assigner avec succès!', 'succès')
-#         return redirect(url_for('liste_dossier'))
-
 @app.route('/valider_dossier_a/<int:dossier_id>', methods=['POST'])
 def valider_dossier_a(dossier_id):
     if 'email_admin' not in session:
@@ -510,39 +493,43 @@ def valider_dossier_a(dossier_id):
 ############ chef brigade
 @app.route("/inscription_chefbrigade",methods=['POST', 'GET'])
 def inscription_chefbrigade():
-    if request.method == 'POST':
-        name = request.form['name']
-        prenom = request.form['prenom']
-        nom_complet=name +' '+ prenom
-        email = request.form['email']
-        numero_telephone = request.form['numero_telephone']
-        password = request.form['password']
-        confirm_password = request.form['confirm_password']
+    if 'email_admin' not in session:
+        return redirect(url_for('login'))
+    else:
+        loggedIn, firstName = getLogin('email_admin', 'admin')
+        if request.method == 'POST':
+            name = request.form['name']
+            prenom = request.form['prenom']
+            nom_complet=name +' '+ prenom
+            email = request.form['email']
+            numero_telephone = request.form['numero_telephone']
+            password = request.form['password']
+            confirm_password = request.form['confirm_password']
 
-        # Vérification de la confirmation de mot de passe
-        if password != confirm_password:
-            return "Les mots de passe ne correspondent pas. Veuillez réessayer."
+            # Vérification de la confirmation de mot de passe
+            if password != confirm_password:
+                return "Les mots de passe ne correspondent pas. Veuillez réessayer."
 
-        hashed_password = hashlib.md5(password.encode()).hexdigest()
-        cursor = mysql.connection.cursor()
-        
-        cursor.execute("SELECT * FROM chef_brigade WHERE email_chefbrigade = %s", (email,))
-        existing_user = cursor.fetchone()
-
-        if existing_user:
-            flash("Cet email est déjà utilisé. Veuillez en utiliser un autre.", "danger")
-            return redirect('/inscription_admin')
-
-        try:
+            hashed_password = hashlib.md5(password.encode()).hexdigest()
             cursor = mysql.connection.cursor()
-            query = """INSERT INTO `chef_brigade` (nom_complet, email_chefbrigade, numero_telephone, password) 
-                       VALUES (%s, %s, %s, %s)"""
-            cursor.execute(query, (nom_complet, email, numero_telephone, hashed_password))
-            mysql.connection.commit()
-            return redirect('/')
-        except Exception as e:
-            return f"Erreur lors de l'inscription : {e}"
-    return render_template('chef_brigade/connexion/cree_compte.html')
+            
+            cursor.execute("SELECT * FROM chef_brigade WHERE email_chefbrigade = %s", (email,))
+            existing_user = cursor.fetchone()
+
+            if existing_user:
+                flash("Cet email est déjà utilisé. Veuillez en utiliser un autre.", "danger")
+                return redirect('/inscription_admin')
+
+            try:
+                cursor = mysql.connection.cursor()
+                query = """INSERT INTO `chef_brigade` (nom_complet, email_chefbrigade, numero_telephone, password) 
+                        VALUES (%s, %s, %s, %s)"""
+                cursor.execute(query, (nom_complet, email, numero_telephone, hashed_password))
+                mysql.connection.commit()
+                return redirect('/')
+            except Exception as e:
+                return f"Erreur lors de l'inscription : {e}"
+        return render_template('chef_brigade/connexion/cree_compte.html',firstName=firstName)
 
 
 @app.route("/chef_brigade_tableau_de_bord")
@@ -591,28 +578,6 @@ def liste_gestion_chef_brigade():
     cur.close()
     return render_template('chef_brigade/dossier/liste_chef_brigade.html', dossiers=dossiers, loggedIn=loggedIn, firstName=firstName, brigades=brigades)
 
-
-# @app.route("/assigner_dossier_chefbrigade/<int:id_dossier>", methods=['POST'])
-# def assigner_dossier_chefbrigade(id_dossier):
-#     # Vérification de la session
-#     if 'email_chefbrigade' not in session:
-#         return redirect(url_for('login'))
-
-#     loggedIn, firstName = getLogin('email_chefbrigade', 'chef_brigade')
-#     cur = mysql.connection.cursor()
-#     cur.execute("SELECT * FROM gestion_chef_brigade WHERE id = %s", (id_dossier,))
-#     dossier = cur.fetchone()
-#     # Mise à jour du dossier
-#     date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-#     cur.execute(""" UPDATE gestion_chef_brigade 
-#                     SET date_assignation = %s, statut = %s, n2_chef_brigade = %s, id_chef_brigade = %s 
-#                     WHERE id = %s""", (date_now, 'En cours', firstName,loggedIn,id_dossier)
-#                 )
-
-#     mysql.connection.commit()
-#     cur.close()
-#     flash("Le dossier a été pris en charge avec succès. Merci pour votre engagement.", "success")
-#     return redirect(url_for('dossier_cours_chef_brigade'))
 
 
 @app.route('/assigner_dossier_chefbrigade/<int:id_dossier>', methods=['POST'])
@@ -688,86 +653,6 @@ def assigner_dossier_chefbrigade(id_dossier):
             cur.close()
 
 
-# @app.route("/dossiers_cours_chef_brigade", methods=['POST', 'GET'])
-# def dossier_cours_chef_brigade():
-#     if 'email_chefbrigade' not in session:
-#         flash("Vous devez être connecté pour accéder à cette page.", "danger")
-#         return redirect(url_for('login'))
-#     else:
-#         loggedIn, firstName = getLogin('email_chefbrigade', 'chef_brigade')
-#         print(loggedIn)
-#         cur = mysql.connection.cursor()
-#         cur.execute("SELECT * FROM gestion_chef_brigade WHERE statut='En cours' and  id_chef_brigade = %s ORDER BY id DESC", (loggedIn,))
-#         dossiers = cur.fetchall()
-        
-        
-#         return render_template('chef_brigade/dossier/liste_dossier_en_cours_chef_brigade.html',
-#                                dossiers=dossiers, loggedIn=loggedIn, firstName=firstName)
-
-
-# @app.route('/terminer_dossier_chefbrigade/<int:id_dossier>', methods=['POST'])
-# def terminer_dossier_chefbrigade(id_dossier):
-#     if 'email_chefbrigade' not in session:
-#         return redirect(url_for('login'))
-
-#     try:
-#         # Obtenir les informations de connexion
-#         loggedIn, firstName = getLogin('email_chefbrigade', 'chef_brigade')
-#         cur = mysql.connection.cursor()
-#         cur.execute("""
-#             SELECT * FROM gestion_chef_brigade 
-#             WHERE id = %s AND id_chef_brigade = %s AND statut = 'En cours'
-#         """, (id_dossier, loggedIn))
-#         dossier = cur.fetchone()
-
-#         if not dossier:
-#             flash("Dossier introuvable ou non assigné.", "warning")
-#             return redirect(url_for('dossier_cours_chef_brigade'))
-
-#         # Générer la date actuelle
-#         date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-#         try:
-#             # Insérer dans la table gestion_brigade
-#             cur.execute("""
-#                 INSERT INTO gestion_brigade 
-#                 (nom_dossier, date_ajout, date_assignation_termin_n2, date_assignation_n3, statut, n1_admin, n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade)
-#                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-#             """, (
-#                 dossier[1], dossier[2], date_now, date_now, 'En attente',
-#                 dossier[6], firstName, loggedIn, None, None
-#             ))
-
-#             # Insérer dans la table gestion_chef_brigade_terminer
-#             cur.execute("""
-#                 INSERT INTO gestion_chef_brigade_terminer 
-#                 (nom_dossier, date_ajout, date_assignation, date_terminer, statut, n1_admin, n2_chef_brigade, id_chef_brigade)
-#                 VALUES (%s, %s, %s, NOW(), %s, %s, %s, %s)
-#             """, (
-#                 dossier[1], dossier[2], dossier[3], 'Terminé',
-#                 dossier[6], firstName, loggedIn
-#             ))
-
-#             # Supprimer le dossier de la table gestion_chef_brigade
-#             cur.execute("DELETE FROM gestion_chef_brigade WHERE id = %s", (id_dossier,))
-#             flash("Le dossier a été validé avec succès.", "success")
-#             mysql.connection.commit()
-#             return redirect(url_for('dossiers_valides'))
-
-#         except Exception as e:
-#             mysql.connection.rollback()  # Annuler les modifications en cas d'erreur
-#             flash(f"Erreur lors de la terminaison du dossier : {str(e)}", "danger")
-#             return redirect(url_for('dossiers_valides'))
-
-#     except Exception as e:
-#         flash(f"Erreur inattendue : {str(e)}", "danger")
-#         return redirect(url_for('dossiers_valides'))
-
-#     finally:
-#         if cur:
-#             cur.close()
-
-
 @app.route('/dossiers_valides_teminer')
 def dossiers_valides():
     # Vérifier si un chef de brigade est connecté
@@ -793,7 +678,11 @@ def dossiers_valides():
 ##### ------------ brigade
 @app.route("/inscription_brigade",methods=['POST', 'GET'])
 def inscription_brigade():
-    if request.method == 'POST':
+    if 'email_chefbrigade' not in session:
+        return redirect(url_for('login'))
+    else:
+      loggedIn, firstName = getLogin('email_chefbrigade', 'chef_brigade')
+      if request.method == 'POST':
         name = request.form['name']
         prenom = request.form['prenom']
         nom_complet = name + ' ' + prenom
@@ -814,7 +703,7 @@ def inscription_brigade():
 
         if existing_user:
             flash("Cet email est déjà utilisé. Veuillez en utiliser un autre.", "danger")
-            return redirect('/inscription_admin')
+            return redirect('/inscription_brigade')
 
         try:
             cursor = mysql.connection.cursor()
@@ -822,10 +711,12 @@ def inscription_brigade():
                        VALUES (%s, %s, %s, %s)"""
             cursor.execute(query, (nom_complet, email, numero_telephone, hashed_password))
             mysql.connection.commit()
-            return redirect('/')
+            return redirect('/inscription_brigade')
         except Exception as e:
             return f"Erreur lors de l'inscription : {e}"
-    return render_template('brigade/connexion/cree_compte.html')
+    return render_template('brigade/connexion/cree_compte.html', firstName=firstName)
+
+
 
 
 @app.route("/brigade_tableau_de_bord")
