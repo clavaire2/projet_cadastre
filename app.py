@@ -6,6 +6,7 @@ from credentials  import*
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from flask_mail import Mail, Message
+import MySQLdb.cursors
 from datetime import datetime, timedelta
 from MySQLdb.cursors import DictCursor
 from datetime import datetime
@@ -571,7 +572,7 @@ def liste_gestion_chef_brigade():
     cur.execute("SELECT * FROM gestion_chef_brigade WHERE id_chef_brigade = %s AND statut='En cours' ORDER BY id DESC", (loggedIn,))
     dossiers = cur.fetchall()
     
-    cur.execute("SELECT ident, nom_complet FROM brigade")
+    cur.execute("SELECT ident, nom_complet FROM brigade WHERE id_chef_brigarde = %s", (loggedIn,))
     brigades = cur.fetchall()
     cur.close()
     
@@ -1063,6 +1064,61 @@ def terminer_dossier_securisation(id_dossier):
         flash(f"Une erreur est survenue : {str(e)}", "danger")
         mysql.connection.rollback()
         return redirect(url_for('dossiers_valides_securisation'))
+
+
+@app.route('/rejeter_dossier_securisation/<int:id_dossier>', methods=['POST'])
+def rejeter_dossier_securisation(id_dossier):
+    if 'email_securisation' not in session:
+        return redirect(url_for('login'))
+
+    cur = None
+    try:
+        # Vérifiez si l'utilisateur est connecté
+        loggedIn, firstName = getLogin('email_securisation', 'securisation')
+        print(f"Debug: loggedIn={loggedIn}, firstName={firstName}, id_dossier={id_dossier}")
+        
+        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        
+        # Sélectionnez le dossier
+        cur.execute("SELECT * FROM gestion_securisation WHERE id = %s", (id_dossier,))
+        dossier = cur.fetchone()
+        print(f"Debug: dossier={dossier}")
+
+        if not dossier:
+            flash("Dossier introuvable.", "warning")
+            return redirect(url_for('dossiers_valides_securisation'))
+
+        # Générer la date actuelle
+        date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        # Insérez le dossier dans gestion_brigade
+        cur.execute("""
+            INSERT INTO gestion_brigade 
+            (nom_dossier, date_ajout, date_assignation_termin_n2, date_assignation_n3, statut, n1_admin, n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            dossier['nom_dossier'], dossier['date_ajout'], dossier.get('date_assignation_termin_n2'), date_now, 
+            'En cours', dossier['n1_admin'], dossier.get('n2_chef_brigade'), dossier.get('id_chef_brigade'),
+            dossier.get('n3_brigade'), dossier.get('id_brigade')
+        ))
+
+        # Supprimez le dossier de la table gestion_securisation
+        cur.execute("DELETE FROM gestion_securisation WHERE id = %s", (id_dossier,))
+        
+        # Valider les transactions
+        mysql.connection.commit()
+        flash("Le dossier a été rejeté avec succès.", "success")
+        return redirect(url_for('dossiers_valides_securisation'))
+
+    except Exception as e:
+        if cur:
+            mysql.connection.rollback()
+        flash(f"Erreur lors du rejet du dossier : {str(e)}", "danger")
+        return redirect(url_for('dossiers_valides_securisation'))
+
+    finally:
+        if cur:
+            cur.close()
 
 
 @app.route('/dossiers_valides_securisation')
