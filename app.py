@@ -1121,6 +1121,7 @@ def rejeter_dossier_securisation(id_dossier):
             cur.close()
 
 
+
 @app.route('/dossiers_valides_securisation')
 def dossiers_valides_securisation():
     if 'email_securisation' not in session:
