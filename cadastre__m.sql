@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le : sam. 11 jan. 2025 à 08:50
+-- Généré le : mar. 21 jan. 2025 à 15:11
 -- Version du serveur : 10.4.32-MariaDB
 -- Version de PHP : 8.2.12
 
@@ -41,7 +41,7 @@ CREATE TABLE `admin` (
 --
 
 INSERT INTO `admin` (`ident`, `nom_complet`, `email_admin`, `numero_telephone`, `date_inscription`, `password`) VALUES
-(1, 'Abalo admin', 'abalo@gmail.com', '66565', '2024-12-06 18:55:54', 'ea66e9c169c7e5a307eb06fb8e6a239d');
+(1, 'Awadi Abalo', 'abalo.awadi@gmail.com', '93464350', '2024-12-06 18:55:54', 'ea66e9c169c7e5a307eb06fb8e6a239d');
 
 -- --------------------------------------------------------
 
@@ -57,16 +57,17 @@ CREATE TABLE `brigade` (
   `date_inscription` timestamp NOT NULL DEFAULT current_timestamp(),
   `password` varchar(255) NOT NULL,
   `reset_token` varchar(255) DEFAULT NULL,
-  `token_expiration` datetime DEFAULT NULL
+  `token_expiration` datetime DEFAULT NULL,
+  `id_chef_brigarde` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Déchargement des données de la table `brigade`
 --
 
-INSERT INTO `brigade` (`ident`, `nom_complet`, `email_brigade`, `numero_telephone`, `date_inscription`, `password`, `reset_token`, `token_expiration`) VALUES
-(1, 'Abalo Brigarde', 'abalo_b@gmail.com', '66565', '2024-12-06 18:28:10', 'ea66e9c169c7e5a307eb06fb8e6a239d', NULL, NULL),
-(2, 'Gomina clavaire', 'clavaire.gominab@gmail.com', '92891445', '2024-12-10 09:20:31', '5669fb4cc8a47469cc15eb3e24dc8f23', NULL, NULL);
+INSERT INTO `brigade` (`ident`, `nom_complet`, `email_brigade`, `numero_telephone`, `date_inscription`, `password`, `reset_token`, `token_expiration`, `id_chef_brigarde`) VALUES
+(3, 'AGBODJAN Kossi Bruce', 'kagbodjan@otr.tg', '90611326', '2025-01-17 20:34:07', 'ea66e9c169c7e5a307eb06fb8e6a239d', NULL, NULL, 4),
+(4, 'ALOUMEDJI Emmanuel Kofi Mawoulé', 'excellencealoumedji@gmail.com', '91723907', '2025-01-17 20:53:27', 'ea66e9c169c7e5a307eb06fb8e6a239d', NULL, NULL, 4);
 
 -- --------------------------------------------------------
 
@@ -90,8 +91,8 @@ CREATE TABLE `chef_brigade` (
 --
 
 INSERT INTO `chef_brigade` (`ident`, `nom_complet`, `email_chefbrigade`, `numero_telephone`, `date_inscription`, `password`, `reset_token`, `token_expiration`) VALUES
-(4, 'Abalo cb', 'abalo_cb@gmail.com', '66565', '2024-12-06 18:19:59', 'ea66e9c169c7e5a307eb06fb8e6a239d', NULL, NULL),
-(5, 'c Gomina clavaire', 'clavaire.gomina@gmail.com', '92891445', '2024-12-10 08:27:15', '5669fb4cc8a47469cc15eb3e24dc8f23', NULL, NULL);
+(4, 'BAKEM	Essimna\r\n', 'eawate@otr.tg', '92871153', '2024-12-06 18:19:59', 'ea66e9c169c7e5a307eb06fb8e6a239d', NULL, NULL),
+(5, 'KOUMA	Féidibé', 'fkouma@otr.tg', '92644004', '2024-12-10 08:27:15', 'ea66e9c169c7e5a307eb06fb8e6a239d', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -156,7 +157,11 @@ INSERT INTO `dossier_terminer` (`id`, `nom_dossier`, `date_ajout`, `date_assigna
 (2, 'ergezr552', '2025-01-10 01:10:21', '2025-01-10 01:16:05', '2025-01-10 01:16:05', 'Terminé', 'Abalo admin'),
 (3, 'df41*', '2025-01-10 01:10:21', '2025-01-10 01:16:26', '2025-01-10 01:16:26', 'Terminé', 'Abalo admin'),
 (4, 'zdf525', '2025-01-10 01:34:21', '2025-01-10 01:35:40', '2025-01-10 01:35:40', 'Terminé', 'Abalo admin'),
-(5, 'eazf52', '2025-01-10 01:34:21', '2025-01-10 01:36:08', '2025-01-10 01:36:08', 'Terminé', 'Abalo admin');
+(5, 'eazf52', '2025-01-10 01:34:21', '2025-01-10 01:36:08', '2025-01-10 01:36:08', 'Terminé', 'Abalo admin'),
+(6, 'hhjjj', '2025-01-11 09:17:45', '2025-01-11 09:22:00', '2025-01-11 09:22:00', 'Terminé', 'Abalo admin'),
+(7, '43958A', '2025-01-11 12:27:35', '2025-01-17 19:01:55', '2025-01-17 19:01:55', 'Terminé', 'Awadi Abalo'),
+(8, 'Vdefre12', '2025-01-18 12:17:20', '2025-01-18 12:27:38', '2025-01-18 12:27:38', 'Terminé', 'Awadi Abalo'),
+(9, 'doc112', '2025-01-18 12:17:20', '2025-01-18 12:35:47', '2025-01-18 12:35:47', 'Terminé', 'Awadi Abalo');
 
 -- --------------------------------------------------------
 
@@ -195,7 +200,7 @@ CREATE TABLE `gestion_brigade` (
   `date_ajout` datetime DEFAULT current_timestamp(),
   `date_assignation_termin_n2` datetime DEFAULT NULL,
   `date_assignation_n3` datetime DEFAULT NULL,
-  `statut` enum('En attente','En cours','Terminé') DEFAULT 'En attente',
+  `statut` enum('En attente','En cours','Terminé','Rejeté') DEFAULT 'En attente',
   `n1_admin` varchar(255) NOT NULL,
   `n2_chef_brigade` varchar(255) DEFAULT NULL,
   `id_chef_brigade` varchar(225) DEFAULT NULL,
@@ -209,9 +214,12 @@ CREATE TABLE `gestion_brigade` (
 
 INSERT INTO `gestion_brigade` (`id`, `nom_dossier`, `date_ajout`, `date_assignation_termin_n2`, `date_assignation_n3`, `statut`, `n1_admin`, `n2_chef_brigade`, `id_chef_brigade`, `n3_brigade`, `id_brigade`) VALUES
 (4, '52890', '2025-01-05 21:49:18', '2025-01-06 06:42:58', '2025-01-06 06:42:58', 'En attente', 'Abalo cb', 'Abalo cb', '4', NULL, NULL),
-(5, '45688', '2025-01-04 23:00:00', '2025-01-09 18:18:11', '2025-01-09 18:18:11', 'En cours', 'Abalo admin', 'Abalo cb', '4', 'Abalo Brigarde', '1'),
-(6, 'eazf52', '2025-01-10 01:36:08', '2025-01-10 01:40:14', '2025-01-10 01:40:14', 'En cours', 'Abalo admin', 'Abalo cb', '4', 'Abalo Brigarde', '1'),
-(7, 'zdf525', '2025-01-10 01:35:40', '2025-01-10 01:42:11', '2025-01-10 01:42:11', 'En cours', 'Abalo admin', 'c Gomina clavaire', '5', 'Gomina clavaire', '2');
+(7, 'zdf525', '2025-01-10 01:35:40', '2025-01-10 01:42:11', '2025-01-10 01:42:11', 'En cours', 'Abalo admin', 'c Gomina clavaire', '5', 'Gomina clavaire', '2'),
+(8, 'hhjjj', '2025-01-11 09:22:00', '2025-01-11 09:23:31', '2025-01-11 09:27:40', 'En cours', 'Abalo admin', 'Abalo cb', '4', 'Abalo Brigarde', '1'),
+(9, '43958A', '2025-01-17 19:01:55', '2025-01-17 20:53:53', '2025-01-17 20:53:53', 'En cours', 'Awadi Abalo', 'BAKEM	Essimna\r\n', '4', 'ALOUMEDJI Emmanuel Kofi Mawoulé', '4'),
+(11, 'doc112', '2025-01-18 12:35:47', '2025-01-18 12:59:16', '2025-01-18 13:01:27', 'En cours', 'Awadi Abalo', 'BAKEM	Essimna\r\n', '4', 'ALOUMEDJI Emmanuel Kofi Mawoulé', '4'),
+(12, '45688', '2025-01-04 23:00:00', '2025-01-09 18:18:11', '2025-01-19 08:15:31', 'En cours', 'Abalo admin', 'Abalo cb', '4', 'Abalo Brigarde', '1'),
+(13, 'Vdefre12', '2025-01-18 12:27:38', '2025-01-18 12:29:48', '2025-01-19 08:29:02', 'En cours', 'Awadi Abalo', 'BAKEM	Essimna\r\n', '4', 'AGBODJAN Kossi Bruce', '3');
 
 -- --------------------------------------------------------
 
@@ -241,7 +249,10 @@ CREATE TABLE `gestion_brigade_terminer` (
 INSERT INTO `gestion_brigade_terminer` (`id`, `nom_dossier`, `date_ajout`, `date_assignation_termin_n2`, `date_assignation_n3`, `date_temine_n3`, `statut`, `n1_admin`, `n2_chef_brigade`, `id_chef_brigade`, `n3_brigade`, `id_brigade`) VALUES
 (1, 'B1245788', '2024-12-14 08:13:05', '2024-12-14 09:24:07', '2024-12-14 20:26:02', '2024-12-15 17:02:51', 'Terminé', 'Abalo cb', 'Abalo cb', '4', 'Abalo Brigarde', '1'),
 (2, 'B1245787', '2024-12-14 00:00:24', '2024-12-22 20:53:33', '2024-12-25 17:09:23', '2024-12-25 17:09:28', 'Terminé', 'Abalo cb', 'Abalo cb', '4', 'Abalo Brigarde', '1'),
-(3, '43958', '2025-01-03 22:19:45', '2025-01-05 21:05:46', '2025-01-05 21:12:18', '2025-01-05 21:16:29', 'Terminé', 'Abalo cb', 'Abalo cb', '4', 'Abalo Brigarde', '1');
+(3, '43958', '2025-01-03 22:19:45', '2025-01-05 21:05:46', '2025-01-05 21:12:18', '2025-01-05 21:16:29', 'Terminé', 'Abalo cb', 'Abalo cb', '4', 'Abalo Brigarde', '1'),
+(4, '45688', '2025-01-04 23:00:00', '2025-01-09 18:18:11', '2025-01-09 18:18:11', '2025-01-11 09:24:23', 'Terminé', 'Abalo admin', 'Abalo cb', '4', 'Abalo Brigarde', '1'),
+(5, 'eazf52', '2025-01-10 01:36:08', '2025-01-10 01:40:14', '2025-01-10 01:40:14', '2025-01-11 09:27:45', 'Terminé', 'Abalo admin', 'Abalo cb', '4', 'Abalo Brigarde', '1'),
+(6, 'Vdefre12', '2025-01-18 12:27:38', '2025-01-18 12:29:48', '2025-01-19 08:27:32', '2025-01-19 08:27:40', 'Terminé', 'Awadi Abalo', 'BAKEM	Essimna\r\n', '4', 'AGBODJAN Kossi Bruce', '3');
 
 -- --------------------------------------------------------
 
@@ -299,7 +310,11 @@ INSERT INTO `gestion_chef_brigade_terminer` (`id`, `nom_dossier`, `date_ajout`, 
 (4, '52890', '2025-01-05 21:49:18', '2025-01-06 06:37:45', '2025-01-06 06:42:58', 'Termine', 'Abalo cb', 'Abalo cb', '4'),
 (5, '45688', '2025-01-04 23:00:00', '2025-01-04 23:00:00', '2025-01-09 18:18:11', 'Termine', 'Abalo admin', 'Abalo cb', '4'),
 (6, 'eazf52', '2025-01-10 01:36:08', '2025-01-10 01:36:08', '2025-01-10 01:40:14', 'Termine', 'Abalo admin', 'Abalo cb', '4'),
-(7, 'zdf525', '2025-01-10 01:35:40', '2025-01-10 01:35:40', '2025-01-10 01:42:11', 'Termine', 'Abalo admin', 'c Gomina clavaire', '5');
+(7, 'zdf525', '2025-01-10 01:35:40', '2025-01-10 01:35:40', '2025-01-10 01:42:11', 'Termine', 'Abalo admin', 'c Gomina clavaire', '5'),
+(8, 'hhjjj', '2025-01-11 09:22:00', '2025-01-11 09:22:00', '2025-01-11 09:23:31', 'Termine', 'Abalo admin', 'Abalo cb', '4'),
+(9, '43958A', '2025-01-17 19:01:55', '2025-01-17 19:01:55', '2025-01-17 20:53:53', 'Termine', 'Awadi Abalo', 'BAKEM	Essimna\r\n', '4'),
+(10, 'Vdefre12', '2025-01-18 12:27:38', '2025-01-18 12:27:38', '2025-01-18 12:29:48', 'Termine', 'Awadi Abalo', 'BAKEM	Essimna\r\n', '4'),
+(11, 'doc112', '2025-01-18 12:35:47', '2025-01-18 12:35:47', '2025-01-18 12:59:16', 'Termine', 'Awadi Abalo', 'BAKEM	Essimna\r\n', '4');
 
 -- --------------------------------------------------------
 
@@ -491,6 +506,13 @@ CREATE TABLE `gestion_securisation` (
   `n4_securisation` varchar(225) DEFAULT NULL,
   `id_securisation` varchar(225) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Déchargement des données de la table `gestion_securisation`
+--
+
+INSERT INTO `gestion_securisation` (`id`, `nom_dossier`, `date_ajout`, `date_assignation_termin_n2`, `date_temine_n3`, `date_assignation_n4`, `statut`, `n1_admin`, `n2_chef_brigade`, `id_chef_brigade`, `n3_brigade`, `id_brigade`, `n4_securisation`, `id_securisation`) VALUES
+(5, 'eazf52', '2025-01-10 01:36:08', '2025-01-10 01:40:14', '2025-01-11 09:27:45', '2025-01-11 09:27:45', 'En attente', 'Abalo admin', 'Abalo cb', '4', 'Abalo Brigarde', '1', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -857,7 +879,7 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT pour la table `brigade`
 --
 ALTER TABLE `brigade`
-  MODIFY `ident` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `ident` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT pour la table `chef_brigade`
@@ -875,13 +897,13 @@ ALTER TABLE `conversation_fonciere`
 -- AUTO_INCREMENT pour la table `dossier`
 --
 ALTER TABLE `dossier`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT pour la table `dossier_terminer`
 --
 ALTER TABLE `dossier_terminer`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT pour la table `evaluation_cadastrale`
@@ -893,25 +915,25 @@ ALTER TABLE `evaluation_cadastrale`
 -- AUTO_INCREMENT pour la table `gestion_brigade`
 --
 ALTER TABLE `gestion_brigade`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT pour la table `gestion_brigade_terminer`
 --
 ALTER TABLE `gestion_brigade_terminer`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT pour la table `gestion_chef_brigade`
 --
 ALTER TABLE `gestion_chef_brigade`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT pour la table `gestion_chef_brigade_terminer`
 --
 ALTER TABLE `gestion_chef_brigade_terminer`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT pour la table `gestion_conversation_fonciere`
@@ -947,7 +969,7 @@ ALTER TABLE `gestion_fonciere`
 -- AUTO_INCREMENT pour la table `gestion_securisation`
 --
 ALTER TABLE `gestion_securisation`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT pour la table `gestion_securisation_terminer`
