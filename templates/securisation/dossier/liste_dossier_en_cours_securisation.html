@@ -2,151 +2,135 @@
 
 {% block titre %}
 <title>Cadastre - Dossiers en cours</title>
-
 {% endblock %}
 
 {% block contenu %}
-
 <div class="page-content">
     <div class="container-fluid">
 
-        <!-- start page title -->
+        <!-- Start Page Title -->
         <div class="row">
             <div class="col-12">
-                <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-                    <h4 class="mb-sm-0">Liste des dossier en cours</h4>
-
+                <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent py-3 px-4 rounded">
+                    <h4 class="mb-sm-0 text-dark fw-bold">Liste des dossiers en cours</h4>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
-                            <li class="breadcrumb-item"><a href="javascript: void(0);">Liste</a></li>
-                            <li class="breadcrumb-item active">Liste des dossiers en cours: <b style="color:blue">securisation</b>
-                            </li>
+                            <li class="breadcrumb-item"><a href="javascript:void(0);" class="text-primary">Accueil</a></li>
+                            <li class="breadcrumb-item active text-muted">Dossiers en cours - <span class="text-primary fw-semibold">Sécurisation</span></li>
                         </ol>
                     </div>
-
                 </div>
             </div>
         </div>
-        <!-- end page title -->
+        <!-- End Page Title -->
 
-        <!-- end row -->
+        <!-- Start Card -->
+        <div class="row mt-4">
+            <div class="col-xl-12">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white d-flex align-items-center">
+                        <h4 class="card-title mb-0 flex-grow-1" style="color:bisque">Suivi des dossiers : <b>Sécurisation</b></h4>
+                    </div>
+                    <!-- End Card Header -->
 
-<div class="row">
-    <div class="col-xl-12">
-        <div class="card">
-            <div class="card-header d-flex align-items-center">
-                <h4 class="card-title mb-0 flex-grow-1">
-                    Liste des dossiers : <b class="text-primary">Securisation</b>
-                </h4>
-            </div>
-            <!-- end card header -->
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered align-middle mb-0">
+                                <thead class="table-light text-center">
+                                    <tr>
+                                        <th>Nom du dossier</th>
+                                        <th>Date d'ajout</th>
+                                        <th>Date fin assignation<br>(N3)</th>
+                                        <th>Responsable N1</th>
+                                        <th>Chef de Brigade (N2)</th>
+                                        <th>Brigarde (N3)</th>
+                                        <th>Date assignation (N4)</th>
+                                        <th>Votre Nom</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for dossier in dossiers %}
+                                    <tr class="text-center">
+                                        <td><b class="text-primary">{{ dossier["nom_dossier"] }}</b></td>
+                                        <td>{{ dossier["date_ajout"] }}</td>
+                                        <td>{{ dossier["date_temine_n3"] }}</td>
+                                        <td>{{ dossier["n1_admin"] }}</td>
+                                        <td>{{ dossier["n2_chef_brigade"] }}</td>
+                                        <td class="text-primary">{{ dossier["n3_brigade"] }}</td>
+                                        <td>{{ dossier["date_assignation_n4"] }}</td>
+                                        <td>{{ dossier["n4_securisation"] }}</td>
+                                        <td>
+                                            <span class="badge {{ 'bg-success' if dossier['statut'] == 'Terminé' else 'bg-warning' }}">{{ dossier["statut"] }}</span>
+                                        </td>
+                                        <td>
+                                            <!-- Bouton Terminer Dossier -->
+                                            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#assignmentModal{{ dossier['id'] }}">
+                                                Terminer
+                                            </button>
 
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped table-bordered align-middle mb-0">
-                        <thead class="table-light text-center">
-                            <tr>
-                                <th>Nom du dossier</th>
-                                <th>Date d'ajout</th>
-                                <th>Date assignation<br>termine N3</th>
-                                <th>Nom N1</th>
-                                <th>Nom N2</th>
-                                <th>Nom N3</th>
-                                <th>Date assignation N4</th>
-                                <th>Votre Nom</th>
-                                <th>Statut</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for dossier in dossiers %}
-                            <tr class="text-center">
-                                <td><b class="text-primary">{{ dossier["nom_dossier"] }}</b></td>
-                                <td>{{ dossier["date_ajout"] }}</td>
-                                <td>{{ dossier["date_temine_n3"] }}</td>
-                                <td>{{ dossier["n1_admin"] }}</td>
-                                <td>{{ dossier["n2_chef_brigade"] }}</td>
-                                <td class="text-primary">{{ dossier["n3_brigade"] }}</td>
-                                <td class="text-primary">{{ dossier["date_assignation_n4"] }}</td>
-                                <td class="text-primary">{{ dossier["n4_securisation"] }}</td>
-                                <td class="text-primary">{{ dossier["statut"] }}</td>
-                                <td>
-                                    <!-- Bouton Terminer Dossier -->
-                                    <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#assignmentModal{{ dossier['id'] }}">
-                                        Terminer<br>Dossier
-                                    </button>
-
-                                    <!-- Modal -->
-                                    <div class="modal fade" id="assignmentModal{{ dossier['id'] }}" tabindex="-1" aria-labelledby="assignmentModalLabel{{ dossier['id'] }}" aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title text-success" id="assignmentModalLabel{{dossier['id'] }}">Confirmer la prise en charge</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body text-center">
-                                                    <p class="text-secondary">
-                                                        Êtes-vous sûr de vouloir de vaider le dossier  (<b>{{ dossier['nom_dossier'] }}</b>) ?
-                                                    </p>
-                                                </div>
-                                                <div class="modal-footer justify-content-center">
-                                                    <form action="{{ url_for('terminer_dossier_securisation', id_dossier=dossier['id']) }}" method="POST">
-                                                        <button type="submit" class="btn btn-success">Oui, confirmer</button>
-                                                    </form>
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!-- Fin Modal -->
-
-                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#rejectModal{{ dossier['id'] }}">
-                                        Rejeter<br>Dossier
-                                    </button>
-                                
-                                    <!-- Modal Rejeter Dossier -->
-                                    <div class="modal fade" id="rejectModal{{ dossier['id'] }}" tabindex="-1" aria-labelledby="rejectModalLabel{{ dossier['id'] }}" aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title text-danger" id="rejectModalLabel{{dossier['id'] }}">Confirmer le rejet</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body text-center">
-                                                    <p class="text-secondary">
-                                                        Êtes-vous sûr de vouloir rejeter le dossier  (<b>{{ dossier['nom_dossier'] }}</b>) ?
-                                                    </p>
-                                                </div>
-                                                <div class="modal-footer justify-content-center">
-                                                    <form action="{{ url_for('rejeter_dossier_securisation', id_dossier=dossier['id']) }}" method="POST">
-                                                        <button type="submit" class="btn btn-danger">Oui, rejeter</button>
-                                                    </form>
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                            <!-- Modal Confirmer -->
+                                            <div class="modal fade" id="assignmentModal{{ dossier['id'] }}" tabindex="-1" aria-labelledby="assignmentModalLabel{{ dossier['id'] }}" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title text-success" id="assignmentModalLabel{{dossier['id'] }}">Confirmer la prise en charge</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body text-center">
+                                                            <p>Êtes-vous sûr de vouloir valider le dossier <b>{{ dossier['nom_dossier'] }}</b> ?</p>
+                                                        </div>
+                                                        <div class="modal-footer justify-content-center">
+                                                            <form action="{{ url_for('terminer_dossier_securisation', id_dossier=dossier['id']) }}" method="POST">
+                                                                <button type="submit" class="btn btn-success">Confirmer</button>
+                                                            </form>
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                </td>
 
+                                            <!-- Bouton Rejeter Dossier -->
+                                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#rejectModal{{ dossier['id'] }}">
+                                                Rejeter
+                                            </button>
 
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                                            <!-- Modal Rejeter -->
+                                            <div class="modal fade" id="rejectModal{{ dossier['id'] }}" tabindex="-1" aria-labelledby="rejectModalLabel{{ dossier['id'] }}" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title text-danger" id="rejectModalLabel{{dossier['id'] }}">Confirmer le rejet</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body text-center">
+                                                            <p>Êtes-vous sûr de vouloir rejeter le dossier <b>{{ dossier['nom_dossier'] }}</b> ?</p>
+                                                        </div>
+                                                        <div class="modal-footer justify-content-center">
+                                                            <form action="{{ url_for('rejeter_dossier_securisation', id_dossier=dossier['id']) }}" method="POST">
+                                                                <button type="submit" class="btn btn-danger">Confirmer</button>
+                                                            </form>
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- End Card Body -->
                 </div>
+                <!-- End Card -->
             </div>
-            <!-- end card-body -->
         </div>
-        <!-- end card -->
-    </div>
-    <!-- end col -->
-</div>
-<!-- end row -->
-
-
+        <!-- End Row -->
 
     </div>
-    <!-- container-fluid -->
+    <!-- End Container -->
 </div>
-
 {% endblock %}

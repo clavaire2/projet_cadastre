@@ -283,15 +283,14 @@ def admin_tableau_de_bord():
                           "gestion_signature_terminer", "gestion_conversation_fonciere_terminer"]
 
     liste_table_terminer_ter=["gestion_conversation_fonciere_terminer"]
-    attente_liste    = [get_pending_count(row, 'En attente') for row in liste_table_gestion]
-    en_cours_liste = [get_pending_count(row, "En cours")   for row in liste_table_gestion]
-    terminer_liste = [get_pending_count(row, "Terminé")   for row in liste_table_terminer]
+    en_cours_liste =   [get_pending_count(row, "En cours")   for row in liste_table_gestion]
+    terminer_liste =   [get_pending_count(row, "Terminé")   for row in liste_table_terminer]
     terminer_liste_ter = [get_pending_count(row, "Terminé")   for row in liste_table_terminer_ter]
 
-    print(terminer_liste_ter)
-    nombre_attente   =  sum(attente_liste)
     nombre_cours     =  sum(en_cours_liste)
     nombre_terminer  =  sum(terminer_liste_ter)
+
+    print(nombre_cours)
 
 
     liste_table    = ["chef_brigade", "brigade", "securisation",
@@ -299,7 +298,7 @@ def admin_tableau_de_bord():
 
     liste_personnel  = [get_count(row) for row in liste_table]
     nombre_personnel = sum(liste_personnel)
-    combined_data    = zip(liste_table, attente_liste, en_cours_liste, terminer_liste, liste_personnel)
+    combined_data    = zip(liste_table, en_cours_liste, terminer_liste, liste_personnel)
 
     directions = [
         {
@@ -322,7 +321,7 @@ def admin_tableau_de_bord():
     return render_template(
         'admin/index.html',
         firstName=firstName,
-        nombre_attente=nombre_attente,
+        # nombre_attente=nombre_attente,
         nombre_cours=nombre_cours,
         nombre_terminer=nombre_terminer,
         liste_table=liste_table,
@@ -1119,6 +1118,7 @@ def rejeter_dossier_securisation(id_dossier):
     finally:
         if cur:
             cur.close()
+
 
 
 @app.route('/dossiers_valides_securisation')

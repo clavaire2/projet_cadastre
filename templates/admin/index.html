@@ -1,234 +1,263 @@
 {% extends 'admin/base.html' %}
 
 {% block contenu %}
-
 <div class="page-content">
     <div class="container-fluid">
-
         <div class="row">
-
             <div class="col">
-
                 <div class="h-100">
 
-                    <div class="row mb-3 pb-1">
+                    <!-- Header Section -->
+                    <div class="row mb-4 pb-2">
                         <div class="col-12">
-                            <div class="d-flex align-items-lg-center flex-lg-row flex-column">
+                            <div class="d-flex align-items-center flex-lg-row flex-column">
                                 <div class="flex-grow-1">
-                                    <h4 class="fs-16 mb-1">Bonjour {{firstName}}!</h4>
-                                    <p class="text-muted mb-0">Voici un aperçu de l'état actuel de vos dossiers
-                                        cadastraux.</p>
+                                    <h4 class="fs-20 fw-bold mb-2">Bonjour {{ firstName }} !</h4>
+                                    <p class="text-muted mb-0">Voici un aperçu détaillé de vos données cadastrales avec des analyses graphiques.</p>
                                 </div>
-                            </div><!-- end card header -->
+                            </div>
                         </div>
-                        <!--end col-->
                     </div>
-                    <!--end row-->
 
+                    <!-- Statistics Cards Section -->
                     <div class="row">
-                        <div class="col-xl-3 col-md-6">
-                            <!-- card -->
-                            <div class="card card-animate">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-grow-1 overflow-hidden">
-                                            <p class="text-uppercase fw-medium text-muted text-truncate mb-0">
-                                                Total dossier en Attente</p>
-                                        </div>
+                        {% for card in [
+                            {'title': 'Total dossiers en cours', 'value': nombre_cours, 'icon': 'ri-folder-line'},
+                            {'title': 'Total dossiers terminés', 'value': nombre_terminer, 'icon': 'ri-check-line'},
+                            {'title': 'Total membres sur la plateforme', 'value': nombre_personnel, 'icon': 'ri-user-line'}
+                        ] %}
+                        <div class="col-xl-4 col-md-6">
+                            <div class="card card-animate shadow-sm">
+                                <div class="card-body d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <p class="text-uppercase fw-medium text-muted mb-2">{{ card.title }}</p>
+                                        <h4 class="fs-24 fw-semibold text-primary">
+                                            <span class="counter-value" data-target="{{ card.value }}">{{ card.value }}</span>
+                                        </h4>
                                     </div>
-                                    <div class="d-flex align-items-end justify-content-between mt-4">
-                                        <div>
-                                            <h4 class="fs-22 fw-semibold ff-secondary mb-4">
-                                                <span class="counter-value" data-target="{{nombre_attente}}">0</span>
-                                            </h4>
-                                        </div>
+                                    <div class="icon-container bg-primary text-white rounded-circle p-3">
+                                        <i class="{{ card.icon }} fs-24"></i>
                                     </div>
-                                </div><!-- end card body -->
-                            </div><!-- end card -->
-                        </div><!-- end col -->
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
 
-                        <div class="col-xl-3 col-md-6">
-                            <!-- card -->
-                            <div class="card card-animate">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-grow-1 overflow-hidden">
-                                            <p class="text-uppercase fw-medium text-muted text-truncate mb-0">
-                                                Total dossier En cours
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex align-items-end justify-content-between mt-4">
-                                        <div>
-                                            <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span
-                                                    class="counter-value" data-target="{{nombre_cours}}">0</span></h4>
-                                        </div>
-                                    </div>
-                                </div><!-- end card body -->
-                            </div><!-- end card -->
-                        </div><!-- end col -->
+            <!-- Graph Section -->
+<div class="row mb-12">
+    <div class="col-xl-4">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h4 class="card-title mb-0">Répartition des dossiers</h4>
+            </div>
+            <div class="card-body">
+                <canvas id="dossierChart" height="300" width="400"></canvas>
+            </div>
+        </div>
+    </div>
 
-                        <div class="col-xl-3 col-md-6">
-                            <!-- card -->
-                            <div class="card card-animate">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-grow-1 overflow-hidden">
-                                            <p class="text-uppercase fw-medium text-muted text-truncate mb-0">
-                                                Tatal dossier Terminé
-                                            </p>
-                                        </div>
-
-                                    </div>
-                                    <div class="d-flex align-items-end justify-content-between mt-4">
-                                        <div>
-                                            <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span
-                                                    class="counter-value" data-target="{{nombre_terminer}}"></span>
-                                            </h4>
-                                        </div>
-                                    </div>
-                                </div><!-- end card body -->
-                            </div><!-- end card -->
-                        </div><!-- end col -->
-
-                        <div class="col-xl-3 col-md-6">
-                            <!-- card -->
-                            <div class="card card-animate">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-grow-1 overflow-hidden">
-                                            <p
-                                                    class="text-uppercase fw-medium text-muted text-truncate mb-0">
-                                                Total de Membre sur la platforme</p>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex align-items-end justify-content-between mt-4">
-                                        <div>
-                                            <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span
-                                                    class="counter-value" data-target="{{nombre_personnel}}">0</span>
-                                            </h4>
-                                        </div>
-                                    </div>
-                                </div><!-- end card body -->
-                            </div><!-- end card -->
-                        </div><!-- end col -->
-                    </div> <!-- end row-->
+    <div class="col-xl-7">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h4 class="card-title mb-0">Performance des Directions</h4>
+            </div>
+            <div class="card-body">
+                <canvas id="directionPerformanceChart" height="420" width="800"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
 
 
+
+
+                    <!-- Dossier Table Section -->
                     <div class="row">
                         <div class="col-xl-6">
-                            <div class="card">
-                                <div class="card-header align-items-center d-flex">
-                                    <h4 class="card-title mb-0 flex-grow-1"><br> <br> Etats des dossiers <br> <br>  </h4>
-
-                                    <div class="flex-shrink-0">
-                                    </div>
-                                </div><!-- end card header -->
-
+                            <div class="card shadow-sm">
+                                <div class="card-header d-flex align-items-center">
+                                    <h4 class="card-title mb-0">État des dossiers</h4>
+                                </div>
                                 <div class="card-body">
-                                    <div class="table-responsive table-card">
-                                        <table class="table table-hover table-centered align-middle table-nowrap mb-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-centered table-striped mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Dossier</th>
+                                                    <th>En cours</th>
+                                                    <th>Terminé</th>
+                                                    <th>Membre</th>
+                                                </tr>
+                                            </thead>
                                             <tbody>
-                                            <br> <br>
-                                            {% for row, att , en, ter, personnel in combined_data %}
-                                            <tr>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="avatar-sm bg-light rounded p-1 me-2">
-                                                            <img src="{{ url_for('static', filename='images/companies/img-2.png') }}"
-                                                                 alt="Company Logo" class="avatar-sm p-2"/>
-                                                        </div>
-                                                        <div>
-                                                            <h5 class="fs-14 my-1">
-                                                                <a href="apps-ecommerce-product-details.html"
-                                                                   class="text-reset">{{ row }}</a>
-                                                            </h5>
-                                                            <span class="text-muted">État des dossiers</span>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <h5 class="fs-14 my-1 fw-normal">{{ att }}</h5>
-                                                    <span class="text-muted">En attente</span>
-                                                </td>
-                                                <td>
-                                                    <h5 class="fs-14 my-1 fw-normal">{{ en }}</h5>
-                                                    <span class="text-muted">En cours</span>
-                                                </td>
-                                                <td>
-                                                    <h5 class="fs-14 my-1 fw-normal">{{ ter }}</h5>
-                                                    <span class="text-muted">Terminé</span>
-                                                </td>
-                                                <td>
-                                                    <h5 class="fs-14 my-1 fw-normal">{{personnel}}</h5>
-                                                    <span class="text-muted">Nbr {{row}}</span>
-                                                </td>
-                                            </tr>
-                                            {% endfor %}
+                                                {% for row, en, ter, personnel in combined_data %}
+                                                <tr>
+                                                    <td>{{ row }}</td>
+                                                    <td>{{ en }}</td>
+                                                    <td>{{ ter }}</td>
+                                                    <td>{{ personnel }}</td>
+                                                </tr>
+                                                {% endfor %}
                                             </tbody>
                                         </table>
                                     </div>
                                 </div>
-
-
                             </div>
                         </div>
 
+                        <!-- Objectives Table Section -->
                         <div class="col-xl-6">
-                            <div class="card card-height-100">
+                            <div class="card shadow-sm">
                                 <div class="card-header d-flex align-items-center">
-                                    <h4 class="card-title mb-0 flex-grow-1">Objectifs des Directions</h4>
-                                </div><!-- end card header -->
+                                    <h4 class="card-title mb-0">Objectifs des Directions</h4>
+                                </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
-                                        <table class="table table-hover table-centered align-middle table-nowrap mb-0">
-                                            <thead>
-                                            <tr>
-                                                <th>Direction</th>
-                                                <th>Objectif</th>
-                                                <th>Progression</th>
-                                            </tr>
+                                        <table class="table table-hover table-centered table-striped mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Direction</th>
+                                                    <th>Objectif</th>
+                                                    <th>Progression</th>
+                                                </tr>
                                             </thead>
                                             <tbody>
-                                            {% for direction in directions %}
-                                            <tr class="{% if direction == meilleure_direction %}table-success{% endif %}">
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="flex-shrink-0 me-2">
-                                                            <img src="{{ url_for('static', filename='images/companies/img-3.png') }}"
-                                                                 alt="Direction Logo" class="avatar-sm p-2"/>
-                                                        </div>
-                                                        <div class="flex-grow-1">
-                                                            <h5 class="fs-14 my-1 fw-medium">{{ direction.name }}</h5>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>{{ direction.objectif }}</td>
-                                                <td>
-                                                    <h5 class="fs-14 mb-0">
+                                                {% for direction in directions %}
+                                                <tr class="{% if direction == meilleure_direction %}table-success{% endif %}">
+                                                    <td>{{ direction.name }}</td>
+                                                    <td>{{ direction.objectif }}</td>
+                                                    <td>
                                                         {{ direction.pourcentage | round(2) }}%
                                                         <i class="ri-bar-chart-fill text-success fs-16 align-middle ms-2"></i>
-                                                    </h5>
-                                                </td>
-                                            </tr>
-                                            {% endfor %}
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
                                             </tbody>
                                         </table>
                                     </div>
-                                </div><!-- end card-body -->
-                            </div><!-- end card -->
-                        </div><!-- end col -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                    </div> <!-- end row-->
-
-                </div> <!-- end .h-100-->
-
-            </div> <!-- end col -->
-
+                </div> <!-- end .h-100 -->
+            </div>
         </div>
-
     </div>
-    <!-- container-fluid -->
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Graphique des dossiers (en cours / terminé) - avec effet de survol
+    const dossierChart = new Chart(document.getElementById('dossierChart'), {
+        type: 'pie',
+        data: {
+            labels: ['En cours', 'Terminé'],
+            datasets: [{
+                data: [{{ nombre_cours }}, {{ nombre_terminer }}],
+                backgroundColor: ['#4caf50', '#2196f3'],  // Couleurs modernes
+                hoverBackgroundColor: ['#66bb6a', '#42a5f5'],  // Effet de survol
+                borderColor: '#fff',  // Bordure blanche pour les segments
+                borderWidth: 1,  // Taille de la bordure
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        boxWidth:50,
+                        font: {
+                            weight: 'bold',
+                            size: 14
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: '#333',  // Couleur de fond du tooltip
+                    titleFont: {
+                        size: 16,
+                        weight: 'bold'
+                    },
+                    bodyFont: {
+                        size: 14
+                    },
+                    cornerRadius: 4  // Coins arrondis pour les tooltips
+                }
+            },
+            animation: {
+                animateScale: true,  // Animation de mise à l'échelle
+                animateRotate: true  // Animation de rotation
+            }
+        }
+    });
+
+    // Graphique des performances des directions - design amélioré
+    const directionPerformanceChart = new Chart(document.getElementById('directionPerformanceChart'), {
+        type: 'bar',
+        data: {
+            labels: [{% for direction in directions %}'{{ direction.name }}',{% endfor %}],
+            datasets: [{
+                label: 'Progression',
+                data: [{% for direction in directions %}{{ direction.pourcentage | round(2) }},{% endfor %}],
+                backgroundColor: '#ffc107',  // Couleur moderne pour la barre
+                borderColor: '#ffca28',  // Couleur de bordure pour la barre
+                borderWidth: 2,  // Bordure de la barre
+                borderRadius: 5,  // Coins arrondis des barres
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: '#e0e0e0',  // Couleur de la grille
+                        borderColor: '#ccc',  // Bordure de la grille
+                    },
+                    ticks: {
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false  // Masquer la grille sur l'axe X
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: 10,
+                            weight: 'bold'
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: '#333',
+                    titleFont: {
+                        size: 10,
+                        weight: 'bold'
+                    },
+                    bodyFont: {
+                        size: 14
+                    },
+                    cornerRadius: 4
+                }
+            },
+            animation: {
+                duration: 1000,  // Durée de l'animation
+                easing: 'easeOutQuad'  // Effet d'animation
+            }
+        }
+    });
+</script>
 
 {% endblock %}
