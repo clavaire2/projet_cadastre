@@ -1,7 +1,8 @@
+
+
 <div class="app-menu navbar-menu">
     <!-- LOGO -->
     <div class="navbar-brand-box">
-        <!-- Dark Logo-->
         <a href="{{url_for('admin_tableau_de_bord')}}" class="logo logo-dark">
             <span class="logo-sm">
                 <img src="{{ url_for('static', filename='images/logo-sm.png') }}" alt="" height="22">
@@ -10,7 +11,6 @@
                 <img src="{{ url_for('static', filename='images/logo-dark.png') }}" alt="" height="17">
             </span>
         </a>
-        <!-- Light Logo-->
         <a href="{{url_for('admin_tableau_de_bord')}}" class="logo logo-light">
             <span class="logo-sm">
                 <img src="{{ url_for('static', filename='images/logo-sm.png') }}" alt="" height="22">
@@ -26,19 +26,20 @@
 
     <div id="scrollbar" class="sidebar-content">
         <div class="container-fluid">
-            <!-- Sidebar Header -->
-            <div class="sidebar-header text-center py-3">
-                <h4 class="fw-bold text-dark">Gestion des Dossiers</h4>
+        
+            <div id="two-column-menu">
             </div>
-
+            
+            <div class="sidebar-header text-center py-4">
+                <h5 class="fw-bold text-white">Gestion des Dossiers <br> admin</h5>
+            </div>
             <!-- Sidebar Menu -->
             <ul class="navbar-nav" id="navbar-nav">
-                <!-- Section Title -->
-                <li class="menu-title text-uppercase mt-3 mb-2"><span data-key="t-menu">Menu</span></li>
+            
 
                 <!-- Dashboard Link -->
                 <li class="nav-item">
-                    <a class="nav-link menu-link d-flex align-items-center" href="{{ url_for('admin_tableau_de_bord') }}" role="button">
+                    <a class="nav-link menu-link d-flex align-items-center border-bottom" href="{{ url_for('admin_tableau_de_bord') }}" role="button">
                         <i class="ri-dashboard-2-line fs-5 me-2"></i>
                         <span data-key="t-apps" class="text-menu">Tableau de bord</span>
                     </a>
@@ -46,7 +47,7 @@
 
                 <!-- Ajouter un Dossier -->
                 <li class="nav-item">
-                    <a class="nav-link menu-link d-flex align-items-center" href="{{ url_for('ajouter_dossier') }}" role="button">
+                    <a class="nav-link menu-link d-flex align-items-center border-bottom" href="{{ url_for('ajouter_dossier') }}" role="button">
                         <i class="ri-folder-add-line fs-5 me-2"></i>
                         <span data-key="t-apps" class="text-menu">Ajouter un dossier</span>
                     </a>
@@ -54,7 +55,7 @@
 
                 <!-- Liste des Dossiers -->
                 <li class="nav-item">
-                    <a class="nav-link menu-link d-flex align-items-center" href="{{ url_for('liste_dossier') }}" role="button">
+                    <a class="nav-link menu-link d-flex align-items-center border-bottom" href="{{ url_for('liste_dossier') }}" role="button">
                         <i class="ri-folder-line fs-5 me-2"></i>
                         <span data-key="t-apps" class="text-menu">Liste des dossiers</span>
                     </a>
@@ -62,51 +63,64 @@
 
                 <!-- Ajouter un Admin -->
                 <li class="nav-item">
-                    <a class="nav-link menu-link d-flex align-items-center" href="{{ url_for('inscription_admin') }}" role="button">
+                    
+                       <br>
+                    
+                </li>
+                <!-- Ajouter un Admin -->
+                <li class="nav-item">
+                    <a class="nav-link menu-link d-flex align-items-center border-bottom" href="{{ url_for('inscription_admin') }}" role="button">
                         <i class="ri-user-add-line fs-5 me-2"></i>
-                        <span data-key="t-apps" class="text-menu">Ajouter un autre Admin</span>
+                        <span data-key="t-apps" class="text-menu">Partie des Admin</span>
                     </a>
                 </li>
 
                 <!-- Ajouter Chef Brigade -->
                 <li class="nav-item">
-                    <a class="nav-link menu-link d-flex align-items-center" href="{{ url_for('inscription_chefbrigade') }}" role="button">
+                    <a class="nav-link menu-link d-flex align-items-center border-bottom" href="{{ url_for('inscription_chefbrigade') }}" role="button">
                         <i class="ri-user-add-line fs-5 me-2"></i>
-                        <span data-key="t-apps" class="text-menu">Ajouter Chef de Brigade</span>
+                        <span data-key="t-apps" class="text-menu">Partie des Chefs Brigade</span>
                     </a>
                 </li>
 
                 <!-- Ajouter Sécurisation -->
                 <li class="nav-item">
-                    <a class="nav-link menu-link d-flex align-items-center" href="{{ url_for('liste_dossier') }}" role="button">
+                    <a class="nav-link menu-link d-flex align-items-center border-bottom" href="{{ url_for('inscription_securisation') }}" role="button">
                         <i class="ri-lock-line fs-5 me-2"></i>
-                        <span data-key="t-apps" class="text-menu">Ajouter Sécurisation</span>
+                        <span data-key="t-apps" class="text-menu">Partie  Sécurisation</span>
                     </a>
                 </li>
 
                 <!-- Ajouter Signature -->
                 <li class="nav-item">
-                    <a class="nav-link menu-link d-flex align-items-center" href="{{ url_for('liste_dossier') }}" role="button">
+                    <a class="nav-link menu-link d-flex align-items-center border-bottom" href="{{ url_for('inscription_evaluation_cadastrale') }}" role="button">
                         <i class="ri-pencil-line fs-5 me-2"></i>
-                        <span data-key="t-apps" class="text-menu">Ajouter Signature</span>
+                        <span data-key="t-apps" class="text-menu">Partie evaluations </span>
+                    </a>
+                </li>
+
+                 <!-- Conservation Foncière -->
+                 <li class="nav-item">
+                    <a class="nav-link menu-link d-flex align-items-center border-bottom" href="{{ url_for('inscription_signature') }}" role="button">
+                        <i class="ri-building-line fs-5 me-2"></i>
+                        <span data-key="t-apps" class="text-menu">Gestion des  Signatures</span>
                     </a>
                 </li>
 
                 <!-- Conservation Foncière -->
                 <li class="nav-item">
-                    <a class="nav-link menu-link d-flex align-items-center" href="{{ url_for('liste_dossier') }}" role="button">
+                    <a class="nav-link menu-link d-flex align-items-center border-bottom" href="{{ url_for('inscription_conversation_fonciere') }}" role="button">
                         <i class="ri-building-line fs-5 me-2"></i>
-                        <span data-key="t-apps" class="text-menu">Conservation Foncière</span>
+                        <span data-key="t-apps" class="text-menu">Gestion des Conservation Foncière</span>
                     </a>
                 </li>
             </ul>
         </div>
     </div>
 
-    <!-- Additional Styling -->
     <style>
         .sidebar {
-            background-color: #333; /* Fond foncé pour un meilleur contraste */
+            background-color: #333;
             padding: 20px;
             border-right: 1px solid #444;
             height: 100vh;
@@ -114,39 +128,40 @@
         .menu-title {
             font-size: 1rem;
             font-weight: 700;
-            color: #fff; /* Titre blanc pour une meilleure lisibilité */
+            color: #fff;
             text-transform: uppercase;
             margin-bottom: 10px;
         }
         .nav-item .nav-link {
-            color: #fff; /* Texte blanc par défaut */
+            color: #fff;
             padding: 12px 20px;
             border-radius: 5px;
-            font-size: 1rem; /* Taille de police lisible */
+            font-size: 1rem;
             font-weight: 500;
             line-height: 1.5;
             transition: background-color 0.3s ease, color 0.3s ease;
-            text-decoration: none; /* Suppression de soulignement */
+            text-decoration: none;
         }
         .nav-item .nav-link:hover {
-            background-color: #575757; /* Fond gris foncé au survol */
-            color: #fff; /* Texte blanc au survol */
+            background-color: #575757;
+            color: #fff;
         }
         .nav-item .nav-link.active {
-            background-color: #1e1e1e; /* Fond plus foncé quand actif */
-            color: #000; /* Texte noir lorsqu'il est actif */
+            background-color: #1e1e1e;
+            color: #000;
         }
         .nav-link i {
             font-size: 1.3rem;
-            color: #fff; /* Icônes blanches */
+            color: #fff;
             margin-right: 12px;
         }
         .text-menu {
-            font-size: 1rem; /* Taille de texte uniforme */
+            font-size: 1rem;
             color: #fff;
             font-weight: 500;
         }
+        .border-bottom {
+            border-bottom: 1px solid #444; /* Ajoute une bordure sous chaque élément du menu */
+        }
     </style>
-
-    <div class="sidebar-background"></div>
 </div>

@@ -1,246 +1,228 @@
-<!doctype html>
-<html lang="en" data-layout="vertical" data-topbar="light" data-sidebar="dark" data-sidebar-size="lg" data-sidebar-image="none" data-preloader="disable" data-theme="default" data-theme-colors="default">
+{% extends 'admin/base.html' %}
 
+{% block titre %}
+<title>Cadastre - Gestion des securisation</title>
+{% endblock %}
 
-<!-- Mirrored from themesbrand.com/velzon/html/master/auth-signup-cover.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 03 Dec 2024 23:56:54 GMT -->
-<head>
+{% block contenu %}
+<div class="page-content">
+    <div class="container-fluid">
 
-    <meta charset="utf-8" />
-    <title>Sign Up | Velzon - Admin & Dashboard Template</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
-    <meta content="Themesbrand" name="author" />
-    <!-- App favicon -->
-    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+        <!-- Titre de la page -->
+        <div class="row">
+            <div class="col-12">
+                <div class="page-title-box d-flex align-items-center justify-content-between">
+                    <h4 class="mb-0 text-primary" style="color: azure;">Gestion des securisation</h4>
+                    <div class="page-title-right">
+                        <ol class="breadcrumb m-0">
+                            <li class="breadcrumb-item"><a href="javascript: void(0);">Accueil</a></li>
+                            <li class="breadcrumb-item active">securisation</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Fin du titre de la page -->
+        <!-- end card header -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div>
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}" role="alert">
+                <center>{{ message }}</center>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
 
-    <!-- jsvectormap css -->
-    <link href="{{ url_for('static', filename='libs/jsvectormap/jsvectormap.min.css') }}" rel="stylesheet"
-        type="text/css">
-
-    <!-- Swiper slider css -->
-    <link href="{{ url_for('static', filename='libs/swiper/swiper-bundle.min.css') }}" rel="stylesheet" type="text/css">
-
-    <!-- Layout config Js -->
-    <script src="{{ url_for('static', filename='js/layout.js') }}"></script>
-
-    <!-- Bootstrap Css -->
-    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet" type="text/css">
-
-    <!-- Icons Css -->
-    <link href="{{ url_for('static', filename='css/icons.min.css') }}" rel="stylesheet" type="text/css">
-
-    <!-- App Css -->
-    <link href="{{ url_for('static', filename='css/app.min.css') }}" rel="stylesheet" type="text/css">
-
-    <!-- Custom Css -->
-    <link href="{{ url_for('static', filename='css/custom.min.css') }}" rel="stylesheet" type="text/css">
-
-</head>
-
-<body>
-
-    <!-- auth-page wrapper -->
-    <div class="auth-page-wrapper auth-bg-cover py-5 d-flex justify-content-center align-items-center min-vh-100">
-        <div class="bg-overlay"></div>
-        <!-- auth-page content -->
-        <div class="auth-page-content overflow-hidden pt-lg-5">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="card overflow-hidden m-0 card-bg-fill galaxy-border-none">
-                            <div class="row justify-content-center g-0">
-                                <div class="col-lg-6">
-                                    <div class="p-lg-5 p-4 auth-one-bg h-100">
-                                        <div class="bg-overlay"></div>
-                                        <div class="position-relative h-100 d-flex flex-column">
-                                            <div class="mb-4">
-                                                <a href="index.html" class="d-block">
-                                                    <img src="{{ url_for('static', filename='images/logo-light.png') }}" alt="" height="18">
-                                                </a>
-                                            </div>
-                                            <div class="mt-auto">
-                                                <div class="mb-3">
-                                                    <i class="ri-double-quotes-l display-4 text-success"></i>
-                                                </div>
-
-                                                <div id="qoutescarouselIndicators" class="carousel slide" data-bs-ride="carousel">
-                                                    <div class="carousel-indicators">
-                                                        <button type="button" data-bs-target="#qoutescarouselIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-                                                        <button type="button" data-bs-target="#qoutescarouselIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
-                                                        <button type="button" data-bs-target="#qoutescarouselIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
-                                                    </div>
-                                                    <div class="carousel-inner text-center text-white-50 pb-5">
-                                                        <div class="carousel-item active">
-                                                            <p class="fs-15 fst-italic">" Great! Clean code, clean design, easy for customization. Thanks very much! "</p>
-                                                        </div>
-                                                        <div class="carousel-item">
-                                                            <p class="fs-15 fst-italic">" The theme is really great with an amazing customer support."</p>
-                                                        </div>
-                                                        <div class="carousel-item">
-                                                            <p class="fs-15 fst-italic">" Great! Clean code, clean design, easy for customization. Thanks very much! "</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <!-- end carousel -->
-
-                                            </div>
+        <!-- Liste des administrateurs -->
+        <div class="card shadow-sm mb-5">
+            <div class="card-header bg-primary text-white d-flex align-items-center justify-content-between">
+                <h4 class="mb-0" style="color: rgb(255, 255, 0);">Liste des securisation</h5>
+                    <a href="#add-admin" class="btn btn-light btn-sm">+ Ajouter</a>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover table-bordered align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Nom Complet</th>
+                            <th>Email</th>
+                            <th>Téléphone</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for admin in data %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ admin[1] }}</td>
+                            <td>{{ admin[2] }}</td>
+                            <td>{{ admin[3] }}</td>
+                            <!-- Bouton pour ouvrir le modal -->
+                            <td class="text-center">
+                                <a href="#deleteModal" data-bs-toggle="modal"
+                                    class="btn btn-sm btn-outline-danger d-flex align-items-center justify-content-center">
+                                    <i class="ri-delete-bin-5-line me-2"></i> Supprimer
+                                </a>
+                            </td>
+                            <!-- Popup de confirmation -->
+                            <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel"
+                                aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteModalLabel">Confirmer la suppression</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
                                         </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-lg-6">
-                                    <div class="p-lg-5 p-4">
-                                        <div>
-                                            <h5 class="text-primary">Cree un compte securisation</h5>
-                                            <p class="text-muted">Entrez bien les informations</p>
+                                        <div class="modal-body">
+                                            <p>Êtes-vous sûr de vouloir supprimer ce securisation ? Cette action est
+                                                irréversible.</p>
                                         </div>
-
-                                        <div class="mt-4">
-                                            <form class="needs-validation" method="POST"  action="{{ url_for('inscription_securisation') }}">
-
-                                                <div class="mb-3">
-                                                    <label for="username" class="form-label">Nom <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" name="name" id="username" placeholder="Enter votre nom" required>
-                                                    <div class="invalid-feedback">
-                                                        Veuillez enter votre nom
-                                                    </div>
-                                                </div>
-
-                                                <div class="mb-3">
-                                                    <label for="username" class="form-label">Prenom <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" name="prenom" id="username" placeholder="Entez votre prenom" required>
-                                                    <div class="invalid-feedback">
-                                                        Veuillez entrer votre prenom
-                                                    </div>
-                                                </div>
-
-                                                
-
-                                                <div class="mb-3">
-                                                    <label for="useremail" class="form-label">Email <span class="text-danger">*</span></label>
-                                                    <input type="email" class="form-control" name="email" id="useremail" placeholder="Entez votre Email" required>
-                                                    <div class="invalid-feedback">
-                                                        Veuillez entrer votre email
-                                                    </div>
-                                                </div>
-
-                                                <div class="mb-3">
-                                                    <label for="useremail" class="form-label">Numero de telephone <span class="text-danger">*</span></label>
-                                                    <input type="tel" class="form-control" name="numero_telephone" placeholder="Entrez votre numero de telephone" required>
-                                                    <div class="invalid-feedback">
-                                                        Veuillez entrer votre email
-                                                    </div>
-                                                </div>
-                                                
-
-                                                <div class="mb-3">
-                                                    <label class="form-label" for="password-input">Mot de passe</label>
-                                                    <div class="position-relative auth-pass-inputgroup">
-                                                        <input type="password" name="password" class="form-control pe-5 password-input"  placeholder="Entez le mot de passe" id="password-input" aria-describedby="passwordInput" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" required>
-                                                        <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon material-shadow-none" type="button" id="password-addon"><i class="ri-eye-fill align-middle"></i></button>
-                                                        <div class="invalid-feedback">
-                                                            Veuillez entrer le mot de passe
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-
-                                                <div class="mb-3">
-                                                    <label class="form-label" for="password-input">Confirmer le mot de passe</label>
-                                                    <div class="position-relative auth-pass-inputgroup">
-                                                        <input type="password" name="confirm_password" class="form-control pe-5 password-input"  placeholder="Confirmer le mot de passe" id="password-input" aria-describedby="passwordInput" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" required>
-                                                        <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon material-shadow-none" type="button" id="password-addon"><i class="ri-eye-fill align-middle"></i></button>
-                                                        <div class="invalid-feedback">
-                                                            Veuillez confirmer le mot de passe
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <!-- <div id="password-contain" class="p-3 bg-light mb-2 rounded">
-                                                    <h5 class="fs-13">Password must contain:</h5>
-                                                    <p id="pass-length" class="invalid fs-12 mb-2">Minimum <b>8 characters</b></p>
-                                                    <p id="pass-lower" class="invalid fs-12 mb-2">At <b>lowercase</b> letter (a-z)</p>
-                                                    <p id="pass-upper" class="invalid fs-12 mb-2">At least <b>uppercase</b> letter (A-Z)</p>
-                                                    <p id="pass-number" class="invalid fs-12 mb-0">A least <b>number</b> (0-9)</p>
-                                                </div> -->
-
-                                                <div class="mt-4">
-                                                    <button class="btn btn-success w-100" type="submit">Sign Up</button>
-                           
-                                            </form>
-                                        </div>
-
-                                        <div class="mt-5 text-center">
-                                            <p class="mb-0">Already have an account ? <a href="auth-signin-cover.html" class="fw-semibold text-primary text-decoration-underline"> Signin</a> </p>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Annuler</button>
+                                            <a href="{{ url_for('supprimer_securisation', id=admin[0]) }}"
+                                                class="btn btn-danger">Supprimer</a>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <!-- end card -->
-                    </div>
-                    <!-- end col -->
 
-                </div>
-                <!-- end row -->
+                            <!-- Styles CSS pour un design classe -->
+                            <style>
+                                /* Styles généraux pour le modal */
+                                .modal-content {
+                                    border-radius: 15px;
+                                    border: none;
+                                    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                                    background: #f8f9fa;
+                                }
+
+                                /* Header du modal avec une couleur moderne */
+                                .modal-header {
+                                    background-color: #007bff;
+                                    color: white;
+                                    font-weight: 600;
+                                    border-top-left-radius: 15px;
+                                    border-top-right-radius: 15px;
+                                }
+
+                                /* Corps du modal avec un espacement agréable */
+                                .modal-body {
+                                    font-size: 16px;
+                                    color: #555;
+                                    padding: 20px;
+                                    line-height: 1.5;
+                                }
+
+                                /* Footer du modal pour les boutons */
+                                .modal-footer {
+                                    justify-content: space-between;
+                                    padding: 20px;
+                                }
+
+                                /* Bouton d'annulation avec une couleur subtile */
+                                .modal-footer .btn-secondary {
+                                    background-color: #6c757d;
+                                    border-color: #6c757d;
+                                    border-radius: 10px;
+                                    transition: background-color 0.3s ease;
+                                }
+
+                                .modal-footer .btn-secondary:hover {
+                                    background-color: #5a6268;
+                                }
+
+                                /* Bouton de suppression avec effet de survol */
+                                .modal-footer .btn-danger {
+                                    background-color: #dc3545;
+                                    border-color: #dc3545;
+                                    border-radius: 10px;
+                                    transition: background-color 0.3s ease, transform 0.2s ease;
+                                }
+
+                                .modal-footer .btn-danger:hover {
+                                    background-color: #c82333;
+                                    transform: translateY(-2px);
+                                }
+
+                                /* Animation douce pour l'affichage du modal */
+                                .fade .modal-dialog {
+                                    transform: translate(0, -50%);
+                                    transition: transform 0.3s ease-out;
+                                }
+                            </style>
+
+
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">Aucun securisation trouvé.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-            <!-- end container -->
         </div>
-        <!-- end auth page content -->
+        <!-- Fin de la liste des administrateurs -->
 
-        <!-- footer -->
-        <footer class="footer galaxy-border-none">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="text-center">
-                            <p class="mb-0">&copy;
-                                <script>document.write(new Date().getFullYear())</script> Velzon. Crafted with <i class="mdi mdi-heart text-danger"></i> by Themesbrand
-                            </p>
+        <!-- Formulaire de création d'un administrateur -->
+        <div id="add-admin" class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0 text-center" style="color: #62ff01;">Créer un Compte securisation</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted text-center mb-4" style="color: red;"> Remplissez le formulaire pour ajouter un
+                    nouvel securisation.</p>
+                <form method="POST" action="{{ url_for('inscription_securisation') }}" novalidate>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="name" class="form-label">Nom <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="name" name="name" placeholder="Entrez le nom"
+                                required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="prenom" class="form-label">Prénom <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="prenom" name="prenom"
+                                placeholder="Entrez le prénom" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="email" name="email"
+                                placeholder="Entrez l'email" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="numero_telephone" class="form-label">Téléphone <span
+                                    class="text-danger">*</span></label>
+                            <input type="tel" class="form-control" id="numero_telephone" name="numero_telephone"
+                                placeholder="Entrez le numéro de téléphone" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="password" class="form-label">Mot de passe <span
+                                    class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="password" name="password"
+                                placeholder="Entrez un mot de passe" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="confirm_password" class="form-label">Confirmez le mot de passe <span
+                                    class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password"
+                                placeholder="Confirmez le mot de passe" required>
                         </div>
                     </div>
-                </div>
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary">Ajouter un securisation</button>
+                    </div>
+                </form>
             </div>
-        </footer>
-        <!-- end Footer -->
+            <div class="card-footer text-center text-muted">
+                <small>© 2025 Cadastre. Tous droits réservés.</small>
+            </div>
+        </div>
+        <!-- Fin du formulaire -->
     </div>
-    <!-- end auth-page-wrapper -->
-
-    <!-- JAVASCRIPT -->
-    <script src="{{ url_for('static', filename='libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-
-    <!-- Simplebar -->
-    <script src="{{ url_for('static', filename='libs/simplebar/simplebar.min.js') }}"></script>
-
-    <!-- Node Waves -->
-    <script src="{{ url_for('static', filename='libs/node-waves/waves.min.js') }}"></script>
-
-    <!-- Feather Icons -->
-    <script src="{{ url_for('static', filename='libs/feather-icons/feather.min.js') }}"></script>
-
-    <!-- Lord Icon -->
-    <script src="{{ url_for('static', filename='js/pages/plugins/lord-icon-2.1.0.js') }}"></script>
-
-    <!-- Plugins -->
-    <script src="{{ url_for('static', filename='js/plugins.js') }}"></script>
-
-    <!-- ApexCharts -->
-    <script src="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.js') }}"></script>
-
-    <!-- Vector Map -->
-    <script src="{{ url_for('static', filename='libs/jsvectormap/jsvectormap.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='libs/jsvectormap/maps/world-merc.js') }}"></script>
-
-    <!-- Swiper Slider -->
-    <script src="{{ url_for('static', filename='libs/swiper/swiper-bundle.min.js') }}"></script>
-
-    <!-- Dashboard Init -->
-    <script src="{{ url_for('static', filename='js/pages/dashboard-ecommerce.init.js') }}"></script>
-
-    <!-- App JS -->
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-</body>
-
-
-<!-- Mirrored from themesbrand.com/velzon/html/master/auth-signup-cover.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 03 Dec 2024 23:56:54 GMT -->
-</html>
+</div>
+{% endblock %}

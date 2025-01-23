@@ -127,6 +127,10 @@ def inscription_admin():
         return redirect(url_for('login'))
     else:
         loggedIn, firstName = getLogin('email_admin', 'admin')
+        query = "SELECT * FROM admin"
+        cur= mysql.connection.cursor()
+        cur.execute(query)
+        data = cur.fetchall()
         if request.method == 'POST':
             name = request.form['name']
             prenom = request.form['prenom']
@@ -148,7 +152,7 @@ def inscription_admin():
 
             if existing_user:
                 flash("Cet email est déjà utilisé. Veuillez en utiliser un autre.", "danger")
-                return redirect('inscription_admin')
+                return redirect(url_for('inscription_admin'))
 
             try:
                 cursor = mysql.connection.cursor()
@@ -156,12 +160,26 @@ def inscription_admin():
                         VALUES (%s, %s, %s, %s)"""
                 cursor.execute(query, (name, prenom, email, numero_telephone, hashed_password))
                 mysql.connection.commit()
-                return redirect('login')
+                return redirect(url_for('inscription_admin'))
             except Exception as e:
                 return f"Erreur lors de l'inscription : {e}"
-        return render_template('admin/connexion/cree_compte.html', firstName=firstName)
+        return render_template('admin/connexion/cree_compte.html', firstName=firstName, data=data)
 
 
+
+
+@app.route('/supprimer_administrateur/<int:id>')
+def supprimer_admin(id):
+    if 'email_admin' in session:
+        loggedIn, firstName = getLogin('email_admin', 'admin')
+        cur = mysql.connection.cursor()
+        cur.execute("DELETE from admin WHERE ident=%s", (id,))
+        mysql.connection.commit()
+        cur.close()
+        flash('Administrateur supprimé avec succès.', 'success')
+        return redirect(url_for('inscription_admin'))
+    else:
+        return redirect(url_for('login'))
 
 
 
@@ -497,6 +515,10 @@ def inscription_chefbrigade():
         return redirect(url_for('login'))
     else:
         loggedIn, firstName = getLogin('email_admin', 'admin')
+        query = "SELECT * FROM chef_brigade"
+        cur= mysql.connection.cursor()
+        cur.execute(query)
+        data = cur.fetchall()
         if request.method == 'POST':
             name = request.form['name']
             prenom = request.form['prenom']
@@ -518,7 +540,7 @@ def inscription_chefbrigade():
 
             if existing_user:
                 flash("Cet email est déjà utilisé. Veuillez en utiliser un autre.", "danger")
-                return redirect('/inscription_admin')
+                return redirect(url_for('inscription_chefbrigade'))
 
             try:
                 cursor = mysql.connection.cursor()
@@ -526,10 +548,28 @@ def inscription_chefbrigade():
                         VALUES (%s, %s, %s, %s)"""
                 cursor.execute(query, (nom_complet, email, numero_telephone, hashed_password))
                 mysql.connection.commit()
-                return redirect('/')
+                return redirect(url_for('inscription_chefbrigade'))
             except Exception as e:
                 return f"Erreur lors de l'inscription : {e}"
-        return render_template('chef_brigade/connexion/cree_compte.html',firstName=firstName)
+        return render_template('chef_brigade/connexion/cree_compte.html',firstName=firstName, data=data)
+
+
+
+@app.route('/supprimer_chefbrigade/<int:id>')
+def supprimer_chefbrigade(id):
+    if 'email_admin' in session:
+        loggedIn, firstName = getLogin('email_admin', 'admin')
+        cur = mysql.connection.cursor()
+        cur.execute("DELETE from chef_brigade WHERE ident=%s", (id,))
+        mysql.connection.commit()
+        cur.close()
+        flash('Administrateur supprimé avec succès.', 'success')
+        return redirect(url_for('inscription_chefbrigade'), )
+    else:
+        return redirect(url_for('login'))
+
+
+
 
 
 @app.route("/chef_brigade_tableau_de_bord")
@@ -682,6 +722,10 @@ def inscription_brigade():
         return redirect(url_for('login'))
     else:
       loggedIn, firstName = getLogin('email_chefbrigade', 'chef_brigade')
+      query = "SELECT * FROM brigade"
+      cur= mysql.connection.cursor()
+      cur.execute(query)
+      data = cur.fetchall()
       if request.method == 'POST':
         name = request.form['name']
         prenom = request.form['prenom']
@@ -714,9 +758,20 @@ def inscription_brigade():
             return redirect('/inscription_brigade')
         except Exception as e:
             return f"Erreur lors de l'inscription : {e}"
-    return render_template('brigade/connexion/cree_compte.html', firstName=firstName)
+    return render_template('brigade/connexion/cree_compte.html', firstName=firstName, data=data)
 
-
+@app.route('/supprimer_brigade/<int:id>')
+def supprimer_brigade(id):
+    if 'email_chefbrigade' in session:
+        loggedIn, firstName = getLogin('email_chefbrigade', 'chef_brigade')
+        cur = mysql.connection.cursor()
+        cur.execute("DELETE from brigade WHERE ident=%s", (id,))
+        mysql.connection.commit()
+        cur.close()
+        flash('Administrateur supprimé avec succès.', 'success')
+        return redirect(url_for('inscription_brigade'), )
+    else:
+        return redirect(url_for('login'))
 
 
 @app.route("/brigade_tableau_de_bord")
@@ -876,39 +931,64 @@ def dossiers_valides_brigade():
 ###################securisation
 @app.route("/inscription_securisation",methods=['POST', 'GET'])
 def inscription_securisation():
-    if request.method == 'POST':
-        name = request.form['name']
-        prenom = request.form['prenom']
-        nom_complet=name+" "+prenom
-        email = request.form['email']
-        numero_telephone = request.form['numero_telephone']
-        password = request.form['password']
-        confirm_password = request.form['confirm_password']
+    if 'email_admin' not in session:
+        return redirect(url_for('login'))
+    else:
+        loggedIn, firstName = getLogin('email_admin', 'admin')
+        query = "SELECT * FROM securisation"
+        cur= mysql.connection.cursor()
+        cur.execute(query)
+        data = cur.fetchall()
+        if request.method == 'POST':
+            name = request.form['name']
+            prenom = request.form['prenom']
+            nom_complet=name+" "+prenom
+            email = request.form['email']
+            numero_telephone = request.form['numero_telephone']
+            password = request.form['password']
+            confirm_password = request.form['confirm_password']
 
-        # Vérification de la confirmation de mot de passe
-        if password != confirm_password:
-            return "Les mots de passe ne correspondent pas. Veuillez réessayer."
+            # Vérification de la confirmation de mot de passe
+            if password != confirm_password:
+                return "Les mots de passe ne correspondent pas. Veuillez réessayer."
 
-        hashed_password = hashlib.md5(password.encode()).hexdigest()
-        cursor = mysql.connection.cursor()
-        
-        cursor.execute("SELECT * FROM securisation WHERE email_securisation = %s", (email,))
-        existing_user = cursor.fetchone()
-
-        if existing_user:
-            flash("Cet email est déjà utilisé. Veuillez en utiliser un autre.", "danger")
-            return redirect('/inscription_admin')
-
-        try:
+            hashed_password = hashlib.md5(password.encode()).hexdigest()
             cursor = mysql.connection.cursor()
-            query = """INSERT INTO `securisation` (nom_complet, email_securisation, numero_telephone, password) 
-                       VALUES (%s, %s, %s, %s)"""
-            cursor.execute(query, (nom_complet, email, numero_telephone, hashed_password))
-            mysql.connection.commit()
-            return redirect('/')
-        except Exception as e:
-            return f"Erreur lors de l'inscription : {e}"
-    return render_template('securisation/connexion/cree_compte.html')
+            
+            cursor.execute("SELECT * FROM securisation WHERE email_securisation = %s", (email,))
+            existing_user = cursor.fetchone()
+
+            if existing_user:
+                flash("Cet email est déjà utilisé. Veuillez en utiliser un autre.", "danger")
+                return redirect('/inscription_admin')
+
+            try:
+                cursor = mysql.connection.cursor()
+                query = """INSERT INTO `securisation` (nom_complet, email_securisation, numero_telephone, password) 
+                        VALUES (%s, %s, %s, %s)"""
+                cursor.execute(query, (nom_complet, email, numero_telephone, hashed_password))
+                mysql.connection.commit()
+                return redirect('/')
+            except Exception as e:
+                return f"Erreur lors de l'inscription : {e}"
+        return render_template('securisation/connexion/cree_compte.html', data=data, firstName=firstName)
+
+
+
+@app.route('/supprimer_securisation/<int:id>')
+def supprimer_securisation(id):
+    if 'email_admin' in session:
+        loggedIn, firstName = getLogin('email_admin', 'admin')
+        cur = mysql.connection.cursor()
+        cur.execute("DELETE from securisation WHERE ident=%s", (id,))
+        mysql.connection.commit()
+        cur.close()
+        flash('Administrateur supprimé avec succès.', 'success')
+        return redirect(url_for('inscription_securisation'), )
+    else:
+        return redirect(url_for('login'))
+
+
 
 @app.route("/securisation_tableau_de_bord")
 def securisation_tableau_de_bord():
@@ -1141,42 +1221,64 @@ def dossiers_valides_securisation():
 
 
 
-###################evaluationcadastrale
-@app.route("/inscription_evaluationcadastrale",methods=['POST', 'GET'])
-def inscription_evaluationcadastrale():
-    if request.method == 'POST':
-        name = request.form['name']
-        prenom = request.form['prenom']
-        nom_complet = name + " " + prenom
-        email = request.form['email']
-        numero_telephone = request.form['numero_telephone']
-        password = request.form['password']
-        confirm_password = request.form['confirm_password']
+###################evaluationcadastrale evaluationcadastrale
+@app.route("/inscription_evaluation_cadastrale",methods=['POST', 'GET'])
+def inscription_evaluation_cadastrale():
+    if 'email_admin' not in session:
+        return redirect(url_for('login'))
+    else:
+        loggedIn, firstName = getLogin('email_admin', 'admin')
+        query = "SELECT * FROM evaluation_cadastrale"
+        cur= mysql.connection.cursor()
+        cur.execute(query)
+        data = cur.fetchall()
+        if request.method == 'POST':
+            name = request.form['name']
+            prenom = request.form['prenom']
+            nom_complet = name + " " + prenom
+            email = request.form['email']
+            numero_telephone = request.form['numero_telephone']
+            password = request.form['password']
+            confirm_password = request.form['confirm_password']
 
-        # Vérification de la confirmation de mot de passe
-        if password != confirm_password:
-            return "Les mots de passe ne correspondent pas. Veuillez réessayer."
+            # Vérification de la confirmation de mot de passe
+            if password != confirm_password:
+                return "Les mots de passe ne correspondent pas. Veuillez réessayer."
 
-        hashed_password = hashlib.md5(password.encode()).hexdigest()
-        cursor = mysql.connection.cursor()
-        
-        cursor.execute("SELECT * FROM evaluation_cadastrale WHERE email_evaluation_cadastrale = %s", (email,))
-        existing_user = cursor.fetchone()
-
-        if existing_user:
-            flash("Cet email est déjà utilisé. Veuillez en utiliser un autre.", "danger")
-            return redirect('/inscription_admin')
-
-        try:
+            hashed_password = hashlib.md5(password.encode()).hexdigest()
             cursor = mysql.connection.cursor()
-            query = """INSERT INTO `evaluation_cadastrale` (nom_complet, email_evaluation_cadastrale, numero_telephone, password) 
-                       VALUES (%s, %s, %s, %s)"""
-            cursor.execute(query, (nom_complet, email, numero_telephone, hashed_password))
-            mysql.connection.commit()
-            return redirect('/')
-        except Exception as e:
-            return f"Erreur lors de l'inscription : {e}"
-    return render_template('evaluation_cadastrale/connexion/cree_compte.html')
+            
+            cursor.execute("SELECT * FROM evaluation_cadastrale WHERE email_evaluation_cadastrale = %s", (email,))
+            existing_user = cursor.fetchone()
+
+            if existing_user:
+                flash("Cet email est déjà utilisé. Veuillez en utiliser un autre.", "danger")
+                return redirect(url_for('inscription_evaluation_cadastrale'), )
+
+            try:
+                cursor = mysql.connection.cursor()
+                query = """INSERT INTO `evaluation_cadastrale` (nom_complet, email_evaluation_cadastrale, numero_telephone, password) 
+                        VALUES (%s, %s, %s, %s)"""
+                cursor.execute(query, (nom_complet, email, numero_telephone, hashed_password))
+                mysql.connection.commit()
+                return redirect(url_for('inscription_evaluation_cadastrale'), )
+            except Exception as e:
+                return f"Erreur lors de l'inscription : {e}"
+        return render_template('evaluation_cadastrale/connexion/cree_compte.html', data=data, firstName=firstName)
+
+
+@app.route('/supprimer_evaluation_cadastrale/<int:id>')
+def supprimer_evaluation_cadastrale(id):
+    if 'email_admin' in session:
+        loggedIn, firstName = getLogin('email_admin', 'admin')
+        cur = mysql.connection.cursor()
+        cur.execute("DELETE from evaluation_cadastrale WHERE ident=%s", (id,))
+        mysql.connection.commit()
+        cur.close()
+        flash('Administrateur supprimé avec succès.', 'success')
+        return redirect(url_for('inscription_evaluation_cadastrale'), )
+    else:
+        return redirect(url_for('login'))
 
 
 @app.route("/evaluation_cadastrale_tableau_de_bord")
@@ -1362,39 +1464,62 @@ def dossiers_valides_evaluation_cadastrale():
 ###################Signature
 @app.route("/inscription_signature",methods=['POST', 'GET'])
 def inscription_signature():
-    if request.method == 'POST':
-        name = request.form['name']
-        prenom = request.form['prenom']
-        nom_complet=name+" "+prenom
-        email = request.form['email']
-        numero_telephone = request.form['numero_telephone']
-        password = request.form['password']
-        confirm_password = request.form['confirm_password']
+    if 'email_admin' not in session:
+        return redirect(url_for('login'))
+    else:
+        loggedIn, firstName = getLogin('email_admin', 'admin')
+        query = "SELECT * FROM signature"
+        cur= mysql.connection.cursor()
+        cur.execute(query)
+        data = cur.fetchall()
+        if request.method == 'POST':
+            name = request.form['name']
+            prenom = request.form['prenom']
+            nom_complet=name+" "+prenom
+            email = request.form['email']
+            numero_telephone = request.form['numero_telephone']
+            password = request.form['password']
+            confirm_password = request.form['confirm_password']
 
-        # Vérification de la confirmation de mot de passe
-        if password != confirm_password:
-            return "Les mots de passe ne correspondent pas. Veuillez réessayer."
+            # Vérification de la confirmation de mot de passe
+            if password != confirm_password:
+                return "Les mots de passe ne correspondent pas. Veuillez réessayer."
 
-        hashed_password = hashlib.md5(password.encode()).hexdigest()
-        cursor = mysql.connection.cursor()
-        
-        cursor.execute("SELECT * FROM signature WHERE email_signature = %s", (email,))
-        existing_user = cursor.fetchone()
-
-        if existing_user:
-            flash("Cet email est déjà utilisé. Veuillez en utiliser un autre.", "danger")
-            return redirect('/inscription_admin')
-
-        try:
+            hashed_password = hashlib.md5(password.encode()).hexdigest()
             cursor = mysql.connection.cursor()
-            query = """INSERT INTO `signature` (nom_complet, email_securisation, numero_telephone, password) 
-                       VALUES (%s, %s, %s, %s)"""
-            cursor.execute(query, (nom_complet, email, numero_telephone, hashed_password))
-            mysql.connection.commit()
-            return redirect('/')
-        except Exception as e:
-            return f"Erreur lors de l'inscription : {e}"
-    return render_template('signature/connexion/cree_compte.html')
+            
+            cursor.execute("SELECT * FROM signature WHERE email_signature = %s", (email,))
+            existing_user = cursor.fetchone()
+
+            if existing_user:
+                flash("Cet email est déjà utilisé. Veuillez en utiliser un autre.", "danger")
+                return redirect('/inscription_signature')
+
+            try:
+                cursor = mysql.connection.cursor()
+                query = """INSERT INTO `signature` (nom_complet, email_securisation, numero_telephone, password) 
+                        VALUES (%s, %s, %s, %s)"""
+                cursor.execute(query, (nom_complet, email, numero_telephone, hashed_password))
+                mysql.connection.commit()
+                return redirect(url_for('inscription_signature'))
+            except Exception as e:
+                return f"Erreur lors de l'inscription : {e}"
+        return render_template('signature/connexion/cree_compte.html', data=data, firstName=firstName)
+
+@app.route('/supprimer_signature/<int:id>')
+def supprimer_signature(id):
+    if 'email_admin' in session:
+        loggedIn, firstName = getLogin('email_admin', 'admin')
+        cur = mysql.connection.cursor()
+        cur.execute("DELETE from signature WHERE ident=%s", (id,))
+        mysql.connection.commit()
+        cur.close()
+        flash('Administrateur supprimé avec succès.', 'success')
+        return redirect(url_for('inscription_signature'))
+    else:
+        return redirect(url_for('login'))
+
+
 
 @app.route("/signature_fonciere_tableau_de_bord")
 def signature_fonciere_tableau_de_bord():
@@ -1639,42 +1764,63 @@ def dossiers_signature_valide():
 
 
 
-###################conversationfonciere
-@app.route("/inscription_conversationfonciere",methods=['POST', 'GET'])
-def inscription_conversationfonciere():
-    if request.method == 'POST':
-        name = request.form['name']
-        prenom = request.form['prenom']
-        email = request.form['email']
-        numero_telephone = request.form['numero_telephone']
-        password = request.form['password']
-        confirm_password = request.form['confirm_password']
+###################conversation_fonciere
+@app.route("/inscription_conversation_fonciere",methods=['POST', 'GET'])
+def inscription_conversation_fonciere():
+    if 'email_admin' not in session:
+        return redirect(url_for('login'))
+    else:
+        loggedIn, firstName = getLogin('email_admin', 'admin')
+        query = "SELECT * FROM conversation_fonciere"
+        cur= mysql.connection.cursor()
+        cur.execute(query)
+        data = cur.fetchall() 
+        if request.method == 'POST':
+            name = request.form['name']
+            prenom = request.form['prenom']
+            email = request.form['email']
+            numero_telephone = request.form['numero_telephone']
+            password = request.form['password']
+            confirm_password = request.form['confirm_password']
 
-        # Vérification de la confirmation de mot de passe
-        if password != confirm_password:
-            return "Les mots de passe ne correspondent pas. Veuillez réessayer."
+            # Vérification de la confirmation de mot de passe
+            if password != confirm_password:
+                return "Les mots de passe ne correspondent pas. Veuillez réessayer."
 
-        hashed_password = hashlib.md5(password.encode()).hexdigest()
-        cursor = mysql.connection.cursor()
-        
-        cursor.execute("SELECT * FROM conversation_fonciere WHERE email_conversation_fonciere = %s", (email,))
-        existing_user = cursor.fetchone()
-
-        if existing_user:
-            flash("Cet email est déjà utilisé. Veuillez en utiliser un autre.", "danger")
-            return redirect('/inscription_admin')
-
-        try:
+            hashed_password = hashlib.md5(password.encode()).hexdigest()
             cursor = mysql.connection.cursor()
-            query = """INSERT INTO `conversation_fonciere` (name, prenom, email_conversation_fonciere, numero_telephone, password) 
-                       VALUES (%s, %s, %s, %s, %s)"""
-            cursor.execute(query, (name, prenom, email, numero_telephone, hashed_password))
-            mysql.connection.commit()
-            return redirect('/')
-        except Exception as e:
-            return f"Erreur lors de l'inscription : {e}"
-    return render_template('conversation_fonciere/connexion/cree_compte.html')
+            
+            cursor.execute("SELECT * FROM conversation_fonciere WHERE email_conversation_fonciere = %s", (email,))
+            existing_user = cursor.fetchone()
 
+            if existing_user:
+                flash("Cet email est déjà utilisé. Veuillez en utiliser un autre.", "danger")
+                return redirect(url_for('inscription_conversation_fonciere'))
+
+            try:
+                cursor = mysql.connection.cursor()
+                query = """INSERT INTO `conversation_fonciere` (name, prenom, email_conversation_fonciere, numero_telephone, password) 
+                        VALUES (%s, %s, %s, %s, %s)"""
+                cursor.execute(query, (name, prenom, email, numero_telephone, hashed_password))
+                mysql.connection.commit()
+                return redirect(url_for('inscription_conversation_fonciere'))
+            except Exception as e:
+                return f"Erreur lors de l'inscription : {e}"
+        return render_template('conversation_fonciere/connexion/cree_compte.html', data=data, firstName=firstName)
+
+
+@app.route('/supprimer_conversation_fonciere/<int:id>')
+def supprimer_conversation_fonciere(id):
+    if 'email_admin' in session:
+        loggedIn, firstName = getLogin('email_admin', 'admin')
+        cur = mysql.connection.cursor()
+        cur.execute("DELETE from conversation_fonciere WHERE ident=%s", (id,))
+        mysql.connection.commit()
+        cur.close()
+        flash('Administrateur supprimé avec succès.', 'success')
+        return redirect(url_for('inscription_conversation_fonciere'))
+    else:
+        return redirect(url_for('login'))
 
 @app.route("/conversation_fonciere_tableau_de_bord")
 def conversation_fonciere_tableau_de_bord():

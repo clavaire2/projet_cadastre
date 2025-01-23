@@ -1,7 +1,7 @@
 {% extends 'chef_brigade/base.html' %}
 
 {% block titre %}
-<title>Cadastre - Liste de dossiers</title>
+<title>Cadastre - Gestion des brigade</title>
 {% endblock %}
 
 {% block contenu %}
@@ -9,124 +9,219 @@
     <div class="container-fluid">
 
         <!-- Titre de la page -->
-        <div class="row mb-4">
+        <div class="row">
             <div class="col-12">
-                <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 text-dark fw-bold">Gestion des Brigades</h4>
+                <div class="page-title-box d-flex align-items-center justify-content-between">
+                    <h4 class="mb-0 text-primary" style="color: azure;">Gestion des brigade</h4>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
-                            <li class="breadcrumb-item"><a href="#" class="text-secondary">Liste</a></li>
-                            <li class="breadcrumb-item active text-primary">Ajout Chef Brigade</li>
+                            <li class="breadcrumb-item"><a href="javascript: void(0);">Accueil</a></li>
+                            <li class="breadcrumb-item active">brigade</li>
                         </ol>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- Fin titre -->
+        <!-- Fin du titre de la page -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div>
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}" role="alert">
+                <center>{{ message }}</center>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
 
-        <!-- Formulaire de création -->
-        <div class="row justify-content-center">
-            <div class="col-lg-6">
-                <div class="card shadow-lg border-0">
-                    <div class="card-header bg-primary text-white text-center rounded-top">
-                        <h2 class="mb-0", style="color: azure;">Créer un compte Chef Brigade</h5>
-                        {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                        <div>
-                            {% for category, message in messages %}
-                            <div class="alert alert-{{ category }}" role="alert">
-                                {{ message }}
-                            </div>
-                            {% endfor %}
-                        </div>
-                        {% endif %}
-                        {% endwith %}
-                    </div>
-                    <div class="card-body p-4">
-                        <p class="text-muted text-center mb-4">Veuillez remplir les informations ci-dessous pour ajouter un chef de brigade.</p>
-                        <form class="needs-validation" method="POST" action="{{ url_for('inscription_brigade') }}" novalidate>
-                            <!-- Nom -->
-                            <div class="mb-3">
-                                <label for="username" class="form-label">Nom <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" name="name" id="username" placeholder="Entrez votre nom" required>
-                                <div class="invalid-feedback">Veuillez entrer votre nom.</div>
-                            </div>
-                            <!-- Prénom -->
-                            <div class="mb-3">
-                                <label for="prenom" class="form-label">Prénom <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" name="prenom" id="prenom" placeholder="Entrez votre prénom" required>
-                                <div class="invalid-feedback">Veuillez entrer votre prénom.</div>
-                            </div>
-                            <!-- Email -->
-                            <div class="mb-3">
-                                <label for="useremail" class="form-label">Email <span class="text-danger">*</span></label>
-                                <input type="email" class="form-control" name="email" id="useremail" placeholder="Entrez votre email" required>
-                                <div class="invalid-feedback">Veuillez entrer une adresse email valide.</div>
-                            </div>
-                            <!-- Numéro de téléphone -->
-                            <div class="mb-3">
-                                <label for="numero_telephone" class="form-label">Numéro de téléphone <span class="text-danger">*</span></label>
-                                <input type="tel" class="form-control" name="numero_telephone" placeholder="Entrez votre numéro de téléphone" required>
-                                <div class="invalid-feedback">Veuillez entrer votre numéro de téléphone.</div>
-                            </div>
-                            <!-- Mot de passe -->
-                            <div class="mb-3">
-                                <label for="password-input" class="form-label">Mot de passe</label>
-                                <div class="input-group">
-                                    <input type="password" class="form-control" name="password" id="password-input" placeholder="Entrez un mot de passe" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" required>
-                                    <button class="btn btn-outline-secondary" type="button" id="toggle-password">
-                                        <i class="ri-eye-off-fill"></i>
-                                    </button>
-                                    <div class="invalid-feedback">Votre mot de passe doit contenir au moins 8 caractères, une majuscule et un chiffre.</div>
+        <!-- Liste des administrateurs -->
+        <div class="card shadow-sm mb-5">
+            <div class="card-header bg-primary text-white d-flex align-items-center justify-content-between">
+                <h4 class="mb-0" style="color: rgb(238, 255, 1);">Liste des brigade</h5>
+                    <a href="#add-admin" class="btn btn-light btn-sm">+ Ajouter</a>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover table-bordered align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Nom Complet</th>
+                            <th>Email</th>
+                            <th>Téléphone</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for admin in data %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ admin[1] }}</td>
+                            <td>{{ admin[2] }}</td>
+                            <td>{{ admin[3] }}</td>
+                            <!-- Bouton pour ouvrir le modal -->
+                            <td class="text-center">
+                                <a href="#deleteModal" data-bs-toggle="modal"
+                                    class="btn btn-sm btn-outline-danger d-flex align-items-center justify-content-center">
+                                    <i class="ri-delete-bin-5-line me-2"></i> Supprimer
+                                </a>
+                            </td>
+                            <!-- Popup de confirmation -->
+                            <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel"
+                                aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteModalLabel">Confirmer la suppression</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>Êtes-vous sûr de vouloir supprimer ce brigade ? Cette action est
+                                                irréversible.</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Annuler</button>
+                                            <a href="{{ url_for('supprimer_brigade', id=admin[0]) }}"
+                                                class="btn btn-danger">Supprimer</a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <!-- Confirmation du mot de passe -->
-                            <div class="mb-3">
-                                <label for="confirm-password-input" class="form-label">Confirmer le mot de passe</label>
-                                <div class="input-group">
-                                    <input type="password" class="form-control" name="confirm_password" id="confirm-password-input" placeholder="Confirmez le mot de passe" required>
-                                    <button class="btn btn-outline-secondary" type="button" id="toggle-confirm-password">
-                                        <i class="ri-eye-off-fill"></i>
-                                    </button>
-                                    <div class="invalid-feedback">Veuillez confirmer votre mot de passe.</div>
-                                </div>
-                            </div>
-                            <!-- Bouton de soumission -->
-                            <div class="d-grid">
-                                <button class="btn btn-primary" type="submit">Ajouter  Brigade</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+
+                            <!-- Styles CSS pour un design classe -->
+                            <style>
+                                /* Styles généraux pour le modal */
+                                .modal-content {
+                                    border-radius: 15px;
+                                    border: none;
+                                    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                                    background: #f8f9fa;
+                                }
+
+                                /* Header du modal avec une couleur moderne */
+                                .modal-header {
+                                    background-color: #007bff;
+                                    color: white;
+                                    font-weight: 600;
+                                    border-top-left-radius: 15px;
+                                    border-top-right-radius: 15px;
+                                }
+
+                                /* Corps du modal avec un espacement agréable */
+                                .modal-body {
+                                    font-size: 16px;
+                                    color: #555;
+                                    padding: 20px;
+                                    line-height: 1.5;
+                                }
+
+                                /* Footer du modal pour les boutons */
+                                .modal-footer {
+                                    justify-content: space-between;
+                                    padding: 20px;
+                                }
+
+                                /* Bouton d'annulation avec une couleur subtile */
+                                .modal-footer .btn-secondary {
+                                    background-color: #6c757d;
+                                    border-color: #6c757d;
+                                    border-radius: 10px;
+                                    transition: background-color 0.3s ease;
+                                }
+
+                                .modal-footer .btn-secondary:hover {
+                                    background-color: #5a6268;
+                                }
+
+                                /* Bouton de suppression avec effet de survol */
+                                .modal-footer .btn-danger {
+                                    background-color: #dc3545;
+                                    border-color: #dc3545;
+                                    border-radius: 10px;
+                                    transition: background-color 0.3s ease, transform 0.2s ease;
+                                }
+
+                                .modal-footer .btn-danger:hover {
+                                    background-color: #c82333;
+                                    transform: translateY(-2px);
+                                }
+
+                                /* Animation douce pour l'affichage du modal */
+                                .fade .modal-dialog {
+                                    transform: translate(0, -50%);
+                                    transition: transform 0.3s ease-out;
+                                }
+                            </style>
+
+
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">Aucun brigade trouvé.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
-        <!-- Fin formulaire -->
+        <!-- Fin de la liste des administrateurs -->
+
+        <!-- Formulaire de création d'un administrateur -->
+        <div id="add-admin" class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0 text-center" style="color: rgb(238, 255, 1);">Créer un Compte brigade</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted text-center mb-4" style="color: red;"> Remplissez le formulaire pour ajouter un
+                    nouvel brigade.</p>
+                <form method="POST" action="{{ url_for('inscription_brigade') }}" novalidate>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="name" class="form-label">Nom <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="name" name="name" placeholder="Entrez le nom"
+                                required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="prenom" class="form-label">Prénom <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="prenom" name="prenom"
+                                placeholder="Entrez le prénom" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="email" name="email"
+                                placeholder="Entrez l'email" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="numero_telephone" class="form-label">Téléphone <span
+                                    class="text-danger">*</span></label>
+                            <input type="tel" class="form-control" id="numero_telephone" name="numero_telephone"
+                                placeholder="Entrez le numéro de téléphone" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="password" class="form-label">Mot de passe <span
+                                    class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="password" name="password"
+                                placeholder="Entrez un mot de passe" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="confirm_password" class="form-label">Confirmez le mot de passe <span
+                                    class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password"
+                                placeholder="Confirmez le mot de passe" required>
+                        </div>
+                    </div>
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary">Ajouter un brigade</button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center text-muted">
+                <small>© 2025 Cadastre. Tous droits réservés.</small>
+            </div>
+        </div>
+        <!-- Fin du formulaire -->
     </div>
 </div>
-
-<script>
-    document.getElementById('toggle-password').addEventListener('click', function () {
-        const passwordInput = document.getElementById('password-input');
-        const icon = this.querySelector('i');
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            icon.classList.replace('ri-eye-off-fill', 'ri-eye-fill');
-        } else {
-            passwordInput.type = 'password';
-            icon.classList.replace('ri-eye-fill', 'ri-eye-off-fill');
-        }
-    });
-
-    document.getElementById('toggle-confirm-password').addEventListener('click', function () {
-        const confirmPasswordInput = document.getElementById('confirm-password-input');
-        const icon = this.querySelector('i');
-        if (confirmPasswordInput.type === 'password') {
-            confirmPasswordInput.type = 'text';
-            icon.classList.replace('ri-eye-off-fill', 'ri-eye-fill');
-        } else {
-            confirmPasswordInput.type = 'password';
-            icon.classList.replace('ri-eye-fill', 'ri-eye-off-fill');
-        }
-    });
-</script>
 {% endblock %}
