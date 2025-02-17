@@ -3,6 +3,7 @@ from flask import *
 from flask_mysqldb import MySQL
 import  hashlib
 from credentials  import*
+import re
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from flask_mail import Mail, Message
@@ -38,7 +39,6 @@ mysql.init_app(app)
 now = datetime.now()
 date_now= now.strftime("%Y-%m-%d %H:%M:%S")
 
-
 def calculer_difference(date1_str, date2_str):
     date1 = datetime.strptime(date1_str, '%Y-%m-%d %H:%M:%S')
     date2 = datetime.strptime(date2_str, '%Y-%m-%d %H:%M:%S')
@@ -48,10 +48,6 @@ def calculer_difference(date1_str, date2_str):
     heures, reste_secondes = divmod(delta.seconds, 3600)
     minutes, _ = divmod(reste_secondes, 60)
     return f"mois: {mois}, jours: {jours}, heures: {heures}, minutes: {minutes}"
-
-
-
-
 
 ###################### Dossier
 def getLogin(email, table):
@@ -66,8 +62,6 @@ def getLogin(email, table):
 
     cur.close()
     return useradminID, firstName
-
-
 def is_valid(email, email_t, password, table):
     cur = mysql.connection.cursor()
     cur.execute('SELECT {}, password FROM {}'.format(email_t, table))
@@ -76,7 +70,6 @@ def is_valid(email, email_t, password, table):
         if row[0] == str(email) and row[1] == hashlib.md5(password.encode()).hexdigest():
             return True
     return False
-
 
 from datetime import datetime
 
@@ -92,16 +85,12 @@ def get_pending_count(table_name, statut):
     cur.execute(query, (statut, current_year))
     result = cur.fetchone()
     return result[0] if result else 0
-
-
 def get_objectif_count(colonne):
     cur = mysql.connection.cursor()
     query = f"SELECT {colonne} FROM objectifs_direction"
     cur.execute(query)
     result = cur.fetchone()
     return result[0] if result else 0
-
-
 def get_count(table_name):
     cur = mysql.connection.cursor()
     query = f"SELECT COUNT(*) FROM {table_name}"
@@ -109,17 +98,10 @@ def get_count(table_name):
     result = cur.fetchone()
     return result[0] if result else 0
 
-
-
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('login'))
-
-
-
-
-
 
 @app.route("/inscription_admin",methods=['POST', 'GET'])
 def inscription_admin():
@@ -166,10 +148,6 @@ def inscription_admin():
         return render_template('admin/connexion/cree_compte.html', firstName=firstName, data=data)
 
 
-
-
-
-
 @app.route('/supprimer_administrateur/<int:id>', methods=['POST'])
 def supprimer_admin(id):
     if 'email_admin' in session:
@@ -186,9 +164,6 @@ def supprimer_admin(id):
         return redirect(url_for('inscription_admin'))
     else:
         return redirect(url_for('login'))
-
-
-
 
 
 @app.route("/rechercher", methods=["GET", "POST"])
@@ -260,7 +235,6 @@ def rechercher_dossier():
             cur.close()
 
     return render_template(f"{current_role}/dossier/recherche_trouver.html", dossiers=None, error=None)
-
 
 
 @app.route("/admin_tableau_de_bord")
@@ -342,7 +316,7 @@ def ajouter_dossier():
             date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
             cur = mysql.connection.cursor()
-            noms_dossiers_list = [nom.strip() for nom in noms_dossiers.split(",") if nom.strip()]
+            noms_dossiers_list = [nom.strip() for nom in re.split(r'[,\n ]+', noms_dossiers) if nom.strip()]
             for nom_dossier in noms_dossiers_list:
                 cur.execute("""INSERT INTO dossier (nom_dossier, date_creation, statut, nom_de_ajouteur) 
                             VALUES (%s, %s, %s, %s)""", 
@@ -412,152 +386,14 @@ def assigner_dossiers():
                         VALUES (%s, %s, %s, %s, %s, %s, %s)
                     """, (dossier[1], date_now, date_now, 'En cours', firstName, chef_brigade_1_name, chef_brigade_1))
                     
-                    msg = Message("Confirmation d'inscription", recipients=[chef_brigade_1_email])
-                    msg.html = f"""
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <meta charset="UTF-8">
-                        <title>Bienvenue {chef_brigade_1_name} !</title>
-                        <style>
-                            body {{
-                                font-family: Arial, sans-serif;
-                                background-color: #f4f4f4;
-                                text-align: center;
-                                padding: 40px;
-                            }}
-                            .container {{
-                                background: white;
-                                padding: 20px;
-                                max-width: 500px;
-                                margin: auto;
-                                border-radius: 10px;
-                                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-                            }}
-                            h2 {{
-                                color: #4CAF50;
-                            }}
-                            .info {{
-                                text-align: left;
-                                font-size: 16px;
-                                margin: 20px 0;
-                            }}
-                            .info p {{
-                                margin: 5px 0;
-                            }}
-                            .btn {{
-                                display: inline-block;
-                                padding: 10px 20px;
-                                margin-top: 20px;
-                                background: #4CAF50;
-                                color: white;
-                                text-decoration: none;
-                                border-radius: 5px;
-                                font-weight: bold;
-                            }}
-                            .footer {{
-                                margin-top: 20px;
-                                font-size: 12px;
-                                color: #777;
-                            }}
-                        </style>
-                    </head>
-                    <body>
-                        <div class="container">
-                            <h2>Bonjour, {chef_brigade_1_name} ! 🎉</h2>
-                            <p>Vous avez été assigné(e) au dossier <strong>{dossier[1]}</strong> par l'administrateur <strong>{firstName}</strong>.</p>
-                            
-                            <div class="info">
-                                <p><strong>Statut :</strong> En cours</p>
-                                <p><strong>Date d'assignation :</strong> {date_now}</p>
-                            </div>
-                            
-                            <a class="btn" href="127.0.0.1:5000">Se connecter</a>
-                            
-                            <p class="footer">Si vous n'êtes pas concerné par cet email, ignorez-le.</p>
-                        </div>
-                    </body>
-                    </html>
-                    """
 
-                    # mail.send(msg)
-                
                 elif securisation:
                     cur.execute("""
                         INSERT INTO gestion_securisation 
                         (nom_dossier, date_ajout, date_assignation_n4, statut, n1_admin, n4_securisation, id_securisation)
                         VALUES (%s, %s, %s, %s, %s, %s, %s)
                     """, (dossier[1], date_now, date_now, 'En cours', firstName, securisation_name, securisation))
-                    
-                    msg = Message("Confirmation d'inscription", recipients=[securisation_email])
-                    msg.html = f"""
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <meta charset="UTF-8">
-                        <title>Bienvenue {securisation_name} !</title>
-                        <style>
-                            body {{
-                                font-family: Arial, sans-serif;
-                                background-color: #f4f4f4;
-                                text-align: center;
-                                padding: 40px;
-                            }}
-                            .container {{
-                                background: white;
-                                padding: 20px;
-                                max-width: 500px;
-                                margin: auto;
-                                border-radius: 10px;
-                                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-                            }}
-                            h2 {{
-                                color: #4CAF50;
-                            }}
-                            .info {{
-                                text-align: left;
-                                font-size: 16px;
-                                margin: 20px 0;
-                            }}
-                            .info p {{
-                                margin: 5px 0;
-                            }}
-                            .btn {{
-                                display: inline-block;
-                                padding: 10px 20px;
-                                margin-top: 20px;
-                                background: #4CAF50;
-                                color: white;
-                                text-decoration: none;
-                                border-radius: 5px;
-                                font-weight: bold;
-                            }}
-                            .footer {{
-                                margin-top: 20px;
-                                font-size: 12px;
-                                color: #777;
-                            }}
-                        </style>
-                    </head>
-                    <body>                        
-                        <div class="container">
-                            <h2>Bonjour, {securisation_name} ! 🎉</h2>
-                            <p>Vous avez été assigné(e) au dossier <strong>{dossier[1]}</strong> par l'administrateur <strong>{firstName}</strong>.</p>
-                            
-                            <div class="info">
-                                <p><strong>Statut :</strong> En cours</p>
-                                <p><strong>Date d'assignation :</strong> {date_now}</p>
-                            </div>
-                            
-                            <a class="btn" href="127.0.0.1:5000">Se connecter</a>
-                            
-                            <p class="footer">Si vous n'êtes pas concerné par cet email, ignorez-le.</p>
-                        </div>
-                    </body>
-                    </html>
-                    """
 
-                    # mail.send(msg)
 
                 elif evaluation_cadastrale:
                     cur.execute("""
@@ -565,76 +401,7 @@ def assigner_dossiers():
                         (nom_dossier, date_ajout, date_assignation_n5, statut, n1_admin, n5_evaluation_cadastrale, id_evaluation_cadastrale)
                         VALUES (%s, %s, %s, %s, %s, %s, %s)
                     """, (dossier[1], date_now, date_now, 'En cours', firstName, evaluation_cadastrale_name, evaluation_cadastrale))
-                    
-                    msg = Message("Confirmation d'inscription", recipients=[evaluation_cadastrale_email])
-                    msg.html = f"""
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <meta charset="UTF-8">
-                        <title>Bienvenue {evaluation_cadastrale_name} !</title>
-                        <style>
-                            body {{
-                                font-family: Arial, sans-serif;
-                                background-color: #f4f4f4;
-                                text-align: center;
-                                padding: 40px;
-                            }}
-                            .container {{
-                                background: white;
-                                padding: 20px;
-                                max-width: 500px;
-                                margin: auto;
-                                border-radius: 10px;
-                                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-                            }}
-                            h2 {{
-                                color: #4CAF50;
-                            }}
-                            .info {{
-                                text-align: left;
-                                font-size: 16px;
-                                margin: 20px 0;
-                            }}
-                            .info p {{
-                                margin: 5px 0;
-                            }}
-                            .btn {{
-                                display: inline-block;
-                                padding: 10px 20px;
-                                margin-top: 20px;
-                                background: #4CAF50;
-                                color: white;
-                                text-decoration: none;
-                                border-radius: 5px;
-                                font-weight: bold;
-                            }}
-                            .footer {{
-                                margin-top: 20px;
-                                font-size: 12px;
-                                color: #777;
-                            }}
-                        </style>
-                    </head>
-                    <body>                        
-                        <div class="container">
-                            <h2>Bonjour, {evaluation_cadastrale_name} ! 🎉</h2>
-                            <p>Vous avez été assigné(e) au dossier <strong>{dossier[1]}</strong> par l'administrateur <strong>{firstName}</strong>.</p>
-                            
-                            <div class="info">
-                                <p><strong>Statut :</strong> En cours</p>
-                                <p><strong>Date d'assignation :</strong> {date_now}</p>
-                            </div>
-                            
-                            <a class="btn" href="127.0.0.1:5000">Se connecter</a>
-                            
-                            <p class="footer">Si vous n'êtes pas concerné par cet email, ignorez-le.</p>
-                        </div>
-                    </body>
-                    </html>
-                    """
 
-                    # mail.send(msg)
 
                 elif signature:
                     cur.execute("""
@@ -642,76 +409,7 @@ def assigner_dossiers():
                         (nom_dossier, date_ajout, date_assignation_n6, statut, n1_admin, n6_signature, id_signature)
                         VALUES (%s, %s, %s, %s, %s, %s, %s)
                     """, (dossier[1], date_now, date_now, 'En cours', firstName, signature_name, signature))
-                    
-                    msg = Message("Confirmation d'inscription", recipients=[signature_email])
-                    msg.html = f"""
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <meta charset="UTF-8">
-                        <title>Bienvenue {signature_name} !</title>
-                        <style>
-                            body {{
-                                font-family: Arial, sans-serif;
-                                background-color: #f4f4f4;
-                                text-align: center;
-                                padding: 40px;
-                            }}
-                            .container {{
-                                background: white;
-                                padding: 20px;
-                                max-width: 500px;
-                                margin: auto;
-                                border-radius: 10px;
-                                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-                            }}
-                            h2 {{
-                                color: #4CAF50;
-                            }}
-                            .info {{
-                                text-align: left;
-                                font-size: 16px;
-                                margin: 20px 0;
-                            }}
-                            .info p {{
-                                margin: 5px 0;
-                            }}
-                            .btn {{
-                                display: inline-block;
-                                padding: 10px 20px;
-                                margin-top: 20px;
-                                background: #4CAF50;
-                                color: white;
-                                text-decoration: none;
-                                border-radius: 5px;
-                                font-weight: bold;
-                            }}
-                            .footer {{
-                                margin-top: 20px;
-                                font-size: 12px;
-                                color: #777;
-                            }}
-                        </style>
-                    </head>
-                    <body>                        
-                        <div class="container">
-                            <h2>Bonjour, {signature_name} ! 🎉</h2>
-                            <p>Vous avez été assigné(e) au dossier <strong>{dossier[1]}</strong> par l'administrateur <strong>{firstName}</strong>.</p>
-                            
-                            <div class="info">
-                                <p><strong>Statut :</strong> En cours</p>
-                                <p><strong>Date d'assignation :</strong> {date_now}</p>
-                            </div>
-                            
-                            <a class="btn" href="127.0.0.1:5000">Se connecter</a>
-                            
-                            <p class="footer">Si vous n'êtes pas concerné par cet email, ignorez-le.</p>
-                        </div>
-                    </body>
-                    </html>
-                    """
 
-                    # mail.send(msg)
 
                 elif conversation_fonciere:
                     cur.execute("""
@@ -719,76 +417,7 @@ def assigner_dossiers():
                         (nom_dossier, date_ajout, date_assignation_n7, statut, n1_admin, n7_conversation_fonciere, id_conversation_fonciere)
                         VALUES (%s, %s, %s, %s, %s, %s, %s)
                     """, (dossier[1], date_now, date_now, 'En cours', firstName, conversation_fonciere_name, conversation_fonciere))
-                    
-                    msg = Message("Confirmation d'inscription", recipients=[conversation_fonciere_email])
-                    msg.html = f"""
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <meta charset="UTF-8">
-                        <title>Bienvenue {conversation_fonciere_name} !</title>
-                        <style>
-                            body {{
-                                font-family: Arial, sans-serif;
-                                background-color: #f4f4f4;
-                                text-align: center;
-                                padding: 40px;
-                            }}
-                            .container {{
-                                background: white;
-                                padding: 20px;
-                                max-width: 500px;
-                                margin: auto;
-                                border-radius: 10px;
-                                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-                            }}
-                            h2 {{
-                                color: #4CAF50;
-                            }}
-                            .info {{
-                                text-align: left;
-                                font-size: 16px;
-                                margin: 20px 0;
-                            }}
-                            .info p {{
-                                margin: 5px 0;
-                            }}
-                            .btn {{
-                                display: inline-block;
-                                padding: 10px 20px;
-                                margin-top: 20px;
-                                background: #4CAF50;
-                                color: white;
-                                text-decoration: none;
-                                border-radius: 5px;
-                                font-weight: bold;
-                            }}
-                            .footer {{
-                                margin-top: 20px;
-                                font-size: 12px;
-                                color: #777;
-                            }}
-                        </style>
-                    </head>
-                    <body>
-                        <div class="container">
-                            <h2>Bonjour, {conversation_fonciere_name} ! 🎉</h2>
-                            <p>Vous avez été assigné(e) au dossier <strong>{dossier[1]}</strong> par l'administrateur <strong>{firstName}</strong>.</p>
-                            
-                            <div class="info">
-                                <p><strong>Statut :</strong> En cours</p>
-                                <p><strong>Date d'assignation :</strong> {date_now}</p>
-                            </div>
-                            
-                            <a class="btn" href="127.0.0.1:5000">Se connecter</a>
-                            
-                            <p class="footer">Si vous n'êtes pas concerné par cet email, ignorez-le.</p>
-                        </div>
-                    </body>
-                    </html>
-                    """
 
-                    # mail.send(msg)
 
                 # Insérer une seule fois dans dossier_terminer
                 cur.execute("""
@@ -813,10 +442,6 @@ def assigner_dossiers():
     except Exception as e:
         flash(f"Erreur lors de l'assignation : {str(e)}", "danger")
         return redirect(url_for('liste_dossier'))
-
-
-
-
 
 
 
@@ -881,11 +506,6 @@ def supprimer_dossier(id):
         return redirect(url_for('liste_dossier_delete'))
     else:
         return redirect(url_for('login'))
-
-
-
-
-
 
 
 @app.route("/liste_dossier")
@@ -1182,74 +802,6 @@ def assigner_dossier_chefbrigade(id_dossier):
         # Supprimer le dossier de la table gestion_chef_brigade
         cur.execute("DELETE FROM gestion_chef_brigade WHERE id = %s", (id_dossier,))
         
-        msg = Message("Confirmation d'inscription", recipients=[email_brigade])
-        msg.html = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Bienvenue {brigade_name} !</title>
-            <style>
-                body {{
-                    font-family: Arial, sans-serif;
-                    background-color: #f4f4f4;
-                    text-align: center;
-                    padding: 40px;
-                }}
-                .container {{
-                    background: white;
-                    padding: 20px;
-                    max-width: 500px;
-                    margin: auto;
-                    border-radius: 10px;
-                    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-                }}
-                h2 {{
-                    color: #4CAF50;
-                }}
-                .info {{
-                    text-align: left;
-                    font-size: 16px;
-                    margin: 20px 0;
-                }}
-                .info p {{
-                    margin: 5px 0;
-                }}
-                .btn {{
-                    display: inline-block;
-                    padding: 10px 20px;
-                    margin-top: 20px;
-                    background: #4CAF50;
-                    color: white;
-                    text-decoration: none;
-                    border-radius: 5px;
-                    font-weight: bold;
-                }}
-                .footer {{
-                    margin-top: 20px;
-                    font-size: 12px;
-                    color: #777;
-                }}
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <h2>Bonjour, {brigade_name} ! 🎉</h2>
-                <p>Votre compte a été créé avec succès.</p>
-                
-                <div class="info">
-                    <p><strong>Ce dossier </strong> {dossier[1]}</p>
-                    <p><strong>vient d'être assigné à vous par le chef brigade </strong> {firstName}</p>
-                   
-                </div>
-                
-                <a class="btn" href="127.0.0.1:5000/brigade_tableau_de_bord">Se connecter</a>
-                
-                <p class="footer">Si vous n'êtes pas à l'origine de cette inscription, ignorez cet email.</p>
-            </div>
-        </body>
-        </html>
-        """
 
         # mail.send(msg)
         
@@ -1865,10 +1417,6 @@ def inscription_securisation():
         return render_template('securisation/connexion/cree_compte.html', data=data, firstName=firstName)
 
 
-
-
-
-
 @app.route('/supprimer_securisation/<int:id>', methods=['POST'])
 def supprimer_securisation(id):
     if 'email_admin' in session:
@@ -2059,7 +1607,6 @@ def terminer_dossier_securisation(id_dossier):
         return redirect(url_for('dossiers_valides_securisation'))
 
 
-
 @app.route('/terminer_dossier_rejet_securisation/<int:id_dossier>', methods=['POST'])
 def terminer_dossier_rejet_securisation(id_dossier):
     if 'email_securisation' not in session:
@@ -2211,7 +1758,6 @@ def rejeter_dossier_securisation(id_dossier):
             cur.close()
 
 
-
 @app.route('/dossiers_valides_securisation')
 def dossiers_valides_securisation():
     if 'email_securisation' not in session:
@@ -2273,7 +1819,6 @@ def inscription_evaluation_cadastrale():
             except Exception as e:
                 return f"Erreur lors de l'inscription : {e}"
         return render_template('evaluation_cadastrale/connexion/cree_compte.html', data=data, firstName=firstName)
-
 
 
 @app.route('/supprimer_evaluation_cadastrale/<int:id>', methods=['POST'])
@@ -2451,8 +1996,6 @@ def rejet_dossier_evaluation_cadastrale(id_dossier):
         return redirect(url_for('dossiers_valides_evaluation_cadastrale'))
 
 
-
-
 @app.route('/terminer_dossier_rejeter_evaluation_cadastrale/<int:id_dossier>', methods=['POST'])
 def terminer_dossier_rejeter_evaluation_cadastrale(id_dossier):
     if 'email_evaluation_cadastrale' not in session:
@@ -2532,7 +2075,6 @@ def terminer_dossier_rejeter_evaluation_cadastrale(id_dossier):
         mysql.connection.rollback()
         flash(f"Une erreur interne est survenue: {str(e)}", "danger")
         return redirect(url_for('dossiers_valides_evaluation_cadastrale'))
-
 
 
 @app.route('/terminer_dossier_evaluation_cadastrale/<int:id_dossier>', methods=['POST'])
@@ -2624,7 +2166,6 @@ def terminer_dossier_evaluation_cadastrale(id_dossier):
         return redirect(url_for('dossiers_valides_evaluation_cadastrale'))
 
 
-
 @app.route('/dossiers_valides_evaluation_cadastrale')
 def dossiers_valides_evaluation_cadastrale():
     if 'email_evaluation_cadastrale' not in session:
@@ -2644,9 +2185,6 @@ def dossiers_valides_evaluation_cadastrale():
         return render_template('evaluation_cadastrale/dossier/dossiers_terminer_evaluation_cadastrale.html',
                                dossiers=dossiers, firstName=firstName, loggedIn=loggedIn
                                )
-
-
-
 
 
 
@@ -3453,8 +2991,6 @@ def rejet_dossier_fonciere(id_dossier):
         return redirect(url_for('liste_dossiers_assignes_fonciere'))
 
 
-
-
 @app.route("/dossiers_fonciere_valide")
 def dossiers_fonciere_valide():
     # Vérifier si l'utilisateur est connecté
@@ -3488,15 +3024,11 @@ def dossiers_fonciere_valide():
     )
 
 
-
-
-
-
 #####******************* login
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form['email'].upper()
+        email = request.form['email'].lower()
         password = request.form['password']
 
         # Vérification des informations
@@ -3534,13 +3066,11 @@ def login():
 
 #####******************* Mot de passe oublié
 
-################# login
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
         email = request.form['email'].lower()
 
-        # Dictionnaire des tables et des colonnes d'email
         tables = {
             "admin": "email_admin",
             "chef_brigade": "email_chefbrigade",
@@ -3551,73 +3081,55 @@ def forgot_password():
             "conversation_fonciere": "email_conversation_fonciere"
         }
 
-
         cursor = mysql.connection.cursor()
-        user = None
-        table_name = None
-        column_name = None
+        user, table_name, column_name = None, None, None
 
-        # Parcourir chaque table et vérifier si l'email existe
         for table, email_column in tables.items():
-            query = f"SELECT * FROM {table} WHERE {email_column} = %s"
-            cursor.execute(query, (email,))
+            cursor.execute(f"SELECT * FROM {table} WHERE {email_column} = %s", (email,))
             user = cursor.fetchone()
             if user:
-                table_name = table
-                column_name = email_column
+                table_name, column_name = table, email_column
                 break
 
         if user:
-            # Générer un token de réinitialisation unique
             reset_token = secrets.token_hex(16)
             token_expiration = datetime.now() + timedelta(hours=1)
 
-            # Enregistrer le token dans la table correspondante
-            update_query = f"""
+            cursor.execute(f"""
                 UPDATE {table_name}
                 SET reset_token = %s, token_expiration = %s
-                WHERE {column_name} = %s
-            """
-            cursor.execute(update_query, (reset_token, token_expiration, email))
+                WHERE {column_name} = %s""", (reset_token, token_expiration, email))
             mysql.connection.commit()
-
-            # Générer et envoyer le lien de réinitialisation
             reset_link = url_for('reset_password', token=reset_token, table=table_name, _external=True)
-
-            # Corps du message avec un design soigné en HTML
-            msg = Message(
-                "Réinitialisation de votre mot de passe",
-                recipients=[email]
-            )
+            msg = Message("🔐 Demande de Réinitialisation de Mot de Passe", recipients=[email])
             msg.html = render_template_string('''
             <!DOCTYPE html>
             <html lang="fr">
-            <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
-                <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
-                    <h2 style="color: #333; text-align: center;">Réinitialisation de votre mot de passe</h2>
-                    <p style="font-size: 16px; color: #555;">Bonjour,</p>
-                    <p style="font-size: 16px; color: #555;">Nous avons reçu une demande pour réinitialiser votre mot de passe. Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe :</p>
+            <body style="font-family: Arial, sans-serif; background-color: #e6f0ff; padding: 20px;">
+                <div style="max-width: 600px; margin: 0 auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-top: 5px solid #004080;">
+                    <h2 style="color: #004080; text-align: center;">🔐 Réinitialisation de votre mot de passe</h2>
+                    <p style="color: #333;">Bonjour,</p>
+                    <p style="color: #333;">Nous avons reçu une demande de réinitialisation de mot de passe pour votre compte. Veuillez cliquer sur le bouton ci-dessous pour définir un nouveau mot de passe sécurisé :</p>
                     <div style="text-align: center; margin: 20px;">
-                        <a href="{{ reset_link }}" style="font-size: 16px; color: #fff; background-color: #0066cc; padding: 12px 25px; border-radius: 4px; text-decoration: none; display: inline-block;">Réinitialiser: mot de passe</a>
+                        <a href="{{ reset_link }}" style="background-color: #004080; color: #fff; padding: 14px 30px; border-radius: 5px; text-decoration: none; font-weight: bold;">🛡️ Réinitialiser mon mot de passe</a>
                     </div>
-                    <p style="font-size: 14px; color: #555;">Ce lien est valable jusqu'au {{ expiration_time }}.</p>
-                    <p style="font-size: 14px; color: #555;">Si vous n'avez pas demandé de réinitialisation, vous pouvez ignorer cet e-mail. Votre mot de passe restera inchangé.</p>
-                    <hr style="border: none; border-top: 1px solid #eee;">
-                    <p style="font-size: 12px; color: #888; text-align: center;">Besoin d'aide ? Contactez notre équipe de support à <a href="mailto:abalo.awadi@gmail.com" style="color: #0066cc; text-decoration: none;">abalo.awadi@gmail.com</a>.</p>
+                    <p style="color: #555; font-size: 14px;">Ce lien unique est valide jusqu'au {{ expiration_time }}. Pour des raisons de sécurité, ne partagez jamais ce lien.</p>
+                    <p style="color: #888; font-size: 12px; text-align: center;">Besoin d'assistance ? Contactez-nous à <a href="mailto:abalo.awadi@gmail.com" style="color: #004080; text-decoration: none; font-weight: bold;">abalo.awadi@gmail.com</a>. Notre équipe dédiée est prête à vous aider.</p>
+                    <hr style="margin: 20px 0; border: 1px solid #004080;">
+                    <p style="color: #888; font-size: 12px; text-align: center;">Merci de faire confiance à notre service. Votre sécurité est notre priorité.</p>
                 </div>
             </body>
             </html>
-            ''', reset_link=reset_link, expiration_time=(datetime.now() + timedelta(hours=1)).strftime('%H:%M, %d/%m/%Y'))
+            ''', reset_link=reset_link, expiration_time=token_expiration.strftime('%H:%M, %d/%m/%Y'))
 
             mail.send(msg)
-
-            flash("Un e-mail contenant un lien de réinitialisation a été envoyé à votre adresse.", "success")
+            flash("Un e-mail de réinitialisation a été envoyé avec succès.", "success")
             return redirect('/')
 
-        flash("Nous n'avons pas trouvé cette adresse e-mail dans notre système. Veuillez vérifier et réessayer.", 'danger')
+        flash("Adresse e-mail introuvable dans nos systèmes.", 'danger')
         return redirect('/forgot_password')
 
-    return render_template('mot_de passe_oublier/mot_de_passe_oublier.html')
+    return render_template('mot_de_passe_oublie/mot_de_passe_oublie.html')
 
 
 @app.route('/reset_password/<table>/<token>', methods=['GET', 'POST'])
@@ -3672,13 +3184,10 @@ def reset_password(table, token):
         cursor.execute(update_query, (hashed_password, token))
         mysql.connection.commit()
 
-        flash("Votre mot de passe a été réinitialisé avec succès.")
+        flash("Votre mot de passe a été réinitialisé avec succès.", "success")
         return redirect('/')
 
-    return render_template('mot_de passe_oublier/reinitialiser_mot_de_passe.html', table=table, token=token)
-
-
-
+    return render_template('mot_de_passe_oublie/reinitialiser_mot_de_passe.html', table=table, token=token)
 
 
 
