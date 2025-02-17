@@ -1,0 +1,127 @@
+{% extends 'evaluation_cadastrale/base.html' %}
+
+{% block titre %}
+<title>Cadastre - Dossiers en cours</title>
+{% endblock %}
+
+{% block contenu %}
+
+<div class="page-content">
+    <div class="container-fluid">
+
+        <!-- Start Page Title -->
+        <div class="row">
+            <div class="col-12">
+                <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-light shadow-sm p-4 rounded">
+                    <h4 class="mb-0 text-dark fw-bold">Liste des dossiers en cours</h4>
+                    <div class="page-title-right">
+                        <ol class="breadcrumb m-0">
+                            <li class="breadcrumb-item"><a href="#" class="text-primary">Accueil</a></li>
+                            <li class="breadcrumb-item active text-muted">Liste des dossiers en cours: <b class="text-primary">Evaluation Cadastrale</b></li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Page Title -->
+
+        <!-- Start Card -->
+        <div class="row mt-4">
+            <div class="col-xl-12">
+                <div class="card shadow-sm border-light rounded">
+                    <div class="card-header bg-primary text-white d-flex align-items-center p-3 rounded-top">
+                        <h4 class="card-title mb-0 flex-grow-1" style="color:aliceblue">Suivi des dossiers : <b>Evaluation Cadastrale</b></h4>
+                    </div>
+                    <!-- End Card Header -->
+
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered align-middle mb-0">
+                                <thead class="table-light text-center">
+                                    <tr>
+                                        <th>Nom du dossier</th>
+                                        <th>Date d'ajout</th>
+                                        <th>Admin</th>
+                                        <th>Chef Brigarde</th>
+                                        <th>Brigarde</th>
+                                        <th>Securisation</th>
+                                        <th>Date assignation N5</th>
+                                        <th>Votre Nom</th>
+                                        <th>Statut</th>
+                                        <th>Objet</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for dossier in dossiers %}
+                                    <tr class="text-center">
+                                        <td><b class="text-primary">{{ dossier["nom_dossier"] }}</b></td>
+                                        <td>{{ dossier["date_ajout"] }}</td>
+                                        <td>{{ dossier["n1_admin"] }}</td>
+                                        <td>{{ dossier["n2_chef_brigade"] }}</td>
+                                        <td class="text-primary">{{ dossier["n3_brigade"] }}</td>
+                                        <td class="text-primary">{{ dossier["n4_securisation"] }}</td>
+                                        <td>{{ dossier["date_assignation_n5"] }}</td>
+                                        <td class="text-primary">{{ dossier["n5_evaluation_cadastrale"] }}</td>
+                                        <td>
+                                            <span class="badge {{ 'bg-success' if dossier['statut'] == 'Terminé' else 'bg-warning' }} rounded-pill">
+                                                {{ dossier["statut"] }}
+                                            </span>
+                                        </td>
+                                        <td>{{ dossier["objet"] }}</td>
+                                        <td>
+                                            <button type="button" class="btn btn-success btn-sm rounded-pill" data-bs-toggle="modal"
+                                                    data-bs-target="#assignmentModal{{ dossier['id'] }}">
+                                                <i class="fas fa-check-circle"></i> Terminer Dossier
+                                            </button>
+
+                                            <!-- Modal -->
+                                            <div class="modal fade" id="assignmentModal{{ dossier['id'] }}" tabindex="-1"
+                                                 aria-labelledby="assignmentModalLabel{{ dossier['id'] }}" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header bg-success text-white">
+                                                            <h5 class="modal-title" id="assignmentModalLabel{{ dossier['id'] }}">
+                                                                Confirmer la validation
+                                                            </h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <p class="text-secondary">
+                                                                Êtes-vous sûr de vouloir valider le dossier <b>{{ dossier['nom_dossier'] }}</b> ?
+                                                            </p>
+                                                             <b  class="form-label">Rermarque ou Observation:</b>
+                                                        </div>
+                                                        <div class="modal-footer justify-content-center">
+                                                            <form action="{{ url_for('rejet_dossier_evaluation_cadastrale', id_dossier=dossier['id']) }}" method="POST">
+
+                                                                <textarea name="objet_validation" id="objet_validation" class="form-control" required></textarea>
+                                                                <div class="mt-3 text-center">
+                                                                    <button type="submit" class="btn btn-success btn-sm rounded-pill">Oui, confirmer</button>
+                                                                    <button type="button" class="btn btn-secondary btn-sm rounded-pill" data-bs-dismiss="modal">Annuler</button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- End Modal -->
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- End Card Body -->
+                </div>
+                <!-- End Card -->
+            </div>
+        </div>
+        <!-- End Row -->
+
+    </div>
+    <!-- End Container -->
+</div>
+
+{% endblock %}

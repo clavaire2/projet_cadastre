@@ -1,8 +1,8 @@
+
 <div class="app-menu navbar-menu">
     <!-- LOGO -->
     <div class="navbar-brand-box">
-        <!-- Dark Logo-->
-        <a href="index.html" class="logo logo-dark">
+        <a href="{{url_for('admin_tableau_de_bord')}}" class="logo logo-dark">
             <span class="logo-sm">
                 <img src="{{ url_for('static', filename='images/logo-sm.png') }}" alt="" height="22">
             </span>
@@ -10,8 +10,7 @@
                 <img src="{{ url_for('static', filename='images/logo-dark.png') }}" alt="" height="17">
             </span>
         </a>
-        <!-- Light Logo-->
-        <a href="index.html" class="logo logo-light">
+        <a href="{{url_for('admin_tableau_de_bord')}}" class="logo logo-light">
             <span class="logo-sm">
                 <img src="{{ url_for('static', filename='images/logo-sm.png') }}" alt="" height="22">
             </span>
@@ -26,36 +25,132 @@
     </div>
 
 
-    <div id="scrollbar">
+
+    <div id="scrollbar" class="sidebar-content">
         <div class="container-fluid">
-
-
+        
             <div id="two-column-menu">
             </div>
+            
+            <div class="sidebar-header text-center py-4">
+                <h5 class="fw-bold text-white">Gestion des <br>Dossiers <br>  evaluation <br>cadastrale</h5>
+            </div>
+            <!-- Sidebar Menu -->
             <ul class="navbar-nav" id="navbar-nav">
-                <li class="menu-title"><span data-key="t-menu">Menu</span></li>
+            
+
+                <!-- Dashboard Link -->
+                <li class="nav-item">
+                    <a class="nav-link menu-link d-flex align-items-center border-bottom" href="{{ url_for('evaluation_cadastrale_tableau_de_bord') }}" role="button">
+                        <i class="ri-dashboard-2-line fs-5 me-2"></i>
+                        <span data-key="t-apps" class="text-menu">Tableau de bord</span>
+                    </a>
+                </li>
+
+                <!-- Ajouter un Dossier -->
+                <li class="nav-item">
+                    <a class="nav-link menu-link d-flex align-items-center border-bottom" href="{{url_for('liste_gestion_evaluation_cadastrale')}}" role="button">
+                        <i class="ri-folder-add-line fs-5 me-2"></i>
+                        <span data-key="t-apps" class="text-menu">Les Dossiers en attente</span>
+                    </a>
+                </li>
+
+                <!-- Liste des Dossiers -->
+                <li class="nav-item">
+                    <a class="nav-link menu-link d-flex align-items-center border-bottom" href="{{ url_for('dossier_cours_evaluation_cadastrale') }}" role="button">
+                        <i class="ri-folder-line fs-5 me-2"></i>
+                        <span data-key="t-apps" class="text-menu">Liste des dossiers<br> en cours </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link menu-link d-flex align-items-center border-bottom" href="{{ url_for('dossiers_rejeter_evaluation_cadastrale') }}" role="button">
+                        <i class="ri-folder-line fs-5 me-2"></i>
+                        <span data-key="t-apps" class="text-menu">Liste des dossiers<br> rejeter </span>
+                    </a>
+                </li>
+
+                
+
+                <!-- Ajouter un Admin -->
+                <li class="nav-item">
+                    <a class="nav-link menu-link d-flex align-items-center border-bottom" href="{{ url_for('dossiers_valides_evaluation_cadastrale') }}" role="button">
+                        <i class="ri-user-add-line fs-5 me-2"></i>
+                        <span data-key="t-apps" class="text-menu">Dossier Terminés<br>BRIGARDE</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link menu-link d-flex align-items-center border-bottom" href="" role="button">
+                        
+                        <span data-key="t-apps" class="text-menu"></span>
+                    </a>
+                </li>
 
 
-                <a class="nav-link menu-link" href="{{ url_for('evaluation_cadastrale_tableau_de_bord') }}"  role="button">
-                        <i class="ri-dashboard-2-line"></i> <span data-key="t-apps">Tableau de bord</span>
-                </a>
+            
+                
 
-                <a class="nav-link menu-link" href="{{url_for('liste_gestion_evaluation_cadastrale')}} "  role="button">
-                    <i class="ri-apps-2-line"></i> <span data-key="t-apps">Dossier en attente</span>
-                </a>
-
-                <a class="nav-link menu-link" href="{{ url_for('dossier_cours_evaluation_cadastrale') }}"  role="button">
-                    <i class="ri-apps-2-line"></i> <span data-key="t-apps">Dossier en cours</span>
-                </a>
-
-                <a class="nav-link menu-link" href="{{ url_for('dossiers_valides_evaluation_cadastrale') }}"  role="button">
-                    <i class="ri-apps-2-line"></i> <span data-key="t-apps">Dossier validé</span>
-                </a>
-
+                
             </ul>
         </div>
-        <!-- Sidebar -->
     </div>
 
-    <div class="sidebar-background"></div>
+
+    
+
+    <style>
+        .sidebar {
+            background-color: #333;
+            padding: 20px;
+            border-right: 1px solid #444;
+            height: 100vh;
+        }
+
+        .menu-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fff;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .nav-item .nav-link {
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 500;
+            line-height: 1.5;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            text-decoration: none;
+        }
+
+        .nav-item .nav-link:hover {
+            background-color: #575757;
+            color: #fff;
+        }
+
+        .nav-item .nav-link.active {
+            background-color: #1e1e1e;
+            color: #000;
+        }
+
+        .nav-link i {
+            font-size: 1.3rem;
+            color: #fff;
+            margin-right: 12px;
+        }
+
+        .text-menu {
+            font-size: 1rem;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .border-bottom {
+            border-bottom: 1px solid #444;
+            /* Ajoute une bordure sous chaque élément du menu */
+        }
+    </style>
 </div>

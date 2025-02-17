@@ -1,0 +1,123 @@
+{% extends 'signature/base.html' %}
+{% block titre %}
+<title>Cadastre - Dossiers assignés</title>
+{% endblock %}
+{% block contenu %}
+
+<div class="page-content">
+    <div class="container-fluid">
+
+        <!-- Titre de la page -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="page-title-box d-flex align-items-center justify-content-between bg-light shadow-sm rounded p-3">
+                    <h4 class="mb-0 text-primary fw-bold">📂 Liste des dossiers en cours</h4>
+                    <div class="page-title-right">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb mb-0">
+                                <li class="breadcrumb-item"><a href="#" class="text-secondary">Accueil</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Gestion Signature</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table des dossiers -->
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card border-0 shadow-lg rounded-4">
+                    <div class="card-header bg-primary text-white d-flex align-items-center">
+                        <h5 class="mb-0" style="color:white">📑 Dossiers en cours</h5>
+                    </div>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                    <div class="m-3">
+                        {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered align-middle">
+                                <thead class="table-primary text-center">
+                                    <tr>
+                                        <th>📁 Nom</th>
+                                        <th>🗓️ Date d'ajout</th>
+                                        <th>👤 Admin</th>
+                                        <th>👤 Chef Brigade</th>
+                                        <th>👷‍♂️ Brigade</th>
+                                        <th>🔒 Sécurisation</th>
+                                        <th>👷‍♂️Evaluation <br>Cadastrale</th>
+                                        <th>✍️ Signature</th>
+                                        <th>📆 Date assignation</th>
+                                        <th>👤 Assigné à</th>
+                                        <th>🔍 Statut</th>
+                                        <th>📝 <br>Remarques</th>
+                                        <th>⚙️ Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for dossier in dossiers %}
+                                    <tr class="text-center">
+                                        <td class="fw-bold text-primary">{{ dossier["nom_dossier"] }}</td>
+                                        <td>{{ dossier["date_ajout"] }}</td>
+                                        <td>{{ dossier["n1_admin"] }}</td>
+                                        <td>{{ dossier["n2_chef_brigade"] }}</td>
+                                        <td class="text-success">{{ dossier["n3_brigade"] }}</td>
+                                        <td>{{ dossier["n4_securisation"] }}</td>
+                                         <td>{{ dossier["n5_evaluation_cadastrale"] }}</td>
+                                        <td>{{ dossier["n6_signature"] }}</td>
+                                        <td>{{ dossier["date_assignation_n6"] }}</td>
+                                        <td>{{ dossier["n6_signature"] }}</td>
+                                        <td class="fw-bold {% if dossier['statut'] == 'Terminé' %}text-success{% else %}text-warning{% endif %}">{{ dossier["statut"] }}</td>
+                                        <td>{{ dossier["objet"] }}</td>
+                                        <td>
+                                            <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#assignmentModal{{ dossier['id'] }}">
+                                                ✅ Terminer
+                                            </button>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Modal de confirmation -->
+                                    <div class="modal fade" id="assignmentModal{{ dossier['id'] }}" tabindex="-1" aria-labelledby="assignmentModalLabel{{ dossier['id'] }}" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-success text-white">
+                                                    <h5 class="modal-title" id="assignmentModalLabel{{ dossier['id'] }}">Confirmation</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body text-center">
+                                                    <p class="mb-4">Confirmez-vous la validation du dossier <strong>{{ dossier['nom_dossier'] }}</strong> ?</p>
+                                                    <form action="{{ url_for('valider_dossier_rejet_signature', id_dossier=dossier['id']) }}" method="POST">
+                                                        <div class="mb-3">
+                                                            <label for="objet_validation" class="form-label">Rermarques ou Observations:</label>
+                                                            <textarea name="objet_validation" id="objet_validation" class="form-control" rows="3" required></textarea>
+                                                        </div>
+                                                        <button type="submit" class="btn btn-success">Oui, valider</button>
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,153 @@
+{% extends 'brigade/base.html' %}
+
+{% block titre %}
+<title>Cadastre - Dossiers en attente</title>
+{% endblock %}
+
+{% block contenu %}
+<div class="page-content">
+    <div class="container-fluid">
+        
+        <!-- Title Section -->
+        <div class="row">
+            <div class="col-12">
+                <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+                    <h4 class="mb-sm-0">Liste des dossiers en attente</h4>
+
+                    <div class="page-title-right">
+                        <ol class="breadcrumb m-0">
+                            <li class="breadcrumb-item"><a href="javascript: void(0);">Liste</a></li>
+                            <li class="breadcrumb-item active">Dossiers en attente</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Title Section -->
+
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card shadow-lg">
+                    <div class="card-header d-flex align-items-center">
+                        <h4 class="card-title mb-0 flex-grow-1">Dossiers en attente</h4>
+                    </div><!-- end card header -->
+
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-hover text-center mb-0">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th>Nom du dossier</th>
+                                        <th>Date d'ajout</th>
+                                        <th>Date assignation N2</th>
+                                        <th>Admin N1</th>
+                                        <th>Chef Brigarde</th>
+                                        <th>Date assignation Brigarde</th>
+                                        <th>Nom Brigarde</th>
+                                        <th>Statut</th>
+                                        <th>Objet</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for dossier in dossiers %}
+                                    <tr>
+                                        <td><b class="text-primary">{{ dossier[1] }}</b></td>
+                                        <td>{{ dossier[2] }}</td>
+                                        <td>{{ dossier[3] }}</td>
+                                        <td>{{ dossier[6] }}</td>
+                                        <td>{{ dossier[7] }}</td>
+                                        <td class="text-primary">{{ dossier[4] }}</td>
+                                        <td class="text-primary">{{ dossier[9] }}</td>
+                                        <td>
+                                            <b class="badge bg-{{ 'success' if dossier[4] == 'actif' else 'danger' }} p-1 fs-6">
+                                                {{ dossier[5] }}
+                                            </b>
+                                        </td>
+                                        <td class="text-primary">{{ dossier[11] }}</td>
+                                        <td>
+                                            <button type="button" class="btn btn-success btn-sm rounded-pill"
+                                                    onclick="confirmAssignment({{ dossier[0] }}, '{{ dossier[1] }}');">
+                                                Terminer Dossier
+                                            </button>
+                                        
+                                            <!-- Modal Confirmation -->
+                                            <div id="assignmentModal{{ dossier[0] }}" class="modal">
+                                                <div class="modal-content">
+                                                    <h3 class="text-success">Confirmation</h3>
+                                                    <p>Êtes-vous sûr de vouloir terminer le dossier ({{ dossier[1] }}) ?</p>
+                                                    
+                                                    <form id="assignForm{{ dossier[0] }}"
+                                                          action="{{ url_for('terminer_dossier_apres_rejet_brigade', id_dossier=dossier[0]) }}"
+                                                          method="POST" class="d-inline">
+                                                          
+                                                        <label for="objet">Objet de la vérification :</label>
+                                                        <textarea name="objet" id="objet" class="form-control" required></textarea>
+                                                    
+                                                        <div class="text-center mt-3">
+                                                            <button type="submit" class="btn btn-success px-4 py-2 rounded">
+                                                                Oui, confirmer
+                                                            </button>
+                                                            <button onclick="closeModal({{ dossier[0] }})" class="btn btn-secondary px-4 py-2 rounded">
+                                                                Annuler
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- End Modal Confirmation -->
+
+                                            <script type="text/javascript">
+                                                function confirmAssignment(dossierId, dossierName) {
+                                                    document.getElementById('assignmentModal' + dossierId).style.display = 'block';
+                                                }
+
+                                                function closeModal(dossierId) {
+                                                    document.getElementById('assignmentModal' + dossierId).style.display = 'none';
+                                                }
+                                            </script>
+
+                                            <style>
+                                                .modal {
+                                                    display: none;
+                                                    position: fixed;
+                                                    z-index: 1;
+                                                    left: 0;
+                                                    top: 0;
+                                                    width: 100%;
+                                                    height: 100%;
+                                                    background-color: rgba(0, 0, 0, 0.4);
+                                                    overflow: auto;
+                                                }
+
+                                                .modal-content {
+                                                    background-color: white;
+                                                    margin: 15% auto;
+                                                    padding: 20px;
+                                                    border-radius: 10px;
+                                                    width: 50%;
+                                                    text-align: center;
+                                                }
+
+                                                .modal-content h3 {
+                                                    margin-bottom: 20px;
+                                                }
+
+                                                .modal-content p {
+                                                    margin-bottom: 20px;
+                                                }
+                                            </style>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div><!-- end card-body -->
+                </div><!-- end card -->
+            </div><!-- end col -->
+        </div><!-- end row -->
+
+    </div><!-- container-fluid -->
+</div>
+{% endblock %}

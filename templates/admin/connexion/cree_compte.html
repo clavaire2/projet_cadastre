@@ -61,36 +61,42 @@
                             <td>{{ admin[3] }}</td>
                             <!-- Bouton pour ouvrir le modal -->
                             <td class="text-center">
-                                <a href="#deleteModal" data-bs-toggle="modal"
-                                    class="btn btn-sm btn-outline-danger d-flex align-items-center justify-content-center">
-                                    <i class="ri-delete-bin-5-line me-2"></i> Supprimer
-                                </a>
-                            </td>
-                            <!-- Popup de confirmation -->
-                            <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel"
-                                aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="deleteModalLabel">Confirmer la suppression</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <p>Êtes-vous sûr de vouloir supprimer cet admin ? Cette action est
-                                                irréversible.</p>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Annuler</button>
-                                            <a href="{{ url_for('supprimer_admin', id=admin[0]) }}"
-                                                class="btn btn-danger">Supprimer</a>
+
+                                <button class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                                    data-bs-target="#deleteModal{{admin[0] }}">
+                                    Supprimer
+                                </button>
+                                <div class="modal fade" id="deleteModal{{ admin[0] }}" tabindex="-1">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title text-danger">Confirmation de suppression</h5>
+                                                <button type="button" class="btn-close"
+                                                    data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Voulez-vous vraiment supprimer <strong>{{admin[1] }}</strong> ?</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <form
+                                                    action="{{ url_for('supprimer_admin', id=admin[0]) }}"
+                                                    method="POST">
+                                                    <button type="submit" class="btn btn-danger">Oui, Supprimer</button>
+                                                </form>
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-bs-dismiss="modal">Annuler</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                                <!-- Popup de confirmation -->
 
-                            <!-- Styles CSS pour un design classe -->
+
+
+
+
+                            </td>
+                       
                             <style>
                                 /* Styles généraux pour le modal */
                                 .modal-content {

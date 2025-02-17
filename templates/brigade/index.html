@@ -11,7 +11,7 @@
                         <div class="col-12">
                             <div class="d-flex align-items-center flex-lg-row flex-column">
                                 <div class="flex-grow-1">
-                                    <h4 class="fs-20 mb-2 text-primary">Bonjour Chef, {{firstName}}</h4>
+                                    <h4 class="fs-20 mb-2 text-primary">Bonjour, {{firstName}}</h4>
                                     <p class="text-muted mb-0">Votre tableau de bord actuel</p>
                                 </div>
                             </div>
@@ -19,22 +19,21 @@
                     </div>
 
                     <div class="row">
-                        <!-- Card 1: Dossier en attente -->
-                        
+                        <!-- Card: Dossier en attente -->
 
-                        <!-- Card 2: Dossier en cours -->
-                        <div class="col-xl-6 col-md-6">
-                            <div class="card card-animate shadow-lg rounded-3">
+                        <!-- Card: Dossier en cours -->
+                        <div class="col-xl-4 col-md-4">
+                            <div class="card card-animate shadow rounded-3">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
                                         <div class="flex-grow-1">
-                                            <p class="text-uppercase fw-medium text-muted mb-1">Nombre de dossier en cours</p>
+                                            <p class="text-uppercase fw-medium text-muted mb-1">Dossiers Urgents attente</p>
                                         </div>
                                     </div>
                                     <div class="d-flex align-items-end justify-content-between mt-3">
                                         <div>
-                                            <h4 class="fs-24 fw-bold text-dark mb-3">{{en_cours}}</h4>
-                                            <a href="{{ url_for('dossier_cours_brigade') }}" class="text-decoration-none text-info">Voir plus</a>
+                                            <h4 class="fs-24 fw-bold text-dark mb-3">{{en_cours_urgent}}</h4>
+                                            <a href="{{ url_for('liste_gestion_brigade_urgents') }}" class="text-decoration-none text-info">Voir plus</a>
                                         </div>
                                         <div class="avatar-sm">
                                             <span class="avatar-title bg-info rounded-circle">
@@ -46,13 +45,37 @@
                             </div>
                         </div>
 
-                        <!-- Card 3: Dossier validés -->
-                        <div class="col-xl-6 col-md-6">
-                            <div class="card card-animate shadow-lg rounded-3">
+                        <!-- Card: Dossier en cours -->
+                        <div class="col-xl-4 col-md-4">
+                            <div class="card card-animate shadow rounded-3">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
                                         <div class="flex-grow-1">
-                                            <p class="text-uppercase fw-medium text-muted mb-1">Nombre de dossier validés</p>
+                                            <p class="text-uppercase fw-medium text-muted mb-1">Dossiers en cours</p>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-end justify-content-between mt-3">
+                                        <div>
+                                            <h4 class="fs-24 fw-bold text-dark mb-3">{{en_cours}}</h4>
+                                            <a href="{{ url_for('liste_gestion_brigade') }}" class="text-decoration-none text-info">Voir plus</a>
+                                        </div>
+                                        <div class="avatar-sm">
+                                            <span class="avatar-title bg-info rounded-circle">
+                                                <i class="bx bx-loader bx-spin text-white"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card: Dossier validés -->
+                        <div class="col-xl-4 col-md-4">
+                            <div class="card card-animate shadow rounded-3">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-grow-1">
+                                            <p class="text-uppercase fw-medium text-muted mb-1">Dossiers validés</p>
                                         </div>
                                     </div>
                                     <div class="d-flex align-items-end justify-content-between mt-3">
@@ -70,12 +93,10 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 
 {% endblock %}

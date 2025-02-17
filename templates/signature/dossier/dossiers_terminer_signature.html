@@ -1,151 +1,98 @@
 {% extends 'signature/base.html' %}
 {% block titre %}
     <title>Cadastre - Dossiers validés</title>
+{% endblock %}
 
-    {% endblock %}
 {% block contenu %}
-
 <div class="page-content">
     <div class="container-fluid">
 
-        <!-- start page title -->
+        <!-- Start page title -->
         <div class="row">
             <div class="col-12">
-                <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-                    <h4 class="mb-sm-0">Liste des dossier Terminer</h4>
-
+                <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-light p-4 rounded shadow-sm">
+                    <h4 class="mb-sm-0 text-dark">Liste des dossiers terminés</h4>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
-                            <li class="breadcrumb-item"><a href="javascript: void(0);">Liste</a></li>
-                            <li class="breadcrumb-item active">Liste des dossiers Terminer: <b style="color:blue">Gestion Signature</b>
-                            </li>
+                            <li class="breadcrumb-item"><a href="javascript: void(0);" class="text-muted">Liste</a></li>
+                            <li class="breadcrumb-item active"><b class="text-primary">Gestion Signature</b></li>
                         </ol>
                     </div>
-
                 </div>
             </div>
         </div>
-        <!-- end page title -->
+        <!-- End page title -->
 
-        <!-- end row -->
-
-        <div class="row">
+        <!-- Start content section -->
+        <div class="row mt-4">
             <div class="col-xl-12">
-                <div class="card">
-                    <div class="card-header align-items-center d-flex">
-                        <h4 class="card-title mb-0 flex-grow-1">
-                            Liste des dossiers : <b style="color: blue;">Gestion Signature</b>
-                        </h4>
+                <div class="card shadow-sm border-light">
+                    <div class="card-header d-flex align-items-center bg-primary text-white p-3 rounded-top">
+                        <h4 class="card-title mb-0 flex-grow-1" style="color:aliceblue">Liste des dossiers : Gestion Signature</h4>
                     </div>
-                    <!-- end card header -->
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                                {% if messages %}
-                                <div>
-                                    {% for category, message in messages %}
-                                    <div class="alert alert-{{ category }}" role="alert">
-                                        {{ message }}
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
-                                {% endwith %}
-                    <div class="card-body">
-                        <div class="live-preview">
-                            <div class="table-responsive table-card">
-                                <table class="table align-middle table-nowrap table-striped mb-0">
-                                    <thead class="table-light">
-                                    <tr>
-                                        <th class="text-center">Nom du dossier</th>
-                                        <th class="text-center">Durées Global <br> de N1-N4 </th>
-                                        <th class="text-center">Date assignation<br>termine N3</th>
-                                        <th class="text-center">Nom N1</th>
-                                        <th class="text-center">Nom N2</th>
-                                        <th class="text-center">Nom N3</th>
-                                        <th class="text-center">Nom N4</th>
-                                        <th class="text-center">Date <br>assignation N4</th>
-                                        <th class="text-center">Votre <br>Nom</th>
-                                        <th>Durées du <br>dossier</th>
-                                        <th class="text-center">Statut</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {% for dossier in dossiers %}
-                                    <tr>
-                                        <td class="text-center">
-                                            <b style="color: blue;">{{ dossier["nom_dossier"] }}</b>
-                                        </td>
-                                        <td class="text-center" style="color: blue;">{{ dossier["date_temine_n6"] - dossier["date_ajout"] }}</td>
-                                        <td class="text-center">{{ dossier["date_temine_n3"] }}</td>
-                                        <td class="text-center">{{ dossier["n1_admin"] }}</td>
-                                        <td class="text-center">{{ dossier["n2_chef_brigade"] }}</td>
-                                        <td class="text-center" style="color: blue;">{{ dossier["n3_brigade"] }}</td>
-                                        <td class="text-center" style="color: blue;">{{ dossier["n4_securisation"] }}</td>
-                                        <td class="text-center" style="color: blue;">{{ dossier["date_assignation_n4"] }}</td>
-                                        <td class="text-center" style="color: blue;">{{ dossier["n6_signature"] }}</td>
-                                        <td class="text-center" style="color: blue;">{{ dossier["date_temine_n6"] - dossier["date_assignation_n5"] }}</td>
-                                        <td class="text-center" style="color: blue;">{{ dossier["statut"] }}</td>
+                    <!-- End card header -->
 
-                                    </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <div class="alert-container">
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                {% endfor %}
                             </div>
+                        {% endif %}
+                    {% endwith %}
+
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover align-middle mb-0">
+                                <thead class="table-light text-center">
+                                    <tr>
+                                        <th>Nom du dossier</th>
+                                        <th>Durée globale (N1-N4)</th>
+                                        <th>Date assignation N3</th>
+                                        <th>Admin</th>
+                                         <th>Chef Brigarde</th>
+                                        <th>Brigarde</th>
+                                        <th>securisation</th>
+                                        <th>evaluation <br>cadastrale</th>
+                                        <th>Date assignation N4</th>
+                                        <th>Votre nom</th>
+                                        <th>Durée du dossier</th>
+                                        <th>Statut</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for dossier in dossiers %}
+                                        <tr class="text-center">
+                                            <td><b class="text-primary">{{ dossier["nom_dossier"] }}</b></td>
+                                            <td>{{ dossier["date_temine_n6"] - dossier["date_ajout"] }}</td>
+                                            <td>{{ dossier["date_temine_n3"] }}</td>
+                                            <td>{{ dossier["n1_admin"] }}</td>
+                                            <td>{{ dossier["n2_chef_brigade"] }}</td>
+                                            <td class="text-primary">{{ dossier["n3_brigade"] }}</td>
+                                            <td class="text-primary">{{ dossier["n4_securisation"] }}</td>
+                                             <td class="text-primary">{{ dossier["n5_evaluation_cadastrale"] }}</td>
+                                            <td>{{ dossier["date_assignation_n4"] }}</td>
+                                            <td class="text-primary">{{ dossier["n6_signature"] }}</td>
+                                            <td>{{ dossier["date_temine_n6"] - dossier["date_assignation_n5"] }}</td>
+                                            <td class="text-success">{{ dossier["statut"] }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                    <!-- end card-body -->
+                    <!-- End card-body -->
                 </div>
-                <!-- end card -->
+                <!-- End card -->
             </div>
-            <!-- end col -->
+            <!-- End col -->
         </div>
-        <!-- end row -->
-
-        <script type="text/javascript">
-            function confirmAssignment(dossierId, dossierName) {
-                // Afficher le modal spécifique au dossier
-                document.getElementById('assignmentModal' + dossierId).style.display = 'block';
-            }
-
-            function closeModal(dossierId) {
-                // Masquer le modal spécifique
-                document.getElementById('assignmentModal' + dossierId).style.display = 'none';
-            }
-        </script>
-
-        <style>
-            .modal {
-                display: none;
-                position: fixed;
-                z-index: 1;
-                left: 0;
-                top: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0, 0, 0, 0.4);
-                overflow: auto;
-            }
-
-            .modal-content {
-                background-color: white;
-                margin: 15% auto;
-                padding: 20px;
-                border-radius: 10px;
-                width: 50%;
-                text-align: center;
-            }
-
-            .modal-content h3 {
-                margin-bottom: 20px;
-            }
-
-            .modal-content p {
-                margin-bottom: 20px;
-            }
-        </style>
-
-
+        <!-- End row -->
     </div>
-    <!-- container-fluid -->
+    <!-- End container-fluid -->
 </div>
-
 {% endblock %}

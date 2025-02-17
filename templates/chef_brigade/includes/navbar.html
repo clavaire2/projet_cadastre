@@ -32,57 +32,54 @@
             </div>
             
             <div class="sidebar-header text-center py-4">
-                <h5 class="fw-bold text-white">Gestion des Dossiers <br> admin</h5>
+                <h5 class="fw-bold text-white">Gestion des Dossiers <br> Chef Brigarde</h5>
             </div>
             <!-- Sidebar Menu -->
             <ul class="navbar-nav" id="navbar-nav">
-            
 
-                <!-- Dashboard Link -->
+                <!-- Tableau de bord -->
                 <li class="nav-item">
                     <a class="nav-link menu-link d-flex align-items-center border-bottom" href="{{ url_for('chef_brigade_tableau_de_bord') }}" role="button">
                         <i class="ri-dashboard-2-line fs-5 me-2"></i>
-                        <span data-key="t-apps" class="text-menu">Tableau de bord</span>
+                        <span class="text-menu">Tableau de bord</span>
                     </a>
                 </li>
-
-                <!-- Ajouter un Dossier -->
+            
+                <!-- Gestion des dossiers -->
                 <li class="nav-item">
-                    <a class="nav-link menu-link d-flex align-items-center border-bottom" href="{{url_for('liste_gestion_chef_brigade')}}" role="button">
+                    <a class="nav-link menu-link d-flex align-items-center border-bottom" href="{{ url_for('liste_gestion_chef_brigade') }}" role="button">
                         <i class="ri-folder-add-line fs-5 me-2"></i>
-                        <span data-key="t-apps" class="text-menu">Mes Dossiers</span>
+                        <span class="text-menu">Mes dossiers</span>
                     </a>
                 </li>
-
-                <!-- Liste des Dossiers -->
+            
+                <!-- Dossiers en attente de validation -->
+                <li class="nav-item">
+                    <a class="nav-link menu-link d-flex align-items-center border-bottom" href="{{ url_for('dossiers_a_verifier_brigade') }}" role="button">
+                        <i class="ri-folder-line fs-5 me-2"></i>
+                        <span class="text-menu">Dossiers à vérifier</span>
+                    </a>
+                </li>
+            
+                <!-- Historique des traitements -->
                 <li class="nav-item">
                     <a class="nav-link menu-link d-flex align-items-center border-bottom" href="{{ url_for('dossiers_valides') }}" role="button">
-                        <i class="ri-folder-line fs-5 me-2"></i>
-                        <span data-key="t-apps" class="text-menu">Liste des dossiers</span>
+                        <i class="ri-file-list-line fs-5 me-2"></i>  <!-- Icône alternative pour l'historique -->
+                        <span class="text-menu">Historique des dossiers</span>
                     </a>
                 </li>
-
-                <!-- Ajouter un Admin -->
+                
+            
+                <!-- Gestion des brigades -->
                 <li class="nav-item">
                     <a class="nav-link menu-link d-flex align-items-center border-bottom" href="{{ url_for('inscription_brigade') }}" role="button">
-                        <i class="ri-user-add-line fs-5 me-2"></i>
-                        <span data-key="t-apps" class="text-menu">Ajouter  Supprimer<br>BRIGARDE</span>
+                        <i class="ri-user-settings-line fs-5 me-2"></i>
+                        <span class="text-menu">Administration des brigades</span>
                     </a>
                 </li>
-
-                <li class="nav-item">
-                    <a class="nav-link menu-link d-flex align-items-center border-bottom" href="" role="button">
-                        
-                        <span data-key="t-apps" class="text-menu"></span>
-                    </a>
-                </li>
-
-
             
-                
-
-                
             </ul>
+            
         </div>
     </div>
 

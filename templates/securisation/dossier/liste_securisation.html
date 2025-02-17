@@ -40,13 +40,14 @@
                                     <tr>
                                         <th>Nom du dossier</th>
                                         <th>Date d'ajout</th>
-                                        <th>Date assignation termine N3</th>
-                                        <th>Nom N1</th>
-                                        <th>Nom N2</th>
-                                        <th>Nom N3</th>
-                                        <th>Date assignation N4</th>
+                                        <th>Date assignation termine</th>
+                                        <th>Admin</th>
+                                        <th>Chef Brigarde</th>
+                                        <th>Brigarde</th>
+                                        <th>Date assignation </th>
                                         <th>Votre Nom</th>
                                         <th>Statut</th>
+                                        <th>Observation</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -62,6 +63,7 @@
                                         <td style="color: blue;">{{ dossier["date_assignation_n4"] }}</td>
                                         <td style="color: blue;">{{ dossier["n4_securisation"] }}</td>
                                         <td style="color: blue;">{{ dossier["statut"] }}</td>
+                                        <td style="color: blue;">{{ dossier["objet"] }}</td>
                                         <td>
                                             <button type="button" class="btn btn-success btn-sm rounded-pill"
                                                     onclick="confirmAssignment({{ dossier['id'] }}, '{{ dossier['nom_dossier'] }}');">

@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le : mar. 21 jan. 2025 à 15:11
+-- Généré le : ven. 14 fév. 2025 à 17:25
 -- Version du serveur : 10.4.32-MariaDB
--- Version de PHP : 8.2.12
+-- Version de PHP : 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -34,7 +34,7 @@ CREATE TABLE `admin` (
   `numero_telephone` varchar(15) DEFAULT NULL,
   `date_inscription` timestamp NOT NULL DEFAULT current_timestamp(),
   `password` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Déchargement des données de la table `admin`
@@ -59,15 +59,16 @@ CREATE TABLE `brigade` (
   `reset_token` varchar(255) DEFAULT NULL,
   `token_expiration` datetime DEFAULT NULL,
   `id_chef_brigarde` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Déchargement des données de la table `brigade`
 --
 
 INSERT INTO `brigade` (`ident`, `nom_complet`, `email_brigade`, `numero_telephone`, `date_inscription`, `password`, `reset_token`, `token_expiration`, `id_chef_brigarde`) VALUES
-(3, 'AGBODJAN Kossi Bruce', 'kagbodjan@otr.tg', '90611326', '2025-01-17 20:34:07', 'ea66e9c169c7e5a307eb06fb8e6a239d', NULL, NULL, 4),
-(4, 'ALOUMEDJI Emmanuel Kofi Mawoulé', 'excellencealoumedji@gmail.com', '91723907', '2025-01-17 20:53:27', 'ea66e9c169c7e5a307eb06fb8e6a239d', NULL, NULL, 4);
+(1, 'AGBODJAN Kossi Bruce', 'clavaireb.gomina@gmail.com', '90611326', '2025-02-05 00:17:06', 'ea66e9c169c7e5a307eb06fb8e6a239d', NULL, NULL, 1),
+(2, 'ALOUMEDJI Emmanuel Kofi Mawoulé', 'excellencealoumedji@gmail.com', '91723907', '2025-02-05 00:18:12', 'ea66e9c169c7e5a307eb06fb8e6a239d', NULL, NULL, 1),
+(3, 'ATSU ETSITSU Josué', 'jatsuetsitsu@otr.tg', '91075997', '2025-02-05 00:19:05', 'ea66e9c169c7e5a307eb06fb8e6a239d', NULL, NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -84,15 +85,16 @@ CREATE TABLE `chef_brigade` (
   `password` varchar(255) NOT NULL,
   `reset_token` varchar(255) DEFAULT NULL,
   `token_expiration` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Déchargement des données de la table `chef_brigade`
 --
 
 INSERT INTO `chef_brigade` (`ident`, `nom_complet`, `email_chefbrigade`, `numero_telephone`, `date_inscription`, `password`, `reset_token`, `token_expiration`) VALUES
-(4, 'BAKEM	Essimna\r\n', 'eawate@otr.tg', '92871153', '2024-12-06 18:19:59', 'ea66e9c169c7e5a307eb06fb8e6a239d', NULL, NULL),
-(5, 'KOUMA	Féidibé', 'fkouma@otr.tg', '92644004', '2024-12-10 08:27:15', 'ea66e9c169c7e5a307eb06fb8e6a239d', NULL, NULL);
+(1, 'BAKEM	 Essimna', 'clavaire.gomina@gmail.com', '92871153', '2025-02-04 21:11:14', 'ea66e9c169c7e5a307eb06fb8e6a239d', NULL, NULL),
+(2, 'KOUMA Féidibé', 'fkouma@otr.tg', '92644004', '2025-02-04 21:11:59', 'ea66e9c169c7e5a307eb06fb8e6a239d', NULL, NULL),
+(3, 'NYATSO Komla Lolonyo', 'lolonnyatso@gmail.com', '90678251', '2025-02-04 21:15:02', 'ea66e9c169c7e5a307eb06fb8e6a239d', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -109,14 +111,14 @@ CREATE TABLE `conversation_fonciere` (
   `password` varchar(255) NOT NULL,
   `reset_token` varchar(255) DEFAULT NULL,
   `token_expiration` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Déchargement des données de la table `conversation_fonciere`
 --
 
 INSERT INTO `conversation_fonciere` (`ident`, `nom_complet`, `email_conversation_fonciere`, `numero_telephone`, `date_inscription`, `password`, `reset_token`, `token_expiration`) VALUES
-(1, 'Abalo cf', 'abalo_cf@gmail.com', '66565', '2024-12-06 18:48:30', 'ea66e9c169c7e5a307eb06fb8e6a239d', NULL, NULL);
+(1, 'Abalo cf', 'abalo_cf@gmail.com', '93464350', '2024-12-06 18:48:30', 'ea66e9c169c7e5a307eb06fb8e6a239d', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -130,7 +132,14 @@ CREATE TABLE `dossier` (
   `date_creation` datetime DEFAULT current_timestamp(),
   `statut` enum('attente','valide','rejete','termine','en_cours') DEFAULT 'attente',
   `nom_de_ajouteur` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Déchargement des données de la table `dossier`
+--
+
+INSERT INTO `dossier` (`id`, `nom_dossier`, `date_creation`, `statut`, `nom_de_ajouteur`) VALUES
+(17, 'Ab015', '2025-02-13 17:18:51', 'attente', 'Awadi Abalo');
 
 -- --------------------------------------------------------
 
@@ -153,15 +162,28 @@ CREATE TABLE `dossier_terminer` (
 --
 
 INSERT INTO `dossier_terminer` (`id`, `nom_dossier`, `date_ajout`, `date_assignation`, `date_terminer`, `statut`, `n1_admin`) VALUES
-(1, 'e5625', '2025-01-10 00:01:48', '2025-01-10 01:15:06', '2025-01-10 01:15:06', 'Terminé', 'Abalo admin'),
-(2, 'ergezr552', '2025-01-10 01:10:21', '2025-01-10 01:16:05', '2025-01-10 01:16:05', 'Terminé', 'Abalo admin'),
-(3, 'df41*', '2025-01-10 01:10:21', '2025-01-10 01:16:26', '2025-01-10 01:16:26', 'Terminé', 'Abalo admin'),
-(4, 'zdf525', '2025-01-10 01:34:21', '2025-01-10 01:35:40', '2025-01-10 01:35:40', 'Terminé', 'Abalo admin'),
-(5, 'eazf52', '2025-01-10 01:34:21', '2025-01-10 01:36:08', '2025-01-10 01:36:08', 'Terminé', 'Abalo admin'),
-(6, 'hhjjj', '2025-01-11 09:17:45', '2025-01-11 09:22:00', '2025-01-11 09:22:00', 'Terminé', 'Abalo admin'),
-(7, '43958A', '2025-01-11 12:27:35', '2025-01-17 19:01:55', '2025-01-17 19:01:55', 'Terminé', 'Awadi Abalo'),
-(8, 'Vdefre12', '2025-01-18 12:17:20', '2025-01-18 12:27:38', '2025-01-18 12:27:38', 'Terminé', 'Awadi Abalo'),
-(9, 'doc112', '2025-01-18 12:17:20', '2025-01-18 12:35:47', '2025-01-18 12:35:47', 'Terminé', 'Awadi Abalo');
+(1, '61021', '2025-02-04 19:52:45', '2025-02-04 19:53:36', '2025-02-04 19:53:36', 'Terminé', 'Awadi Abalo'),
+(2, '60170', '2025-02-04 19:52:45', '2025-02-04 19:53:36', '2025-02-04 19:53:36', 'Terminé', 'Awadi Abalo'),
+(3, '57195', '2025-02-04 19:52:45', '2025-02-04 19:53:47', '2025-02-04 19:53:47', 'Terminé', 'Awadi Abalo'),
+(4, '55326', '2025-02-04 19:52:45', '2025-02-04 19:53:47', '2025-02-04 19:53:47', 'Terminé', 'Awadi Abalo'),
+(5, '54010', '2025-02-04 19:52:45', '2025-02-05 00:03:03', '2025-02-05 00:03:03', 'Terminé', 'Awadi Abalo'),
+(6, '49312', '2025-02-04 19:52:45', '2025-02-05 00:03:03', '2025-02-05 00:03:03', 'Terminé', 'Awadi Abalo'),
+(7, '47660', '2025-02-04 19:52:45', '2025-02-09 10:30:06', '2025-02-09 10:30:06', 'Terminé', 'Awadi Abalo'),
+(8, '47242', '2025-02-04 19:52:45', '2025-02-09 10:30:06', '2025-02-09 10:30:06', 'Terminé', 'Awadi Abalo'),
+(9, '46957', '2025-02-04 19:52:45', '2025-02-09 10:30:06', '2025-02-09 10:30:06', 'Terminé', 'Awadi Abalo'),
+(10, '52890', '2025-02-04 19:52:45', '2025-02-09 23:53:30', '2025-02-09 23:53:30', 'Terminé', 'Awadi Abalo'),
+(11, '45688', '2025-02-04 19:52:45', '2025-02-09 23:53:30', '2025-02-09 23:53:30', 'Terminé', 'Awadi Abalo'),
+(12, '43958', '2025-02-04 19:52:45', '2025-02-09 23:53:30', '2025-02-09 23:53:30', 'Terminé', 'Awadi Abalo'),
+(13, '38511', '2025-02-04 19:52:45', '2025-02-10 00:08:35', '2025-02-10 00:08:35', 'Terminé', 'Awadi Abalo'),
+(14, 'ezr6', '2025-02-10 15:16:38', '2025-02-10 17:42:50', '2025-02-10 17:42:54', 'Terminé', 'Awadi Abalo'),
+(15, 'zvcz68', '2025-02-10 15:16:38', '2025-02-10 18:01:18', '2025-02-10 18:01:22', 'Terminé', 'Awadi Abalo'),
+(16, 'zevez64', '2025-02-10 15:16:38', '2025-02-10 18:01:18', '2025-02-10 18:01:25', 'Terminé', 'Awadi Abalo'),
+(17, 'zefezf6', '2025-02-10 15:16:38', '2025-02-10 18:02:43', '2025-02-10 18:02:46', 'Terminé', 'Awadi Abalo'),
+(18, 'zefze54', '2025-02-10 15:16:38', '2025-02-10 18:02:43', '2025-02-10 18:02:49', 'Terminé', 'Awadi Abalo'),
+(19, 'zegve55', '2025-02-11 11:17:15', '2025-02-11 11:17:23', '2025-02-11 11:17:27', 'Terminé', 'Awadi Abalo'),
+(20, 'Ab016', '2025-02-13 17:19:01', '2025-02-13 17:20:56', '2025-02-13 17:20:56', 'Terminé', 'Awadi Abalo'),
+(21, 'AB017', '2025-02-13 17:19:14', '2025-02-13 17:20:56', '2025-02-13 17:20:56', 'Terminé', 'Awadi Abalo'),
+(22, 'Ab014', '2025-02-13 17:18:39', '2025-02-14 14:52:39', '2025-02-14 14:52:39', 'Terminé', 'Awadi Abalo');
 
 -- --------------------------------------------------------
 
@@ -178,15 +200,14 @@ CREATE TABLE `evaluation_cadastrale` (
   `password` varchar(255) NOT NULL,
   `reset_token` varchar(255) DEFAULT NULL,
   `token_expiration` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Déchargement des données de la table `evaluation_cadastrale`
 --
 
 INSERT INTO `evaluation_cadastrale` (`ident`, `nom_complet`, `email_evaluation_cadastrale`, `numero_telephone`, `date_inscription`, `password`, `reset_token`, `token_expiration`) VALUES
-(1, 'Abalo ec', 'abalo_ec@gmail.com', '66565', '2024-12-06 18:46:59', 'ea66e9c169c7e5a307eb06fb8e6a239d', NULL, NULL),
-(2, 'c Gomina clavaire', 'clavaire.gominasev@gmail.com', '92891445', '2024-12-10 10:50:14', '5669fb4cc8a47469cc15eb3e24dc8f23', NULL, NULL);
+(2, 'KOUGNIGAN Reine Marimar Théréza', 'rkougnigan@otr.tg', '98978181', '2025-02-04 21:21:47', 'ea66e9c169c7e5a307eb06fb8e6a239d', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -205,21 +226,18 @@ CREATE TABLE `gestion_brigade` (
   `n2_chef_brigade` varchar(255) DEFAULT NULL,
   `id_chef_brigade` varchar(225) DEFAULT NULL,
   `n3_brigade` varchar(225) DEFAULT NULL,
-  `id_brigade` varchar(225) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `id_brigade` varchar(225) DEFAULT NULL,
+  `objet` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Déchargement des données de la table `gestion_brigade`
 --
 
-INSERT INTO `gestion_brigade` (`id`, `nom_dossier`, `date_ajout`, `date_assignation_termin_n2`, `date_assignation_n3`, `statut`, `n1_admin`, `n2_chef_brigade`, `id_chef_brigade`, `n3_brigade`, `id_brigade`) VALUES
-(4, '52890', '2025-01-05 21:49:18', '2025-01-06 06:42:58', '2025-01-06 06:42:58', 'En attente', 'Abalo cb', 'Abalo cb', '4', NULL, NULL),
-(7, 'zdf525', '2025-01-10 01:35:40', '2025-01-10 01:42:11', '2025-01-10 01:42:11', 'En cours', 'Abalo admin', 'c Gomina clavaire', '5', 'Gomina clavaire', '2'),
-(8, 'hhjjj', '2025-01-11 09:22:00', '2025-01-11 09:23:31', '2025-01-11 09:27:40', 'En cours', 'Abalo admin', 'Abalo cb', '4', 'Abalo Brigarde', '1'),
-(9, '43958A', '2025-01-17 19:01:55', '2025-01-17 20:53:53', '2025-01-17 20:53:53', 'En cours', 'Awadi Abalo', 'BAKEM	Essimna\r\n', '4', 'ALOUMEDJI Emmanuel Kofi Mawoulé', '4'),
-(11, 'doc112', '2025-01-18 12:35:47', '2025-01-18 12:59:16', '2025-01-18 13:01:27', 'En cours', 'Awadi Abalo', 'BAKEM	Essimna\r\n', '4', 'ALOUMEDJI Emmanuel Kofi Mawoulé', '4'),
-(12, '45688', '2025-01-04 23:00:00', '2025-01-09 18:18:11', '2025-01-19 08:15:31', 'En cours', 'Abalo admin', 'Abalo cb', '4', 'Abalo Brigarde', '1'),
-(13, 'Vdefre12', '2025-01-18 12:27:38', '2025-01-18 12:29:48', '2025-01-19 08:29:02', 'En cours', 'Awadi Abalo', 'BAKEM	Essimna\r\n', '4', 'AGBODJAN Kossi Bruce', '3');
+INSERT INTO `gestion_brigade` (`id`, `nom_dossier`, `date_ajout`, `date_assignation_termin_n2`, `date_assignation_n3`, `statut`, `n1_admin`, `n2_chef_brigade`, `id_chef_brigade`, `n3_brigade`, `id_brigade`, `objet`) VALUES
+(10, 'zefezf6', '2025-02-10 18:02:43', '2025-02-14 14:15:31', '2025-02-14 14:34:50', 'En cours', 'Awadi Abalo', 'BAKEM	 Essimna', '1', 'BAKEM	 Essimna', '1', 'non'),
+(12, '45688', '2025-02-09 23:53:30', '2025-02-14 14:49:34', '2025-02-14 14:51:45', 'En cours', 'Awadi Abalo', 'BAKEM	 Essimna', '1', 'BAKEM	 Essimna', '1', 'encore'),
+(13, 'Ab014', '2025-02-14 14:52:39', NULL, '2025-02-14 14:52:52', 'En attente', 'Awadi Abalo', NULL, NULL, NULL, NULL, 'non');
 
 -- --------------------------------------------------------
 
@@ -240,19 +258,7 @@ CREATE TABLE `gestion_brigade_terminer` (
   `id_chef_brigade` varchar(225) DEFAULT NULL,
   `n3_brigade` varchar(225) DEFAULT NULL,
   `id_brigade` varchar(225) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Déchargement des données de la table `gestion_brigade_terminer`
---
-
-INSERT INTO `gestion_brigade_terminer` (`id`, `nom_dossier`, `date_ajout`, `date_assignation_termin_n2`, `date_assignation_n3`, `date_temine_n3`, `statut`, `n1_admin`, `n2_chef_brigade`, `id_chef_brigade`, `n3_brigade`, `id_brigade`) VALUES
-(1, 'B1245788', '2024-12-14 08:13:05', '2024-12-14 09:24:07', '2024-12-14 20:26:02', '2024-12-15 17:02:51', 'Terminé', 'Abalo cb', 'Abalo cb', '4', 'Abalo Brigarde', '1'),
-(2, 'B1245787', '2024-12-14 00:00:24', '2024-12-22 20:53:33', '2024-12-25 17:09:23', '2024-12-25 17:09:28', 'Terminé', 'Abalo cb', 'Abalo cb', '4', 'Abalo Brigarde', '1'),
-(3, '43958', '2025-01-03 22:19:45', '2025-01-05 21:05:46', '2025-01-05 21:12:18', '2025-01-05 21:16:29', 'Terminé', 'Abalo cb', 'Abalo cb', '4', 'Abalo Brigarde', '1'),
-(4, '45688', '2025-01-04 23:00:00', '2025-01-09 18:18:11', '2025-01-09 18:18:11', '2025-01-11 09:24:23', 'Terminé', 'Abalo admin', 'Abalo cb', '4', 'Abalo Brigarde', '1'),
-(5, 'eazf52', '2025-01-10 01:36:08', '2025-01-10 01:40:14', '2025-01-10 01:40:14', '2025-01-11 09:27:45', 'Terminé', 'Abalo admin', 'Abalo cb', '4', 'Abalo Brigarde', '1'),
-(6, 'Vdefre12', '2025-01-18 12:27:38', '2025-01-18 12:29:48', '2025-01-19 08:27:32', '2025-01-19 08:27:40', 'Terminé', 'Awadi Abalo', 'BAKEM	Essimna\r\n', '4', 'AGBODJAN Kossi Bruce', '3');
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 -- --------------------------------------------------------
 
@@ -268,18 +274,18 @@ CREATE TABLE `gestion_chef_brigade` (
   `statut` enum('En attente','En cours','Terminé') DEFAULT 'En attente',
   `n1_admin` varchar(255) NOT NULL,
   `n2_chef_brigade` varchar(255) DEFAULT NULL,
-  `id_chef_brigade` varchar(225) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `id_chef_brigade` varchar(225) DEFAULT NULL,
+  `objet` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Déchargement des données de la table `gestion_chef_brigade`
 --
 
-INSERT INTO `gestion_chef_brigade` (`id`, `nom_dossier`, `date_ajout`, `date_assignation`, `statut`, `n1_admin`, `n2_chef_brigade`, `id_chef_brigade`) VALUES
-(6, 'jj2588', '2025-01-10 00:01:48', '2025-01-10 00:01:48', 'En attente', 'Abalo admin', NULL, NULL),
-(7, 'e5625', '2025-01-10 01:15:06', '2025-01-10 01:15:06', 'En cours', 'Abalo admin', NULL, NULL),
-(8, 'ergezr552', '2025-01-10 01:16:05', '2025-01-10 01:16:05', 'En cours', 'Abalo admin', NULL, NULL),
-(9, 'df41*', '2025-01-10 01:16:26', '2025-01-10 01:16:26', 'En cours', 'Abalo admin', NULL, NULL);
+INSERT INTO `gestion_chef_brigade` (`id`, `nom_dossier`, `date_ajout`, `date_assignation`, `statut`, `n1_admin`, `n2_chef_brigade`, `id_chef_brigade`, `objet`) VALUES
+(3, 'ezr6', '2025-02-10 17:42:50', '2025-02-10 17:42:50', 'En cours', 'Awadi Abalo', 'BAKEM	 Essimna', '1', NULL),
+(4, 'zvcz68', '2025-02-10 18:01:18', '2025-02-10 18:01:18', 'En cours', 'Awadi Abalo', 'BAKEM	 Essimna', '1', NULL),
+(5, 'zevez64', '2025-02-10 18:01:18', '2025-02-10 18:01:18', 'En cours', 'Awadi Abalo', 'BAKEM	 Essimna', '1', NULL);
 
 -- --------------------------------------------------------
 
@@ -297,24 +303,18 @@ CREATE TABLE `gestion_chef_brigade_terminer` (
   `n1_admin` varchar(255) NOT NULL,
   `n2_chef_brigade` varchar(255) DEFAULT NULL,
   `id_chef_brigade` varchar(225) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Déchargement des données de la table `gestion_chef_brigade_terminer`
 --
 
 INSERT INTO `gestion_chef_brigade_terminer` (`id`, `nom_dossier`, `date_ajout`, `date_assignation`, `date_terminer`, `statut`, `n1_admin`, `n2_chef_brigade`, `id_chef_brigade`) VALUES
-(1, 'B1245788', '2024-12-14 08:13:05', '2024-12-14 08:49:21', '2024-12-14 09:24:07', 'Termine', 'Abalo cb', 'Abalo cb', '4'),
-(2, 'B1245787', '2024-12-14 00:00:24', '2024-12-14 01:41:07', '2024-12-22 20:53:33', 'Termine', 'Abalo cb', 'Abalo cb', '4'),
-(3, '43958', '2025-01-03 22:19:45', '2025-01-05 08:38:04', '2025-01-05 21:05:46', 'Termine', 'Abalo cb', 'Abalo cb', '4'),
-(4, '52890', '2025-01-05 21:49:18', '2025-01-06 06:37:45', '2025-01-06 06:42:58', 'Termine', 'Abalo cb', 'Abalo cb', '4'),
-(5, '45688', '2025-01-04 23:00:00', '2025-01-04 23:00:00', '2025-01-09 18:18:11', 'Termine', 'Abalo admin', 'Abalo cb', '4'),
-(6, 'eazf52', '2025-01-10 01:36:08', '2025-01-10 01:36:08', '2025-01-10 01:40:14', 'Termine', 'Abalo admin', 'Abalo cb', '4'),
-(7, 'zdf525', '2025-01-10 01:35:40', '2025-01-10 01:35:40', '2025-01-10 01:42:11', 'Termine', 'Abalo admin', 'c Gomina clavaire', '5'),
-(8, 'hhjjj', '2025-01-11 09:22:00', '2025-01-11 09:22:00', '2025-01-11 09:23:31', 'Termine', 'Abalo admin', 'Abalo cb', '4'),
-(9, '43958A', '2025-01-17 19:01:55', '2025-01-17 19:01:55', '2025-01-17 20:53:53', 'Termine', 'Awadi Abalo', 'BAKEM	Essimna\r\n', '4'),
-(10, 'Vdefre12', '2025-01-18 12:27:38', '2025-01-18 12:27:38', '2025-01-18 12:29:48', 'Termine', 'Awadi Abalo', 'BAKEM	Essimna\r\n', '4'),
-(11, 'doc112', '2025-01-18 12:35:47', '2025-01-18 12:35:47', '2025-01-18 12:59:16', 'Termine', 'Awadi Abalo', 'BAKEM	Essimna\r\n', '4');
+(1, '49312', '2025-02-05 00:03:03', '2025-02-05 00:03:03', '2025-02-05 00:33:05', 'Termine', 'Awadi Abalo', 'BAKEM	 Essimna', '1'),
+(2, '54010', '2025-02-05 00:03:03', '2025-02-05 00:03:03', '2025-02-10 16:18:25', 'Termine', 'Awadi Abalo', 'BAKEM	 Essimna', '1'),
+(3, 'zegve55', '2025-02-11 11:17:23', '2025-02-11 11:17:23', '2025-02-11 11:20:45', 'Termine', 'Awadi Abalo', 'BAKEM	 Essimna', '1'),
+(4, 'zefze54', '2025-02-10 18:02:43', '2025-02-10 18:02:43', '2025-02-11 12:00:04', 'Termine', 'Awadi Abalo', 'BAKEM	 Essimna', '1'),
+(5, 'zefezf6', '2025-02-10 18:02:43', '2025-02-10 18:02:43', '2025-02-14 14:15:31', 'Termine', 'Awadi Abalo', 'BAKEM	 Essimna', '1');
 
 -- --------------------------------------------------------
 
@@ -335,7 +335,7 @@ CREATE TABLE `gestion_conversation_fonciere` (
   `date_assignation_n6` datetime DEFAULT NULL,
   `date_temine_n6` datetime DEFAULT NULL,
   `date_assignation_n7` datetime DEFAULT NULL,
-  `statut` enum('En attente','En cours','Terminé') DEFAULT 'En attente',
+  `statut` enum('En attente','En cours','Terminé','Réjeté') DEFAULT 'En attente',
   `n1_admin` varchar(255) NOT NULL,
   `n2_chef_brigade` varchar(255) DEFAULT NULL,
   `id_chef_brigade` varchar(225) DEFAULT NULL,
@@ -348,8 +348,18 @@ CREATE TABLE `gestion_conversation_fonciere` (
   `n6_signature` varchar(225) DEFAULT NULL,
   `id_signature` varchar(225) DEFAULT NULL,
   `n7_conversation_fonciere` varchar(225) DEFAULT NULL,
-  `id_conversation_fonciere` varchar(225) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `id_conversation_fonciere` varchar(225) DEFAULT NULL,
+  `objet` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Déchargement des données de la table `gestion_conversation_fonciere`
+--
+
+INSERT INTO `gestion_conversation_fonciere` (`id`, `nom_dossier`, `date_ajout`, `date_assignation_termin_n2`, `date_temine_n3`, `date_assignation_n4`, `date_temine_n4`, `date_assignation_n5`, `date_temine_n5`, `date_assignation_n6`, `date_temine_n6`, `date_assignation_n7`, `statut`, `n1_admin`, `n2_chef_brigade`, `id_chef_brigade`, `n3_brigade`, `id_brigade`, `n4_securisation`, `id_securisation`, `n5_evaluation_cadastrale`, `id_evaluation_cadastrale`, `n6_signature`, `id_signature`, `n7_conversation_fonciere`, `id_conversation_fonciere`, `objet`) VALUES
+(2, 'zegve55', '2025-02-11 11:17:23', '2025-02-11 11:20:45', '2025-02-11 11:29:53', '2025-02-11 11:30:11', '2025-02-11 11:30:20', '2025-02-11 11:30:48', '2025-02-11 11:36:12', '2025-02-11 13:24:16', '2025-02-11 13:29:54', '2025-02-11 13:29:54', 'En attente', 'Awadi Abalo', 'BAKEM	 Essimna', '1', 'BAKEM	 Essimna', '1', 'CLOUKPO	Amy Sitou Elsa', '1', 'KOUGNIGAN Reine Marimar Théréza', '2', 'Nom du chef', '2', 'Nom du chef', '2', 'dd'),
+(3, '46957', '2025-02-09 10:30:06', NULL, NULL, '2025-02-09 10:30:06', '2025-02-09 11:03:46', '2025-02-12 17:08:15', '2025-02-12 20:24:41', '2025-02-12 20:32:28', '2025-02-12 20:32:43', '2025-02-12 21:23:10', 'En cours', 'Awadi Abalo', NULL, NULL, NULL, NULL, 'CLOUKPO	Amy Sitou Elsa', '1', 'Nom du chef', '2', 'Nom du chef', '2', 'Abalo cf', '1', 'fin du dossier '),
+(7, 'Ab016', '2025-02-13 17:20:56', '2025-02-13 20:48:51', '2025-02-13 20:48:51', '2025-02-13 20:48:51', '2025-02-13 20:48:51', '2025-02-13 20:48:51', '2025-02-13 20:48:51', '2025-02-14 08:27:26', '2025-02-14 08:52:37', '2025-02-14 08:52:37', 'En attente', 'Awadi Abalo', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Nom du chef', '2', 'Nom du chef', '2', 'bien je valide');
 
 -- --------------------------------------------------------
 
@@ -385,16 +395,7 @@ CREATE TABLE `gestion_conversation_fonciere_terminer` (
   `id_signature` varchar(225) DEFAULT NULL,
   `n7_conversation_fonciere` varchar(225) DEFAULT NULL,
   `id_conversation_fonciere` varchar(225) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Déchargement des données de la table `gestion_conversation_fonciere_terminer`
---
-
-INSERT INTO `gestion_conversation_fonciere_terminer` (`id`, `nom_dossier`, `date_ajout`, `date_assignation_termin_n2`, `date_temine_n3`, `date_assignation_n4`, `date_temine_n4`, `date_assignation_n5`, `date_temine_n5`, `date_assignation_n6`, `date_temine_n6`, `date_assignation_n7`, `date_temine_n7`, `statut`, `n1_admin`, `n2_chef_brigade`, `id_chef_brigade`, `n3_brigade`, `id_brigade`, `n4_securisation`, `id_securisation`, `n5_evaluation_cadastrale`, `id_evaluation_cadastrale`, `n6_signature`, `id_signature`, `n7_conversation_fonciere`, `id_conversation_fonciere`) VALUES
-(2, 'B1245788', '2024-12-14 08:13:05', '2024-12-14 09:24:07', '2024-12-15 17:02:51', '2024-12-22 09:51:30', '2024-12-22 11:32:45', '2024-12-22 12:48:22', '2024-12-23 11:33:30', '2024-12-23 12:42:31', '2024-12-23 15:21:47', '2024-12-23 16:40:28', '2024-12-23 17:24:54', 'Terminé', 'Abalo cb', 'Abalo cb', '4', 'Abalo Brigarde', '1', 'Abalo S', '1', 'Abalo ec', '1', 'Abalo si', '1', 'Abalo cf', '1'),
-(3, 'B1245787', '2024-12-14 00:00:24', '2024-12-22 20:53:33', '2024-12-25 17:09:28', '2024-12-25 17:11:00', '2024-12-25 17:29:42', '2024-12-25 17:31:54', '2024-12-25 17:32:01', '2024-12-26 19:44:53', '2024-12-26 19:57:25', '2024-12-26 21:43:56', '2024-12-29 17:21:20', 'Terminé', 'Abalo cb', 'Abalo cb', '4', 'Abalo Brigarde', '1', 'Abalo S', '1', 'Abalo ec', '1', 'Abalo si', '1', 'Abalo cf', '1'),
-(4, '43958', '2025-01-03 22:19:45', '2025-01-05 21:05:46', '2025-01-05 21:16:29', '2025-01-05 21:32:01', '2025-01-05 21:35:49', '2025-01-05 21:40:46', '2025-01-05 21:40:56', '2025-01-05 21:43:30', '2025-01-05 21:43:33', '2025-01-05 21:48:16', '2025-01-05 21:49:43', 'Terminé', 'Abalo cb', 'Abalo cb', '4', 'Abalo Brigarde', '1', 'Abalo S', '1', 'Abalo ec', '1', 'Abalo si', '1', 'Abalo cf', '1');
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 -- --------------------------------------------------------
 
@@ -411,7 +412,7 @@ CREATE TABLE `gestion_evaluation_cadastrale` (
   `date_assignation_n4` datetime DEFAULT NULL,
   `date_temine_n4` datetime DEFAULT NULL,
   `date_assignation_n5` datetime DEFAULT NULL,
-  `statut` enum('En attente','En cours','Terminé') DEFAULT 'En attente',
+  `statut` enum('En attente','En cours','Terminé','Réjeté') DEFAULT 'En attente',
   `n1_admin` varchar(255) NOT NULL,
   `n2_chef_brigade` varchar(255) DEFAULT NULL,
   `id_chef_brigade` varchar(225) DEFAULT NULL,
@@ -420,8 +421,17 @@ CREATE TABLE `gestion_evaluation_cadastrale` (
   `n4_securisation` varchar(225) DEFAULT NULL,
   `id_securisation` varchar(225) DEFAULT NULL,
   `n5_evaluation_cadastrale` varchar(225) DEFAULT NULL,
-  `id_evaluation_cadastrale` varchar(225) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `id_evaluation_cadastrale` varchar(225) DEFAULT NULL,
+  `objet` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Déchargement des données de la table `gestion_evaluation_cadastrale`
+--
+
+INSERT INTO `gestion_evaluation_cadastrale` (`id`, `nom_dossier`, `date_ajout`, `date_assignation_termin_n2`, `date_temine_n3`, `date_assignation_n4`, `date_temine_n4`, `date_assignation_n5`, `statut`, `n1_admin`, `n2_chef_brigade`, `id_chef_brigade`, `n3_brigade`, `id_brigade`, `n4_securisation`, `id_securisation`, `n5_evaluation_cadastrale`, `id_evaluation_cadastrale`, `objet`) VALUES
+(19, '38511', '2025-02-10 00:08:35', '2025-02-10 00:30:32', '2025-02-11 11:52:01', '2025-02-14 13:51:40', '2025-02-14 14:04:18', '2025-02-14 14:04:18', 'En attente', 'Awadi Abalo', 'BAKEM	 Essimna', '1', 'BAKEM	 Essimna', '1', 'CLOUKPO	Amy Sitou Elsa', '1', NULL, NULL, 'bien'),
+(20, 'zefze54', '2025-02-10 18:02:43', '2025-02-11 12:00:04', '2025-02-11 12:00:50', '2025-02-11 12:01:15', '2025-02-14 14:05:37', '2025-02-14 14:05:37', 'En attente', 'Awadi Abalo', 'BAKEM	 Essimna', '1', 'BAKEM	 Essimna', '1', 'CLOUKPO	Amy Sitou Elsa', '1', NULL, NULL, 'merci');
 
 -- --------------------------------------------------------
 
@@ -449,16 +459,22 @@ CREATE TABLE `gestion_evaluation_cadastrale_terminer` (
   `id_securisation` int(11) DEFAULT NULL,
   `n5_evaluation_cadastrale` varchar(255) DEFAULT NULL,
   `id_evaluation_cadastrale` int(11) DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Déchargement des données de la table `gestion_evaluation_cadastrale_terminer`
 --
 
 INSERT INTO `gestion_evaluation_cadastrale_terminer` (`id`, `nom_dossier`, `date_ajout`, `date_assignation_termin_n2`, `date_temine_n3`, `date_assignation_n4`, `date_temine_n4`, `date_assignation_n5`, `date_temine_n5`, `statut`, `n1_admin`, `n2_chef_brigade`, `id_chef_brigade`, `n3_brigade`, `id_brigade`, `n4_securisation`, `id_securisation`, `n5_evaluation_cadastrale`, `id_evaluation_cadastrale`) VALUES
-(1, 'B1245788', '2024-12-14 08:13:05', '2024-12-14 09:24:07', '2024-12-15 17:02:51', '2024-12-22 09:51:30', '2024-12-22 11:32:45', '2024-12-22 12:48:22', '2024-12-23 11:33:30', 'Terminé', 'Abalo cb', 'Abalo cb', 4, 'Abalo Brigarde', 1, 'Abalo S', 1, 'Abalo ec', 1),
-(2, 'B1245787', '2024-12-14 00:00:24', '2024-12-22 20:53:33', '2024-12-25 17:09:28', '2024-12-25 17:11:00', '2024-12-25 17:29:42', '2024-12-25 17:31:54', '2024-12-25 17:32:01', 'Terminé', 'Abalo cb', 'Abalo cb', 4, 'Abalo Brigarde', 1, 'Abalo S', 1, 'Abalo ec', 1),
-(3, '43958', '2025-01-03 22:19:45', '2025-01-05 21:05:46', '2025-01-05 21:16:29', '2025-01-05 21:32:01', '2025-01-05 21:35:49', '2025-01-05 21:40:46', '2025-01-05 21:40:56', 'Terminé', 'Abalo cb', 'Abalo cb', 4, 'Abalo Brigarde', 1, 'Abalo S', 1, 'Abalo ec', 1);
+(1, 'zegve55', '2025-02-11 11:17:23', '2025-02-11 11:20:45', '2025-02-11 11:29:53', '2025-02-11 11:30:11', '2025-02-11 11:30:20', '2025-02-11 11:30:48', '2025-02-11 11:36:12', 'Terminé', 'Awadi Abalo', 'BAKEM	 Essimna', 1, 'BAKEM	 Essimna', 1, 'CLOUKPO	Amy Sitou Elsa', 1, 'KOUGNIGAN Reine Marimar Théréza', 2),
+(2, '49312', '2025-02-05 00:03:03', '2025-02-05 00:33:05', '2025-02-06 21:18:14', '2025-02-09 09:35:18', '2025-02-09 09:36:10', '2025-02-11 11:52:17', '2025-02-11 11:53:22', 'Terminé', 'Awadi Abalo', 'BAKEM	 Essimna', 1, 'BAKEM	 Essimna', 1, 'CLOUKPO	Amy Sitou Elsa', 1, 'KOUGNIGAN Reine Marimar Théréza', 2),
+(3, 'zefze54', '2025-02-10 18:02:43', '2025-02-11 12:00:04', '2025-02-11 12:00:50', '2025-02-11 12:01:15', '2025-02-11 12:58:04', '2025-02-11 13:20:44', '2025-02-11 13:21:09', 'Terminé', 'Awadi Abalo', 'BAKEM	 Essimna', 1, 'BAKEM	 Essimna', 1, 'CLOUKPO	Amy Sitou Elsa', 1, 'KOUGNIGAN Reine Marimar Théréza', 2),
+(4, '55326', '2025-02-04 19:53:47', NULL, NULL, '2025-02-04 19:53:47', '2025-02-09 09:35:45', '2025-02-09 09:54:17', '2025-02-12 16:53:32', 'Terminé', 'Awadi Abalo', NULL, NULL, NULL, NULL, 'CLOUKPO	Amy Sitou Elsa', 1, 'KOUGNIGAN Reine Marimar Théréza', 2),
+(5, '54010', '2025-02-05 00:03:03', '2025-02-10 16:18:25', '2025-02-11 11:51:32', '2025-02-12 16:43:13', '2025-02-12 16:51:22', '2025-02-12 16:51:40', '2025-02-12 16:53:46', 'Terminé', 'Awadi Abalo', 'BAKEM	 Essimna', 1, 'BAKEM	 Essimna', 1, 'CLOUKPO	Amy Sitou Elsa', 1, 'KOUGNIGAN Reine Marimar Théréza', 2),
+(6, '46957', '2025-02-09 10:30:06', NULL, NULL, '2025-02-09 10:30:06', '2025-02-09 11:03:46', '2025-02-12 17:08:15', '2025-02-12 17:08:24', 'Terminé', 'Awadi Abalo', NULL, NULL, NULL, NULL, 'CLOUKPO	Amy Sitou Elsa', 1, 'KOUGNIGAN Reine Marimar Théréza', 2),
+(7, '54010', '2025-02-05 00:03:03', '2025-02-10 16:18:25', '2025-02-11 11:51:32', '2025-02-12 16:43:13', '2025-02-12 17:15:36', '2025-02-12 17:15:54', '2025-02-12 17:16:05', 'Terminé', 'Awadi Abalo', 'BAKEM	 Essimna', 1, 'BAKEM	 Essimna', 1, 'CLOUKPO	Amy Sitou Elsa', 1, 'KOUGNIGAN Reine Marimar Théréza', 2),
+(8, '43958', '2025-02-09 23:53:30', NULL, NULL, '2025-02-09 23:53:30', '2025-02-10 00:05:14', '2025-02-12 20:08:32', '2025-02-12 20:08:40', 'Terminé', 'Awadi Abalo', NULL, NULL, NULL, NULL, 'CLOUKPO	Amy Sitou Elsa', 1, 'KOUGNIGAN Reine Marimar Théréza', 2),
+(9, '49312', '2025-02-05 00:03:03', '2025-02-05 00:33:05', '2025-02-06 21:18:14', '2025-02-09 09:35:18', '2025-02-11 11:53:22', '2025-02-14 09:38:53', '2025-02-14 13:22:46', 'Terminé', 'Awadi Abalo', 'BAKEM	 Essimna', 1, 'BAKEM	 Essimna', 1, 'KOUGNIGAN Reine Marimar Théréza', 2, 'KOUGNIGAN Reine Marimar Théréza', 2);
 
 -- --------------------------------------------------------
 
@@ -475,14 +491,7 @@ CREATE TABLE `gestion_fonciere` (
   `statut` enum('En cours','Terminé','En attente') DEFAULT 'En cours',
   `fonciere_id` int(11) DEFAULT NULL,
   `validateur` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Déchargement des données de la table `gestion_fonciere`
---
-
-INSERT INTO `gestion_fonciere` (`id`, `nom_dossier`, `date_creation`, `date_validation`, `nom_signature`, `statut`, `fonciere_id`, `validateur`) VALUES
-(1, 'ss', '2024-12-10 09:02:14', '2024-12-10 12:24:23', 'c Gomina clavaire w', 'En attente', NULL, NULL);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 -- --------------------------------------------------------
 
@@ -497,22 +506,23 @@ CREATE TABLE `gestion_securisation` (
   `date_assignation_termin_n2` datetime DEFAULT NULL,
   `date_temine_n3` datetime DEFAULT NULL,
   `date_assignation_n4` datetime DEFAULT NULL,
-  `statut` enum('En attente','En cours','Terminé') DEFAULT 'En attente',
+  `statut` enum('En attente','En cours','Terminé','Réjeté') DEFAULT 'En attente',
   `n1_admin` varchar(255) NOT NULL,
   `n2_chef_brigade` varchar(255) DEFAULT NULL,
   `id_chef_brigade` varchar(225) DEFAULT NULL,
   `n3_brigade` varchar(225) DEFAULT NULL,
   `id_brigade` varchar(225) DEFAULT NULL,
   `n4_securisation` varchar(225) DEFAULT NULL,
-  `id_securisation` varchar(225) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `id_securisation` varchar(225) DEFAULT NULL,
+  `objet` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Déchargement des données de la table `gestion_securisation`
 --
 
-INSERT INTO `gestion_securisation` (`id`, `nom_dossier`, `date_ajout`, `date_assignation_termin_n2`, `date_temine_n3`, `date_assignation_n4`, `statut`, `n1_admin`, `n2_chef_brigade`, `id_chef_brigade`, `n3_brigade`, `id_brigade`, `n4_securisation`, `id_securisation`) VALUES
-(5, 'eazf52', '2025-01-10 01:36:08', '2025-01-10 01:40:14', '2025-01-11 09:27:45', '2025-01-11 09:27:45', 'En attente', 'Abalo admin', 'Abalo cb', '4', 'Abalo Brigarde', '1', NULL, NULL);
+INSERT INTO `gestion_securisation` (`id`, `nom_dossier`, `date_ajout`, `date_assignation_termin_n2`, `date_temine_n3`, `date_assignation_n4`, `statut`, `n1_admin`, `n2_chef_brigade`, `id_chef_brigade`, `n3_brigade`, `id_brigade`, `n4_securisation`, `id_securisation`, `objet`) VALUES
+(20, '54010', '2025-02-05 00:03:03', '2025-02-10 16:18:25', '2025-02-11 11:51:32', '2025-02-12 16:43:13', 'Réjeté', 'Awadi Abalo', 'BAKEM	 Essimna', '1', 'BAKEM	 Essimna', '1', 'CLOUKPO	Amy Sitou Elsa', '1', 'fini');
 
 -- --------------------------------------------------------
 
@@ -538,16 +548,25 @@ CREATE TABLE `gestion_securisation_terminer` (
   `id_securisation` varchar(225) DEFAULT NULL,
   `n5_evaluation` varchar(225) DEFAULT NULL,
   `id_evaluation` varchar(225) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Déchargement des données de la table `gestion_securisation_terminer`
 --
 
 INSERT INTO `gestion_securisation_terminer` (`id`, `nom_dossier`, `date_ajout`, `date_assignation_termin_n2`, `date_temine_n3`, `date_assignation_n4`, `date_temine_n4`, `statut`, `n1_admin`, `n2_chef_brigade`, `id_chef_brigade`, `n3_brigade`, `id_brigade`, `n4_securisation`, `id_securisation`, `n5_evaluation`, `id_evaluation`) VALUES
-(1, 'B1245788', '2024-12-14 08:13:05', '2024-12-14 09:24:07', '2024-12-15 17:02:51', '2024-12-22 09:51:30', '2024-12-22 11:32:45', 'Terminé', 'Abalo cb', 'Abalo cb', '4', 'Abalo Brigarde', '1', 'Abalo S', '1', NULL, NULL),
-(2, 'B1245787', '2024-12-14 00:00:24', '2024-12-22 20:53:33', '2024-12-25 17:09:28', '2024-12-25 17:11:00', '2024-12-25 17:29:42', 'Terminé', 'Abalo cb', 'Abalo cb', '4', 'Abalo Brigarde', '1', 'Abalo S', '1', NULL, NULL),
-(3, '43958', '2025-01-03 22:19:45', '2025-01-05 21:05:46', '2025-01-05 21:16:29', '2025-01-05 21:32:01', '2025-01-05 21:35:49', 'Terminé', 'Abalo cb', 'Abalo cb', '4', 'Abalo Brigarde', '1', 'Abalo S', '1', NULL, NULL);
+(1, '55326', '2025-02-04 19:53:47', NULL, NULL, '2025-02-04 19:53:47', '2025-02-09 09:35:45', 'Terminé', 'Awadi Abalo', NULL, NULL, NULL, NULL, 'CLOUKPO	Amy Sitou Elsa', '1', NULL, NULL),
+(2, '49312', '2025-02-05 00:03:03', '2025-02-05 00:33:05', '2025-02-06 21:18:14', '2025-02-09 09:35:18', '2025-02-09 09:36:10', 'Terminé', 'Awadi Abalo', 'BAKEM	 Essimna', '1', 'BAKEM	 Essimna', '1', 'CLOUKPO	Amy Sitou Elsa', '1', NULL, NULL),
+(3, '46957', '2025-02-09 10:30:06', NULL, NULL, '2025-02-09 10:30:06', '2025-02-09 11:03:46', 'Terminé', 'Awadi Abalo', NULL, NULL, NULL, NULL, 'CLOUKPO	Amy Sitou Elsa', '1', NULL, NULL),
+(4, '43958', '2025-02-09 23:53:30', NULL, NULL, '2025-02-09 23:53:30', '2025-02-10 00:05:14', 'Terminé', 'Awadi Abalo', NULL, NULL, NULL, NULL, 'CLOUKPO	Amy Sitou Elsa', '1', NULL, NULL),
+(5, 'zegve55', '2025-02-11 11:17:23', '2025-02-11 11:20:45', '2025-02-11 11:29:53', '2025-02-11 11:30:11', '2025-02-11 11:30:20', 'Terminé', 'Awadi Abalo', 'BAKEM	 Essimna', '1', 'BAKEM	 Essimna', '1', 'CLOUKPO	Amy Sitou Elsa', '1', NULL, NULL),
+(6, 'zefze54', '2025-02-10 18:02:43', '2025-02-11 12:00:04', '2025-02-11 12:00:50', '2025-02-11 12:01:15', '2025-02-11 12:01:31', 'Terminé', 'Awadi Abalo', 'BAKEM	 Essimna', '1', 'BAKEM	 Essimna', '1', 'CLOUKPO	Amy Sitou Elsa', '1', NULL, NULL),
+(7, 'zefze54', '2025-02-10 18:02:43', '2025-02-11 12:00:04', '2025-02-11 12:00:50', '2025-02-11 12:01:15', '2025-02-11 12:58:04', 'Terminé', 'Awadi Abalo', 'BAKEM	 Essimna', '1', 'BAKEM	 Essimna', '1', 'CLOUKPO	Amy Sitou Elsa', '1', NULL, NULL),
+(8, '54010', '2025-02-05 00:03:03', '2025-02-10 16:18:25', '2025-02-11 11:51:32', '2025-02-12 16:43:13', '2025-02-12 16:45:43', 'Terminé', 'Awadi Abalo', 'BAKEM	 Essimna', '1', 'BAKEM	 Essimna', '1', 'CLOUKPO	Amy Sitou Elsa', '1', NULL, NULL),
+(9, '54010', '2025-02-05 00:03:03', '2025-02-10 16:18:25', '2025-02-11 11:51:32', '2025-02-12 16:43:13', '2025-02-12 16:51:22', 'Terminé', 'Awadi Abalo', 'BAKEM	 Essimna', '1', 'BAKEM	 Essimna', '1', 'CLOUKPO	Amy Sitou Elsa', '1', NULL, NULL),
+(10, '54010', '2025-02-05 00:03:03', '2025-02-10 16:18:25', '2025-02-11 11:51:32', '2025-02-12 16:43:13', '2025-02-12 17:15:36', 'Terminé', 'Awadi Abalo', 'BAKEM	 Essimna', '1', 'BAKEM	 Essimna', '1', 'CLOUKPO	Amy Sitou Elsa', '1', NULL, NULL),
+(11, '38511', '2025-02-10 00:08:35', '2025-02-10 00:30:32', '2025-02-11 11:52:01', '2025-02-14 13:51:40', '2025-02-14 14:04:18', 'Terminé', 'Awadi Abalo', 'BAKEM	 Essimna', '1', 'BAKEM	 Essimna', '1', 'CLOUKPO	Amy Sitou Elsa', '1', NULL, NULL),
+(12, 'zefze54', '2025-02-10 18:02:43', '2025-02-11 12:00:04', '2025-02-11 12:00:50', '2025-02-11 12:01:15', '2025-02-14 14:05:37', 'Terminé', 'Awadi Abalo', 'BAKEM	 Essimna', '1', 'BAKEM	 Essimna', '1', 'CLOUKPO	Amy Sitou Elsa', '1', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -566,7 +585,7 @@ CREATE TABLE `gestion_signature` (
   `date_assignation_n5` datetime DEFAULT NULL,
   `date_temine_n5` datetime DEFAULT NULL,
   `date_assignation_n6` datetime DEFAULT NULL,
-  `statut` enum('En attente','En cours','Terminé') DEFAULT 'En attente',
+  `statut` enum('En attente','En cours','Terminé','Réjeté') DEFAULT 'En attente',
   `n1_admin` varchar(255) NOT NULL,
   `n2_chef_brigade` varchar(255) DEFAULT NULL,
   `id_chef_brigade` varchar(225) DEFAULT NULL,
@@ -577,8 +596,19 @@ CREATE TABLE `gestion_signature` (
   `n5_evaluation_cadastrale` varchar(225) DEFAULT NULL,
   `id_evaluation_cadastrale` varchar(225) DEFAULT NULL,
   `n6_signature` varchar(225) DEFAULT NULL,
-  `id_signature` varchar(225) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `id_signature` varchar(225) DEFAULT NULL,
+  `objet` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Déchargement des données de la table `gestion_signature`
+--
+
+INSERT INTO `gestion_signature` (`id`, `nom_dossier`, `date_ajout`, `date_assignation_termin_n2`, `date_temine_n3`, `date_assignation_n4`, `date_temine_n4`, `date_assignation_n5`, `date_temine_n5`, `date_assignation_n6`, `statut`, `n1_admin`, `n2_chef_brigade`, `id_chef_brigade`, `n3_brigade`, `id_brigade`, `n4_securisation`, `id_securisation`, `n5_evaluation_cadastrale`, `id_evaluation_cadastrale`, `n6_signature`, `id_signature`, `objet`) VALUES
+(8, '43958', '2025-02-09 23:53:30', NULL, NULL, '2025-02-09 23:53:30', '2025-02-10 00:05:14', '2025-02-12 20:08:32', '2025-02-12 20:08:40', '2025-02-12 20:08:40', 'En attente', 'Awadi Abalo', NULL, NULL, NULL, NULL, 'CLOUKPO	Amy Sitou Elsa', '1', 'KOUGNIGAN Reine Marimar Théréza', '2', NULL, NULL, 'fin'),
+(10, 'AB017', '2025-02-13 17:20:56', '2025-02-13 20:27:57', '2025-02-13 20:27:57', '2025-02-13 20:27:57', '2025-02-13 20:27:57', '2025-02-13 20:27:57', '2025-02-13 20:27:57', '2025-02-13 20:27:57', 'En attente', 'Awadi Abalo', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'non'),
+(13, '49312', '2025-02-05 00:03:03', '2025-02-05 00:33:05', '2025-02-06 21:18:14', '2025-02-09 09:35:18', '2025-02-11 11:53:22', '2025-02-14 09:38:53', '2025-02-14 13:22:46', '2025-02-14 13:22:46', 'En attente', 'Awadi Abalo', 'BAKEM	 Essimna', '1', 'BAKEM	 Essimna', '1', 'KOUGNIGAN Reine Marimar Théréza', '2', 'KOUGNIGAN Reine Marimar Théréza', '2', NULL, NULL, 'bien'),
+(14, '55326', '2025-02-04 19:53:47', '2025-02-14 09:25:50', '2025-02-14 09:25:50', '2025-02-04 19:53:47', '2025-02-09 09:35:45', '2025-02-09 09:54:17', '2025-02-14 13:42:02', '2025-02-14 13:42:02', 'En attente', 'Awadi Abalo', NULL, NULL, NULL, NULL, 'CLOUKPO	Amy Sitou Elsa', '1', 'KOUGNIGAN Reine Marimar Théréza', '2', NULL, NULL, 'fini et bon');
 
 -- --------------------------------------------------------
 
@@ -609,16 +639,47 @@ CREATE TABLE `gestion_signature_terminer` (
   `id_evaluation_cadastrale` varchar(225) DEFAULT NULL,
   `n6_signature` varchar(225) DEFAULT NULL,
   `id_signature` varchar(225) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Déchargement des données de la table `gestion_signature_terminer`
 --
 
 INSERT INTO `gestion_signature_terminer` (`id`, `nom_dossier`, `date_ajout`, `date_assignation_termin_n2`, `date_temine_n3`, `date_assignation_n4`, `date_temine_n4`, `date_assignation_n5`, `date_temine_n5`, `date_temine_n6`, `statut`, `n1_admin`, `n2_chef_brigade`, `id_chef_brigade`, `n3_brigade`, `id_brigade`, `n4_securisation`, `id_securisation`, `n5_evaluation_cadastrale`, `id_evaluation_cadastrale`, `n6_signature`, `id_signature`) VALUES
-(2, 'B1245788', '2024-12-14 08:13:05', '2024-12-14 09:24:07', '2024-12-15 17:02:51', '2024-12-22 09:51:30', '2024-12-22 11:32:45', '2024-12-22 12:48:22', '2024-12-23 15:21:47', '2024-12-24 15:21:47', 'Terminé', 'Abalo cb', 'Abalo cb', '4', 'Abalo Brigarde', '1', 'Abalo S', '1', 'Abalo ec', '1', 'Abalo si', '1'),
-(3, 'B1245787', '2024-12-14 00:00:24', '2024-12-22 20:53:33', '2024-12-25 17:09:28', '2024-12-25 17:11:00', '2024-12-25 17:29:42', '2024-12-25 17:31:54', '2024-12-25 17:32:01', '2024-12-26 19:57:25', 'Terminé', 'Abalo cb', 'Abalo cb', '4', 'Abalo Brigarde', '1', 'Abalo S', '1', 'Abalo ec', '1', 'Abalo si', '1'),
-(4, '43958', '2025-01-03 22:19:45', '2025-01-05 21:05:46', '2025-01-05 21:16:29', '2025-01-05 21:32:01', '2025-01-05 21:35:49', '2025-01-05 21:40:46', '2025-01-05 21:40:56', '2025-01-05 21:43:33', 'Terminé', 'Abalo cb', 'Abalo cb', '4', 'Abalo Brigarde', '1', 'Abalo S', '1', 'Abalo ec', '1', 'Abalo si', '1');
+(1, 'zegve55', '2025-02-11 11:17:23', '2025-02-11 11:20:45', '2025-02-11 11:29:53', '2025-02-11 11:30:11', '2025-02-11 11:30:20', '2025-02-11 11:30:48', '2025-02-11 11:36:12', '2025-02-11 13:24:24', 'Terminé', 'Awadi Abalo', 'BAKEM	 Essimna', '1', 'BAKEM	 Essimna', '1', 'CLOUKPO	Amy Sitou Elsa', '1', 'KOUGNIGAN Reine Marimar Théréza', '2', 'Nom du chef', '2'),
+(2, 'zegve55', '2025-02-11 11:17:23', '2025-02-11 11:20:45', '2025-02-11 11:29:53', '2025-02-11 11:30:11', '2025-02-11 11:30:20', '2025-02-11 11:30:48', '2025-02-11 11:36:12', '2025-02-11 13:29:54', 'Terminé', 'Awadi Abalo', 'BAKEM	 Essimna', '1', 'BAKEM	 Essimna', '1', 'CLOUKPO	Amy Sitou Elsa', '1', 'KOUGNIGAN Reine Marimar Théréza', '2', 'Nom du chef', '2'),
+(3, '46957', '2025-02-09 10:30:06', NULL, NULL, '2025-02-09 10:30:06', '2025-02-09 11:03:46', '2025-02-12 17:08:15', '2025-02-12 20:24:41', '2025-02-12 20:32:43', 'Terminé', 'Awadi Abalo', NULL, NULL, NULL, NULL, 'CLOUKPO	Amy Sitou Elsa', '1', 'Nom du chef', '2', 'Nom du chef', '2'),
+(4, 'Ab016', '2025-02-13 17:20:56', '2025-02-13 20:48:51', '2025-02-13 20:48:51', '2025-02-13 20:48:51', '2025-02-13 20:48:51', '2025-02-13 20:48:51', '2025-02-13 20:48:51', '2025-02-14 08:27:55', 'Terminé', 'Awadi Abalo', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Nom du chef', '2'),
+(5, 'Ab016', '2025-02-13 17:20:56', '2025-02-13 20:48:51', '2025-02-13 20:48:51', '2025-02-13 20:48:51', '2025-02-13 20:48:51', '2025-02-13 20:48:51', '2025-02-13 20:48:51', '2025-02-14 08:52:37', 'Terminé', 'Awadi Abalo', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Nom du chef', '2');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `gestion_verification_chef_brigade`
+--
+
+CREATE TABLE `gestion_verification_chef_brigade` (
+  `id` int(11) NOT NULL,
+  `nom_dossier` varchar(255) NOT NULL,
+  `date_ajout` datetime DEFAULT current_timestamp(),
+  `date_assignation_termin_n2` datetime DEFAULT NULL,
+  `date_assignation_n3` datetime DEFAULT NULL,
+  `statut` enum('En attente','En cours','Terminé','Rejeté') DEFAULT 'En attente',
+  `n1_admin` varchar(255) NOT NULL,
+  `n2_chef_brigade` varchar(255) DEFAULT NULL,
+  `id_chef_brigade` varchar(225) DEFAULT NULL,
+  `n3_brigade` varchar(225) DEFAULT NULL,
+  `id_brigade` varchar(225) DEFAULT NULL,
+  `objet` text DEFAULT NULL,
+  `date_envoie` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Déchargement des données de la table `gestion_verification_chef_brigade`
+--
+
+INSERT INTO `gestion_verification_chef_brigade` (`id`, `nom_dossier`, `date_ajout`, `date_assignation_termin_n2`, `date_assignation_n3`, `statut`, `n1_admin`, `n2_chef_brigade`, `id_chef_brigade`, `n3_brigade`, `id_brigade`, `objet`, `date_envoie`) VALUES
+(1, '52890', '2025-02-09 23:53:30', '2025-02-10 00:21:00', '2025-02-10 00:20:41', 'En cours', 'Awadi Abalo', '3', 'BAKEM	 Essimna', 'AGBODJAN Kossi Bruce', '1', 'fin dossier ', '2025-02-10 00:21:00');
 
 -- --------------------------------------------------------
 
@@ -635,7 +696,7 @@ CREATE TABLE `objectifs_direction` (
   `signature` int(11) DEFAULT 0,
   `conversation_fonciere` int(11) DEFAULT 0,
   `date_mise_a_jour` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Déchargement des données de la table `objectifs_direction`
@@ -659,15 +720,15 @@ CREATE TABLE `securisation` (
   `password` varchar(255) NOT NULL,
   `reset_token` varchar(255) DEFAULT NULL,
   `token_expiration` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Déchargement des données de la table `securisation`
 --
 
 INSERT INTO `securisation` (`ident`, `nom_complet`, `email_securisation`, `numero_telephone`, `date_inscription`, `password`, `reset_token`, `token_expiration`) VALUES
-(1, 'Abalo S', 'abalo_s@gmail.com', '66565', '2024-12-06 18:45:52', 'ea66e9c169c7e5a307eb06fb8e6a239d', NULL, NULL),
-(2, 'c Gomina clavaire', 'clavaire.gominas@gmail.com', '92891445', '2024-12-10 10:27:11', '5669fb4cc8a47469cc15eb3e24dc8f23', NULL, NULL);
+(1, 'CLOUKPO	Amy Sitou Elsa', 'acloukpo@otr.tg', '96244244', '2024-12-06 18:45:52', 'ea66e9c169c7e5a307eb06fb8e6a239d', NULL, NULL),
+(2, 'TANAN Solim Prisca', 'stanan@otr.tg', '91616255', '2024-12-10 10:27:11', 'ea66e9c169c7e5a307eb06fb8e6a239d', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -684,15 +745,14 @@ CREATE TABLE `signature` (
   `password` varchar(255) NOT NULL,
   `reset_token` varchar(255) DEFAULT NULL,
   `token_expiration` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Déchargement des données de la table `signature`
 --
 
 INSERT INTO `signature` (`ident`, `nom_complet`, `email_signature`, `numero_telephone`, `date_inscription`, `password`, `reset_token`, `token_expiration`) VALUES
-(1, 'Abalo si', 'abalo_si@gmail.com', '66565', '2024-12-06 18:47:41', 'ea66e9c169c7e5a307eb06fb8e6a239d', NULL, NULL),
-(2, 'c Gomina clavaire', 'clavaire.gominasi@gmail.com', '92891445', '2024-12-10 12:21:01', '5669fb4cc8a47469cc15eb3e24dc8f23', NULL, NULL);
+(2, 'Nom du chef', 'signature@gmail.com', '93464350', '2024-12-10 12:21:01', 'ea66e9c169c7e5a307eb06fb8e6a239d', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -707,7 +767,7 @@ CREATE TABLE `terminer_brigade` (
   `date_assignation` datetime DEFAULT current_timestamp(),
   `date_terminer` datetime DEFAULT current_timestamp(),
   `nom_brigade` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Index pour les tables déchargées
@@ -844,6 +904,12 @@ ALTER TABLE `gestion_signature_terminer`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Index pour la table `gestion_verification_chef_brigade`
+--
+ALTER TABLE `gestion_verification_chef_brigade`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Index pour la table `objectifs_direction`
 --
 ALTER TABLE `objectifs_direction`
@@ -879,13 +945,13 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT pour la table `brigade`
 --
 ALTER TABLE `brigade`
-  MODIFY `ident` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `ident` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT pour la table `chef_brigade`
 --
 ALTER TABLE `chef_brigade`
-  MODIFY `ident` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `ident` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT pour la table `conversation_fonciere`
@@ -897,13 +963,13 @@ ALTER TABLE `conversation_fonciere`
 -- AUTO_INCREMENT pour la table `dossier`
 --
 ALTER TABLE `dossier`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT pour la table `dossier_terminer`
 --
 ALTER TABLE `dossier_terminer`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT pour la table `evaluation_cadastrale`
@@ -921,73 +987,79 @@ ALTER TABLE `gestion_brigade`
 -- AUTO_INCREMENT pour la table `gestion_brigade_terminer`
 --
 ALTER TABLE `gestion_brigade_terminer`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `gestion_chef_brigade`
 --
 ALTER TABLE `gestion_chef_brigade`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT pour la table `gestion_chef_brigade_terminer`
 --
 ALTER TABLE `gestion_chef_brigade_terminer`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT pour la table `gestion_conversation_fonciere`
 --
 ALTER TABLE `gestion_conversation_fonciere`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT pour la table `gestion_conversation_fonciere_terminer`
 --
 ALTER TABLE `gestion_conversation_fonciere_terminer`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `gestion_evaluation_cadastrale`
 --
 ALTER TABLE `gestion_evaluation_cadastrale`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT pour la table `gestion_evaluation_cadastrale_terminer`
 --
 ALTER TABLE `gestion_evaluation_cadastrale_terminer`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT pour la table `gestion_fonciere`
 --
 ALTER TABLE `gestion_fonciere`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `gestion_securisation`
 --
 ALTER TABLE `gestion_securisation`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT pour la table `gestion_securisation_terminer`
 --
 ALTER TABLE `gestion_securisation_terminer`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT pour la table `gestion_signature`
 --
 ALTER TABLE `gestion_signature`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT pour la table `gestion_signature_terminer`
 --
 ALTER TABLE `gestion_signature_terminer`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT pour la table `gestion_verification_chef_brigade`
+--
+ALTER TABLE `gestion_verification_chef_brigade`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT pour la table `objectifs_direction`

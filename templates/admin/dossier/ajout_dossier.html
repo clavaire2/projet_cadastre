@@ -34,10 +34,10 @@
                     <form action="{{ url_for('ajouter_dossier') }}" method="POST">
                         <div class="card-body p-5">
                             <!-- Champ numéro du dossier -->
-                            <div class="mb-4">
-                                <label for="basiInput" class="form-label fw-bold">Numéro du dossier</label>
-                                <input type="text" name="nom" class="form-control shadow-sm rounded" id="basiInput" placeholder="Entrez le numéro du dossier" required>
-                            </div>
+                            <label for="basiInput" class="form-label fw-bold">Noms des dossiers (séparés par une virgule) :</label>
+                            <textarea class="form-control shadow-sm rounded" id="basiInput" name="nom_dossiers" placeholder="Noms des dossiers (séparés par une virgule)" required></textarea>
+                          
+                        </div>
                             <!-- Champ caché (raison) -->
                             <input type="hidden" name="raison" class="form-control" id="labelInput">
                             <!-- Bouton de soumission -->

@@ -18,9 +18,9 @@ app.config['SECRET_KEY']=my_token
 app.config['MYSQL_HOST'] = my_host
 app.config['MYSQL_USER'] = my_user
 app.config['MYSQL_PASSWORD'] = my_password
-app.config['MYSQL_DB'] =  my_db
+app.config['MYSQL_DB']       =  my_db
 app.config['MYSQL_CURSORCLASS'] =my_CURSORCLASS
-
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
 
 
 
@@ -67,7 +67,7 @@ def getLogin(email, table):
     cur.close()
     return useradminID, firstName
 
-# Fonction is_valid
+
 def is_valid(email, email_t, password, table):
     cur = mysql.connection.cursor()
     cur.execute('SELECT {}, password FROM {}'.format(email_t, table))
@@ -135,7 +135,7 @@ def inscription_admin():
             name = request.form['name']
             prenom = request.form['prenom']
             nom_complet = name + ' ' +  prenom
-            email = request.form['email']
+            email = request.form['email'].lower()
             numero_telephone = request.form['numero_telephone']
             password = request.form['password']
             confirm_password = request.form['confirm_password']
@@ -168,119 +168,98 @@ def inscription_admin():
 
 
 
-@app.route('/supprimer_administrateur/<int:id>')
+
+
+@app.route('/supprimer_administrateur/<int:id>', methods=['POST'])
 def supprimer_admin(id):
     if 'email_admin' in session:
-        loggedIn, firstName = getLogin('email_admin', 'admin')
-        cur = mysql.connection.cursor()
-        cur.execute("DELETE from admin WHERE ident=%s", (id,))
-        mysql.connection.commit()
-        cur.close()
-        flash('Administrateur supprimé avec succès.', 'success')
+        try:
+            loggedIn, firstName = getLogin('email_admin', 'admin')
+            cur = mysql.connection.cursor()
+            cur.execute("DELETE from admin WHERE ident=%s", (id,))
+            mysql.connection.commit()
+            flash("Evaluation cadastrale supprimé avec succès", "success")
+        except Exception as e:
+            flash(f"Erreur lors de la suppression : {e}", "danger")
+        finally:
+            cur.close()
         return redirect(url_for('inscription_admin'))
     else:
         return redirect(url_for('login'))
 
 
 
+
+
 @app.route("/rechercher", methods=["GET", "POST"])
 def rechercher_dossier():
+    user_roles = {
+        'email_admin': 'admin',
+        'email_chefbrigade': 'chef_brigade',
+        'email_brigade': 'brigade',
+        'email_securisation': 'securisation',
+        'email_evaluation_cadastrale': 'evaluation_cadastrale',
+        'email_signature': 'signature',
+        'email_conversation_fonciere': 'conversation_fonciere'
+    }
+
+    # Identifier le rôle en fonction de l'email en session
+    current_role = next((role for email, role in user_roles.items() if email in session), None)
+
+    if not current_role:
+        return redirect(url_for('login'))
+
     if request.method == "POST":
         nom_dossier = request.form.get("nom_dossier")
         if not nom_dossier:
-            return render_template(
-                "admin/dossier/recherche_trouver.html",
-                error="Veuillez saisir un nom de dossier.",
-                dossiers=None
-            )
+            return render_template(f"{current_role}/dossier/recherche_trouver.html", error="Veuillez saisir un nom de dossier.", dossiers=None)
 
         tables = [
             "gestion_chef_brigade", "gestion_brigade", "gestion_securisation",
             "gestion_evaluation_cadastrale", "gestion_signature", "gestion_conversation_fonciere",
             "gestion_conversation_fonciere_terminer"
         ]
-        dossiers = []
 
-        # Fonction pour formater le nom de la table
         def format_table_name(table_name):
-            table_name = table_name.replace("gestion_", "")  # Enlever 'gestion_'
-            table_name = table_name.replace("_", " ").capitalize()  # Remplacer le _ par un espace et mettre en majuscule
-            return table_name
+            return table_name.replace("gestion_", "").replace("_", " ").capitalize()
 
         cur = mysql.connection.cursor()
+        dossiers = []
+
         try:
             for table in tables:
                 query = f"SELECT * FROM {table} WHERE nom_dossier LIKE %s"
                 cur.execute(query, (f"%{nom_dossier}%",))
                 results = cur.fetchall()
-                columns = [desc[0] for desc in cur.description]  # Récupérer les noms des colonnes
+                columns = [desc[0] for desc in cur.description]
 
                 for result in results:
-                    dossier = {"table": format_table_name(table)}  # Formater le nom de la table ici
+                    dossier = {"table": format_table_name(table)}
                     for idx, column in enumerate(columns):
-                        dossier[column] = result[idx] if idx < len(result) else None  # Ajouter uniquement les colonnes existantes
+                        dossier[column] = result[idx] if idx < len(result) else None
                     dossiers.append(dossier)
 
-            # Fonction pour extraire les dates et trouver la date maximale
-            def get_max_date(row):
-                dates = []
-
-                # Parcourir les clés du dictionnaire pour trouver les colonnes "date"
-                for column, value in row.items():
-                    if column.lower().startswith('date_') and isinstance(value, datetime):
-                        dates.append(value)
-
-                # Trouver la date maximale
-                if dates:
-                    return max(dates)
-                return None
-
-            # Calculer la différence en mois, jours, heures, minutes et secondes pour chaque dossier
             for dossier in dossiers:
-                max_date = get_max_date(dossier)
+                date_fields = [value for key, value in dossier.items() if key.lower().startswith('date_') and isinstance(value, datetime)]
+                max_date = max(date_fields) if date_fields else None
+
                 if max_date and 'date_ajout' in dossier and isinstance(dossier['date_ajout'], datetime):
-                    # Calculer la différence
                     delta = relativedelta(max_date, dossier['date_ajout'])
+                    dossier.update({
+                        'duree_mois': delta.years * 12 + delta.months,
+                        'duree_jours': delta.days,
+                        'duree_heures': delta.hours,
+                        'duree_minutes': delta.minutes,
+                        'duree_secondes': delta.seconds
+                    })
 
-                    # Calcul des mois, jours, heures, minutes et secondes
-                    mois = delta.years * 12 + delta.months
-                    jours = delta.days
-                    heures = max_date.hour - dossier['date_ajout'].hour
-                    minutes = max_date.minute - dossier['date_ajout'].minute
-                    secondes = max_date.second - dossier['date_ajout'].second
-
-                    # Corriger les heures, minutes et secondes négatives
-                    if secondes < 0:
-                        secondes += 60
-                        minutes -= 1
-                    if minutes < 0:
-                        minutes += 60
-                        heures -= 1
-                    if heures < 0:
-                        heures += 24
-                        jours -= 1
-
-                    dossier['duree_mois'] = mois
-                    dossier['duree_jours'] = jours
-                    dossier['duree_heures'] = heures
-                    dossier['duree_minutes'] = minutes
-                    dossier['duree_secondes'] = secondes
-
-            return render_template(
-                "admin/dossier/recherche_trouver.html",
-                dossiers=dossiers,
-                nom_dossier=nom_dossier,
-                error=None
-            )
+            return render_template(f"{current_role}/dossier/recherche_trouver.html", dossiers=dossiers, nom_dossier=nom_dossier, error=None)
         except Exception as e:
-            return render_template(
-                "admin/dossier/recherche_trouver.html",
-                error=f"Erreur : {str(e)}",
-                dossiers=None
-            )
+            return render_template(f"{current_role}/dossier/recherche_trouver.html", error=f"Erreur : {str(e)}", dossiers=None)
         finally:
             cur.close()
-    return render_template("admin/dossier/recherche_trouver.html", dossiers=None, error=None)
+
+    return render_template(f"{current_role}/dossier/recherche_trouver.html", dossiers=None, error=None)
 
 
 
@@ -308,7 +287,7 @@ def admin_tableau_de_bord():
     nombre_cours     =  sum(en_cours_liste)
     nombre_terminer  =  sum(terminer_liste_ter)
 
-    print(nombre_cours)
+
 
 
     liste_table    = ["chef_brigade", "brigade", "securisation",
@@ -353,20 +332,494 @@ def admin_tableau_de_bord():
 def ajouter_dossier():
     if 'email_admin' not in session:
         return redirect(url_for('login'))
-    # Récupérer les informations du chef de brigade connecté
-    loggedIn, firstName = getLogin('email_admin', 'admin')
-    if not loggedIn:
+    
+    else:
+        loggedIn, firstName = getLogin('email_admin', 'admin')
+
+        if request.method == 'POST':
+            noms_dossiers = request.form['nom_dossiers']
+            statut = 'attente'
+            date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            cur = mysql.connection.cursor()
+            noms_dossiers_list = [nom.strip() for nom in noms_dossiers.split(",") if nom.strip()]
+            for nom_dossier in noms_dossiers_list:
+                cur.execute("""INSERT INTO dossier (nom_dossier, date_creation, statut, nom_de_ajouteur) 
+                            VALUES (%s, %s, %s, %s)""", 
+                            (nom_dossier, date_now, statut, firstName))
+
+            mysql.connection.commit()
+            cur.close()
+            flash(f"{len(noms_dossiers_list)} dossier(s) ajouté(s) avec succès !", "success")
+
+            return redirect(url_for('liste_dossier'))
+
+        return render_template('admin/dossier/ajout_dossier.html', firstName=firstName)
+
+
+
+@app.route('/assigner_dossiers', methods=['POST'])
+def assigner_dossiers():
+    if 'email_admin' not in session:
         return redirect(url_for('login'))
-    if request.method == 'POST':
-        nom_dossier = request.form['nom']
-        statut = 'attente'  # Le statut est toujours 'attente' par défaut
+
+    try:
+        loggedIn, firstName = getLogin('email_admin', 'admin')
+        selected_dossiers = request.form.get('selected_dossiers', '')
+        if not selected_dossiers:
+            flash("Aucun dossier sélectionné.", "warning")
+            return redirect(url_for('liste_dossier'))
+        dossier_ids = selected_dossiers.split(',')
+
+        chef_brigade_1 = request.form.get('chef_brigade_1')
+        securisation = request.form.get('securisation')
+        evaluation_cadastrale = request.form.get('evaluation_cadastrale')
+        signature = request.form.get('signature')
+        conversation_fonciere = request.form.get('conversation_fonciere')
+
         cur = mysql.connection.cursor()
-        cur.execute("""INSERT INTO dossier (nom_dossier,date_creation,statut,nom_de_ajouteur) VALUES (%s, %s, %s,%s)""", (nom_dossier,date_now,statut,firstName))
+        date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        def get_nom_complet_email(table, ident, role, email_colonne):
+            if ident:
+                cur.execute(f"SELECT nom_complet, {email_colonne} FROM {table} WHERE ident = %s", (ident,))
+                data = cur.fetchone()
+                if not data:
+                    flash(f"{role} introuvable.", "warning")
+                    return None, None  # Retourner None pour éviter des erreurs d'affichage
+                return data[0], data[1]  # Retourne le nom complet et l'email
+            return None, None  # Assurez-vous que la fonction retourne bien deux valeurs
+
+
+        chef_brigade_1_name, chef_brigade_1_email = get_nom_complet_email('chef_brigade', chef_brigade_1, 'Chef de brigade 1', 'email_chefbrigade')
+        securisation_name, securisation_email = get_nom_complet_email('securisation', securisation, 'Sécurisation', 'email_securisation')
+        evaluation_cadastrale_name, evaluation_cadastrale_email = get_nom_complet_email('evaluation_cadastrale', evaluation_cadastrale, 'Évaluation cadastrale', 'email_evaluation_cadastrale')
+        signature_name, signature_email = get_nom_complet_email('signature', signature, 'Signature', 'email_signature')
+        conversation_fonciere_name, conversation_fonciere_email = get_nom_complet_email('conversation_fonciere', conversation_fonciere, 'Conversation foncière', 'email_conversation_fonciere')
+
+
+
+        for dossier_id in dossier_ids:
+            cur.execute("SELECT * FROM dossier WHERE id = %s", (dossier_id,))
+            dossier = cur.fetchone()
+
+            if dossier:
+                # Vérifier dans quel groupe assigner le dossier
+                if chef_brigade_1:
+                    cur.execute("""
+                        INSERT INTO gestion_chef_brigade 
+                        (nom_dossier, date_ajout, date_assignation, statut, n1_admin, n2_chef_brigade, id_chef_brigade)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    """, (dossier[1], date_now, date_now, 'En cours', firstName, chef_brigade_1_name, chef_brigade_1))
+                    
+                    msg = Message("Confirmation d'inscription", recipients=[chef_brigade_1_email])
+                    msg.html = f"""
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>Bienvenue {chef_brigade_1_name} !</title>
+                        <style>
+                            body {{
+                                font-family: Arial, sans-serif;
+                                background-color: #f4f4f4;
+                                text-align: center;
+                                padding: 40px;
+                            }}
+                            .container {{
+                                background: white;
+                                padding: 20px;
+                                max-width: 500px;
+                                margin: auto;
+                                border-radius: 10px;
+                                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+                            }}
+                            h2 {{
+                                color: #4CAF50;
+                            }}
+                            .info {{
+                                text-align: left;
+                                font-size: 16px;
+                                margin: 20px 0;
+                            }}
+                            .info p {{
+                                margin: 5px 0;
+                            }}
+                            .btn {{
+                                display: inline-block;
+                                padding: 10px 20px;
+                                margin-top: 20px;
+                                background: #4CAF50;
+                                color: white;
+                                text-decoration: none;
+                                border-radius: 5px;
+                                font-weight: bold;
+                            }}
+                            .footer {{
+                                margin-top: 20px;
+                                font-size: 12px;
+                                color: #777;
+                            }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            <h2>Bonjour, {chef_brigade_1_name} ! 🎉</h2>
+                            <p>Vous avez été assigné(e) au dossier <strong>{dossier[1]}</strong> par l'administrateur <strong>{firstName}</strong>.</p>
+                            
+                            <div class="info">
+                                <p><strong>Statut :</strong> En cours</p>
+                                <p><strong>Date d'assignation :</strong> {date_now}</p>
+                            </div>
+                            
+                            <a class="btn" href="127.0.0.1:5000">Se connecter</a>
+                            
+                            <p class="footer">Si vous n'êtes pas concerné par cet email, ignorez-le.</p>
+                        </div>
+                    </body>
+                    </html>
+                    """
+
+                    # mail.send(msg)
+                
+                elif securisation:
+                    cur.execute("""
+                        INSERT INTO gestion_securisation 
+                        (nom_dossier, date_ajout, date_assignation_n4, statut, n1_admin, n4_securisation, id_securisation)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    """, (dossier[1], date_now, date_now, 'En cours', firstName, securisation_name, securisation))
+                    
+                    msg = Message("Confirmation d'inscription", recipients=[securisation_email])
+                    msg.html = f"""
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>Bienvenue {securisation_name} !</title>
+                        <style>
+                            body {{
+                                font-family: Arial, sans-serif;
+                                background-color: #f4f4f4;
+                                text-align: center;
+                                padding: 40px;
+                            }}
+                            .container {{
+                                background: white;
+                                padding: 20px;
+                                max-width: 500px;
+                                margin: auto;
+                                border-radius: 10px;
+                                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+                            }}
+                            h2 {{
+                                color: #4CAF50;
+                            }}
+                            .info {{
+                                text-align: left;
+                                font-size: 16px;
+                                margin: 20px 0;
+                            }}
+                            .info p {{
+                                margin: 5px 0;
+                            }}
+                            .btn {{
+                                display: inline-block;
+                                padding: 10px 20px;
+                                margin-top: 20px;
+                                background: #4CAF50;
+                                color: white;
+                                text-decoration: none;
+                                border-radius: 5px;
+                                font-weight: bold;
+                            }}
+                            .footer {{
+                                margin-top: 20px;
+                                font-size: 12px;
+                                color: #777;
+                            }}
+                        </style>
+                    </head>
+                    <body>                        
+                        <div class="container">
+                            <h2>Bonjour, {securisation_name} ! 🎉</h2>
+                            <p>Vous avez été assigné(e) au dossier <strong>{dossier[1]}</strong> par l'administrateur <strong>{firstName}</strong>.</p>
+                            
+                            <div class="info">
+                                <p><strong>Statut :</strong> En cours</p>
+                                <p><strong>Date d'assignation :</strong> {date_now}</p>
+                            </div>
+                            
+                            <a class="btn" href="127.0.0.1:5000">Se connecter</a>
+                            
+                            <p class="footer">Si vous n'êtes pas concerné par cet email, ignorez-le.</p>
+                        </div>
+                    </body>
+                    </html>
+                    """
+
+                    # mail.send(msg)
+
+                elif evaluation_cadastrale:
+                    cur.execute("""
+                        INSERT INTO gestion_evaluation_cadastrale 
+                        (nom_dossier, date_ajout, date_assignation_n5, statut, n1_admin, n5_evaluation_cadastrale, id_evaluation_cadastrale)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    """, (dossier[1], date_now, date_now, 'En cours', firstName, evaluation_cadastrale_name, evaluation_cadastrale))
+                    
+                    msg = Message("Confirmation d'inscription", recipients=[evaluation_cadastrale_email])
+                    msg.html = f"""
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>Bienvenue {evaluation_cadastrale_name} !</title>
+                        <style>
+                            body {{
+                                font-family: Arial, sans-serif;
+                                background-color: #f4f4f4;
+                                text-align: center;
+                                padding: 40px;
+                            }}
+                            .container {{
+                                background: white;
+                                padding: 20px;
+                                max-width: 500px;
+                                margin: auto;
+                                border-radius: 10px;
+                                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+                            }}
+                            h2 {{
+                                color: #4CAF50;
+                            }}
+                            .info {{
+                                text-align: left;
+                                font-size: 16px;
+                                margin: 20px 0;
+                            }}
+                            .info p {{
+                                margin: 5px 0;
+                            }}
+                            .btn {{
+                                display: inline-block;
+                                padding: 10px 20px;
+                                margin-top: 20px;
+                                background: #4CAF50;
+                                color: white;
+                                text-decoration: none;
+                                border-radius: 5px;
+                                font-weight: bold;
+                            }}
+                            .footer {{
+                                margin-top: 20px;
+                                font-size: 12px;
+                                color: #777;
+                            }}
+                        </style>
+                    </head>
+                    <body>                        
+                        <div class="container">
+                            <h2>Bonjour, {evaluation_cadastrale_name} ! 🎉</h2>
+                            <p>Vous avez été assigné(e) au dossier <strong>{dossier[1]}</strong> par l'administrateur <strong>{firstName}</strong>.</p>
+                            
+                            <div class="info">
+                                <p><strong>Statut :</strong> En cours</p>
+                                <p><strong>Date d'assignation :</strong> {date_now}</p>
+                            </div>
+                            
+                            <a class="btn" href="127.0.0.1:5000">Se connecter</a>
+                            
+                            <p class="footer">Si vous n'êtes pas concerné par cet email, ignorez-le.</p>
+                        </div>
+                    </body>
+                    </html>
+                    """
+
+                    # mail.send(msg)
+
+                elif signature:
+                    cur.execute("""
+                        INSERT INTO gestion_signature 
+                        (nom_dossier, date_ajout, date_assignation_n6, statut, n1_admin, n6_signature, id_signature)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    """, (dossier[1], date_now, date_now, 'En cours', firstName, signature_name, signature))
+                    
+                    msg = Message("Confirmation d'inscription", recipients=[signature_email])
+                    msg.html = f"""
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>Bienvenue {signature_name} !</title>
+                        <style>
+                            body {{
+                                font-family: Arial, sans-serif;
+                                background-color: #f4f4f4;
+                                text-align: center;
+                                padding: 40px;
+                            }}
+                            .container {{
+                                background: white;
+                                padding: 20px;
+                                max-width: 500px;
+                                margin: auto;
+                                border-radius: 10px;
+                                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+                            }}
+                            h2 {{
+                                color: #4CAF50;
+                            }}
+                            .info {{
+                                text-align: left;
+                                font-size: 16px;
+                                margin: 20px 0;
+                            }}
+                            .info p {{
+                                margin: 5px 0;
+                            }}
+                            .btn {{
+                                display: inline-block;
+                                padding: 10px 20px;
+                                margin-top: 20px;
+                                background: #4CAF50;
+                                color: white;
+                                text-decoration: none;
+                                border-radius: 5px;
+                                font-weight: bold;
+                            }}
+                            .footer {{
+                                margin-top: 20px;
+                                font-size: 12px;
+                                color: #777;
+                            }}
+                        </style>
+                    </head>
+                    <body>                        
+                        <div class="container">
+                            <h2>Bonjour, {signature_name} ! 🎉</h2>
+                            <p>Vous avez été assigné(e) au dossier <strong>{dossier[1]}</strong> par l'administrateur <strong>{firstName}</strong>.</p>
+                            
+                            <div class="info">
+                                <p><strong>Statut :</strong> En cours</p>
+                                <p><strong>Date d'assignation :</strong> {date_now}</p>
+                            </div>
+                            
+                            <a class="btn" href="127.0.0.1:5000">Se connecter</a>
+                            
+                            <p class="footer">Si vous n'êtes pas concerné par cet email, ignorez-le.</p>
+                        </div>
+                    </body>
+                    </html>
+                    """
+
+                    # mail.send(msg)
+
+                elif conversation_fonciere:
+                    cur.execute("""
+                        INSERT INTO gestion_conversation_fonciere 
+                        (nom_dossier, date_ajout, date_assignation_n7, statut, n1_admin, n7_conversation_fonciere, id_conversation_fonciere)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    """, (dossier[1], date_now, date_now, 'En cours', firstName, conversation_fonciere_name, conversation_fonciere))
+                    
+                    msg = Message("Confirmation d'inscription", recipients=[conversation_fonciere_email])
+                    msg.html = f"""
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>Bienvenue {conversation_fonciere_name} !</title>
+                        <style>
+                            body {{
+                                font-family: Arial, sans-serif;
+                                background-color: #f4f4f4;
+                                text-align: center;
+                                padding: 40px;
+                            }}
+                            .container {{
+                                background: white;
+                                padding: 20px;
+                                max-width: 500px;
+                                margin: auto;
+                                border-radius: 10px;
+                                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+                            }}
+                            h2 {{
+                                color: #4CAF50;
+                            }}
+                            .info {{
+                                text-align: left;
+                                font-size: 16px;
+                                margin: 20px 0;
+                            }}
+                            .info p {{
+                                margin: 5px 0;
+                            }}
+                            .btn {{
+                                display: inline-block;
+                                padding: 10px 20px;
+                                margin-top: 20px;
+                                background: #4CAF50;
+                                color: white;
+                                text-decoration: none;
+                                border-radius: 5px;
+                                font-weight: bold;
+                            }}
+                            .footer {{
+                                margin-top: 20px;
+                                font-size: 12px;
+                                color: #777;
+                            }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            <h2>Bonjour, {conversation_fonciere_name} ! 🎉</h2>
+                            <p>Vous avez été assigné(e) au dossier <strong>{dossier[1]}</strong> par l'administrateur <strong>{firstName}</strong>.</p>
+                            
+                            <div class="info">
+                                <p><strong>Statut :</strong> En cours</p>
+                                <p><strong>Date d'assignation :</strong> {date_now}</p>
+                            </div>
+                            
+                            <a class="btn" href="127.0.0.1:5000">Se connecter</a>
+                            
+                            <p class="footer">Si vous n'êtes pas concerné par cet email, ignorez-le.</p>
+                        </div>
+                    </body>
+                    </html>
+                    """
+
+                    # mail.send(msg)
+
+                # Insérer une seule fois dans dossier_terminer
+                cur.execute("""
+                    INSERT INTO dossier_terminer 
+                    (nom_dossier, date_ajout, date_assignation, date_terminer, statut, n1_admin)
+                    VALUES (%s, %s, %s, NOW(), %s, %s)
+                """, (
+                    dossier[1],  # nom_dossier
+                    dossier[2],  # date_ajout
+                    date_now,    # date_assignation
+                    'Terminé',   # statut
+                    firstName    # n1_admin
+                ))
+
+                # Supprimer le dossier de la table d'origine
+                cur.execute("DELETE FROM dossier WHERE id = %s", (dossier_id,))
+
         mysql.connection.commit()
-        cur.close()
+        flash("Dossiers assignés avec succès.", "success")
         return redirect(url_for('liste_dossier'))
 
-    return render_template('admin/dossier/ajout_dossier.html', firstName=firstName)
+    except Exception as e:
+        flash(f"Erreur lors de l'assignation : {str(e)}", "danger")
+        return redirect(url_for('liste_dossier'))
+
+
+
+
+
+
+
 
 # Route pour modifier un produit
 @app.route('/modifier_dossier/<int:id>', methods=['GET', 'POST'])
@@ -411,22 +864,65 @@ def modifier_dossier(id):
         return redirect(url_for('login'))
 
 
-# Route pour supprimer un produit
-@app.route('/supprimer/<int:id>')
+
+@app.route('/supprimer_dossier/<int:id>', methods=['POST'])
 def supprimer_dossier(id):
     if 'email_admin' in session:
-        loggedIn, firstName = getLogin('email_admin', 'admin')
-        cur = mysql.connection.cursor()
-        cur.execute("DELETE from dossier WHERE id=%s", (id,))
-        mysql.connection.commit()
-        cur.close()
-        flash('Produit supprimé avec succès!','succès')
-        return redirect(url_for('liste_dossier'))
+        try:
+            loggedIn, firstName = getLogin('email_admin', 'admin')
+            cur = mysql.connection.cursor()
+            cur.execute("DELETE FROM dossier WHERE id = %s", (id,))
+            mysql.connection.commit()
+            flash("Dossier supprimé avec succès", "success")
+        except Exception as e:
+            flash(f"Erreur lors de la suppression : {e}", "danger")
+        finally:
+            cur.close()
+        return redirect(url_for('liste_dossier_delete'))
     else:
         return redirect(url_for('login'))
 
+
+
+
+
+
+
 @app.route("/liste_dossier")
 def liste_dossier():
+    if 'email_admin' not in session:
+        return redirect(url_for('login'))
+    else:
+        loggedIn, firstName = getLogin('email_admin', 'admin')
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT * FROM dossier  ORDER BY `dossier`.`id` DESC")  # Vous pouvez ajuster cette requête si vous avez des filtres
+        dossiers = cur.fetchall()  # Récupérer tous les résultats sous forme de liste
+        
+        cur.execute("SELECT ident, nom_complet FROM chef_brigade")
+        chef_brigades = cur.fetchall()
+
+        cur.execute("SELECT ident, nom_complet FROM securisation")
+        securisation = cur.fetchall()
+        
+        cur.execute("SELECT ident, nom_complet FROM evaluation_cadastrale")
+        evaluation_cadastrale = cur.fetchall()
+
+        cur.execute("SELECT ident, nom_complet FROM signature")
+        signature = cur.fetchall()
+
+
+        cur.execute("SELECT ident, nom_complet FROM conversation_fonciere")
+        conversation_fonciere = cur.fetchall()
+ 
+        return render_template('admin/dossier/liste_dossier.html',
+                               dossiers=dossiers,firstName=firstName,
+                               securisation=securisation, chef_brigades=chef_brigades,
+                               evaluation_cadastrale=evaluation_cadastrale, 
+                               signature=signature, conversation_fonciere=conversation_fonciere)
+
+
+@app.route("/liste_dossier_delete")
+def liste_dossier_delete():
     loggedIn, firstName = getLogin('email_admin', 'admin')
     if 'email_admin' not in session:
         return redirect(url_for('login'))
@@ -437,23 +933,22 @@ def liste_dossier():
         
         cur.execute("SELECT ident, nom_complet FROM chef_brigade")
         chef_brigades = cur.fetchall()
-        return render_template('admin/dossier/liste_dossier.html',dossiers=dossiers,firstName=firstName,chef_brigades=chef_brigades)
+        return render_template('admin/dossier/liste_dossier_delete.html',dossiers=dossiers,firstName=firstName,chef_brigades=chef_brigades)
+
 
 
 @app.route('/valider_dossier_a/<int:dossier_id>', methods=['POST'])
 def valider_dossier_a(dossier_id):
     if 'email_admin' not in session:
         return redirect(url_for('login'))
-
+    
     try:
-        # Obtenir les informations de connexion
         loggedIn, firstName = getLogin('email_admin', 'admin')
-        print(f"Debug: loggedIn={loggedIn}, firstName={firstName}, dossier_id={dossier_id}")
         
         cur = mysql.connection.cursor()
         cur.execute("SELECT * FROM dossier WHERE id = %s", (dossier_id,))
         dossier = cur.fetchone()
-        print(f"Debug: dossier={dossier}")
+
 
         if not dossier:
             flash("Dossier introuvable.", "warning")
@@ -508,6 +1003,12 @@ def valider_dossier_a(dossier_id):
         if cur:
             cur.close()
 
+
+
+
+
+
+
 ############ chef brigade
 @app.route("/inscription_chefbrigade",methods=['POST', 'GET'])
 def inscription_chefbrigade():
@@ -519,11 +1020,12 @@ def inscription_chefbrigade():
         cur= mysql.connection.cursor()
         cur.execute(query)
         data = cur.fetchall()
+        print(data)
         if request.method == 'POST':
             name = request.form['name']
             prenom = request.form['prenom']
             nom_complet=name +' '+ prenom
-            email = request.form['email']
+            email = request.form['email'].lower()
             numero_telephone = request.form['numero_telephone']
             password = request.form['password']
             confirm_password = request.form['confirm_password']
@@ -555,21 +1057,22 @@ def inscription_chefbrigade():
 
 
 
-@app.route('/supprimer_chefbrigade/<int:id>')
+@app.route('/supprimer_chefbrigade/<int:id>', methods=['POST'])
 def supprimer_chefbrigade(id):
     if 'email_admin' in session:
-        loggedIn, firstName = getLogin('email_admin', 'admin')
-        cur = mysql.connection.cursor()
-        cur.execute("DELETE from chef_brigade WHERE ident=%s", (id,))
-        mysql.connection.commit()
-        cur.close()
-        flash('Administrateur supprimé avec succès.', 'success')
-        return redirect(url_for('inscription_chefbrigade'), )
+        try:
+            loggedIn, firstName = getLogin('email_admin', 'admin')
+            cur = mysql.connection.cursor()
+            cur.execute("DELETE from chef_brigade WHERE ident=%s", (id,))
+            mysql.connection.commit()
+            flash("chef brigade supprimé avec succès", "success")
+        except Exception as e:
+            flash(f"Erreur lors de la suppression : {e}", "danger")
+        finally:
+            cur.close()
+        return redirect(url_for('inscription_chefbrigade'))
     else:
         return redirect(url_for('login'))
-
-
-
 
 
 @app.route("/chef_brigade_tableau_de_bord")
@@ -581,7 +1084,8 @@ def chef_brigade_tableau_de_bord():
         return redirect(url_for('login'))
     else:
         cur = mysql.connection.cursor()
-        cur.execute("SELECT COUNT(*) FROM gestion_chef_brigade WHERE id_chef_brigade = %s AND statut='En cours'", [loggedIn])
+        cur.execute("SELECT COUNT(*) FROM gestion_chef_brigade "
+                    "WHERE id_chef_brigade = %s AND statut='En cours'", [loggedIn])
         en_cours = cur.fetchone()[0]
         # Requête avec filtre d'année dynamique
         requete = """
@@ -591,11 +1095,8 @@ def chef_brigade_tableau_de_bord():
               AND statut = 'Terminé' 
               AND YEAR(date_ajout) = %s
         """
-
-        # Exécution de la requête avec les paramètres
         cur.execute(requete, [loggedIn, annee_actuelle])
 
-        # Récupérer le résultat
         termine = cur.fetchone()[0]
         cur.close()
         return render_template('chef_brigade/index.html', firstName=firstName,  en_cours=en_cours, termine=termine)
@@ -617,7 +1118,6 @@ def liste_gestion_chef_brigade():
     
     cur.close()
     return render_template('chef_brigade/dossier/liste_chef_brigade.html', dossiers=dossiers, loggedIn=loggedIn, firstName=firstName, brigades=brigades)
-
 
 
 @app.route('/assigner_dossier_chefbrigade/<int:id_dossier>', methods=['POST'])
@@ -647,7 +1147,7 @@ def assigner_dossier_chefbrigade(id_dossier):
 
         # Assigner le dossier à un brigade
         brigade_id = request.form['brigade_id']  # ID du brigade sélectionné
-        cur.execute("SELECT nom_complet FROM brigade WHERE ident = %s", (brigade_id,))
+        cur.execute("SELECT nom_complet, email_brigade FROM brigade WHERE ident = %s", (brigade_id,))
         brigade = cur.fetchone()
         print(f"Debug: brigade={brigade}")
 
@@ -656,14 +1156,17 @@ def assigner_dossier_chefbrigade(id_dossier):
             return redirect(url_for('liste_gestion_chef_brigade'))
 
         brigade_name = brigade[0]
+        email_brigade = brigade[1]
+        
+        motif_envoie = request.form.get('motif_envoie')
 
         cur.execute("""
             INSERT INTO gestion_brigade 
-            (nom_dossier, date_ajout, date_assignation_termin_n2, date_assignation_n3, statut, n1_admin, n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            (nom_dossier, date_ajout, date_assignation_termin_n2, date_assignation_n3, statut, n1_admin, n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade, objet)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             dossier[1], dossier[2], date_now, date_now, 'En cours',
-            dossier[5], firstName, loggedIn, brigade_name, brigade_id
+            dossier[5], firstName, loggedIn, brigade_name, brigade_id, motif_envoie
         ))
 
         # Insérer dans la table gestion_chef_brigade_terminer
@@ -678,6 +1181,77 @@ def assigner_dossier_chefbrigade(id_dossier):
 
         # Supprimer le dossier de la table gestion_chef_brigade
         cur.execute("DELETE FROM gestion_chef_brigade WHERE id = %s", (id_dossier,))
+        
+        msg = Message("Confirmation d'inscription", recipients=[email_brigade])
+        msg.html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Bienvenue {brigade_name} !</title>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f4;
+                    text-align: center;
+                    padding: 40px;
+                }}
+                .container {{
+                    background: white;
+                    padding: 20px;
+                    max-width: 500px;
+                    margin: auto;
+                    border-radius: 10px;
+                    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+                }}
+                h2 {{
+                    color: #4CAF50;
+                }}
+                .info {{
+                    text-align: left;
+                    font-size: 16px;
+                    margin: 20px 0;
+                }}
+                .info p {{
+                    margin: 5px 0;
+                }}
+                .btn {{
+                    display: inline-block;
+                    padding: 10px 20px;
+                    margin-top: 20px;
+                    background: #4CAF50;
+                    color: white;
+                    text-decoration: none;
+                    border-radius: 5px;
+                    font-weight: bold;
+                }}
+                .footer {{
+                    margin-top: 20px;
+                    font-size: 12px;
+                    color: #777;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h2>Bonjour, {brigade_name} ! 🎉</h2>
+                <p>Votre compte a été créé avec succès.</p>
+                
+                <div class="info">
+                    <p><strong>Ce dossier </strong> {dossier[1]}</p>
+                    <p><strong>vient d'être assigné à vous par le chef brigade </strong> {firstName}</p>
+                   
+                </div>
+                
+                <a class="btn" href="127.0.0.1:5000/brigade_tableau_de_bord">Se connecter</a>
+                
+                <p class="footer">Si vous n'êtes pas à l'origine de cette inscription, ignorez cet email.</p>
+            </div>
+        </body>
+        </html>
+        """
+
+        # mail.send(msg)
         
         mysql.connection.commit()
         flash("Le dossier a été assigné avec succès.", "success")
@@ -713,6 +1287,130 @@ def dossiers_valides():
                                )
 
 
+@app.route('/dossiers_a_verifier_brigade')
+def dossiers_a_verifier_brigade():
+    # Vérifier si un chef de brigade est connecté
+    if 'email_chefbrigade' not in session:
+        return redirect(url_for('login'))
+    else :
+        loggedIn, firstName = getLogin('email_chefbrigade', 'chef_brigade')
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT ident FROM chef_brigade WHERE email_chefbrigade = %s", [session['email_chefbrigade']])
+        chef_brigade = cur.fetchone()
+        cur.execute("""SELECT * FROM gestion_verification_chef_brigade
+                                     WHERE id_chef_brigade = %s AND statut = 'En cours' 
+                                     ORDER BY id DESC limit 50""", [loggedIn])
+        dossiers = cur.fetchall()
+        # duree_dossier=calculer_difference(dossiers[4], dossiers[3])
+        print(dossiers)
+        cur.close()
+        return render_template('chef_brigade/dossier/dossiers_a_verifier_brigade.html',
+                               dossiers=dossiers, firstName=firstName, loggedIn=loggedIn)
+        
+  
+                               
+
+@app.route('/envoyer_securisation/<int:id_dossier>', methods=['POST'])
+def envoyer_securisation(id_dossier):
+    if 'email_chefbrigade' not in session:
+        return redirect(url_for('login'))
+
+    try:
+        # Récupérer l'utilisateur connecté
+        loggedIn, firstName = getLogin('email_chefbrigade', 'chef_brigade')
+
+        with mysql.connection.cursor() as cur:
+            # Vérifier si le dossier existe et est bien assigné à l'utilisateur
+            cur.execute("""
+                SELECT * FROM gestion_verification_chef_brigade 
+                WHERE id = %s AND id_chef_brigade = %s AND statut = 'En cours'
+            """, (id_dossier, loggedIn))
+            dossier = cur.fetchone()
+
+            if not dossier:
+                flash("Dossier introuvable ou non assigné.", "warning")
+                return redirect(url_for('dossiers_a_verifier_brigade'))
+
+            # Récupérer le motif du formulaire
+            motif = request.form.get('motif')
+
+            # Générer la date actuelle
+            date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            # Insérer dans la table gestion_securisation
+            cur.execute("""
+                INSERT INTO gestion_securisation 
+                (nom_dossier, date_ajout, date_assignation_termin_n2, date_temine_n3, statut, 
+                n1_admin, n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade, objet)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                dossier[1], dossier[2], dossier[3], date_now, 'En attente',
+                dossier[6], dossier[7], dossier[8], firstName, loggedIn, motif
+            ))
+            # Supprimer le dossier de la table gestion_verification_chef_brigade
+            cur.execute("DELETE FROM gestion_verification_chef_brigade WHERE id = %s", (id_dossier,))
+
+            # Confirmer les modifications
+            mysql.connection.commit()
+
+
+            flash("Le dossier a été envoyé pour sécurisation avec succès.", "success")
+            return redirect(url_for('dossiers_a_verifier_brigade'))
+
+    except Exception as e:
+        flash(f"Une erreur est survenue : {str(e)}", "danger")
+        mysql.connection.rollback()
+        return redirect(url_for('dossiers_a_verifier_brigade'))
+
+
+@app.route('/rejeter_dossier_brigade/<int:id_dossier>', methods=['POST'])
+def rejeter_dossier_brigade(id_dossier):
+    if 'email_chefbrigade' not in session:
+        return redirect(url_for('login'))
+
+    try:
+        # Récupérer les informations de l'utilisateur connecté
+        loggedIn, firstName = getLogin('email_chefbrigade', 'chef_brigade')
+
+        with mysql.connection.cursor() as cur:
+            # Vérifier si le dossier existe dans gestion_verification_chef_brigade
+            cur.execute("""
+                SELECT * FROM gestion_verification_chef_brigade 
+                WHERE id = %s AND id_chef_brigade = %s
+            """, (id_dossier, loggedIn))
+            dossier = cur.fetchone()
+            
+            
+
+            if not dossier:
+                flash("Dossier introuvable ou non assigné.", "warning")
+                return redirect(url_for('dossiers_a_verifier_brigade'))
+            
+            motif_rejet = request.form.get('motif_rejet')
+
+            # Insérer le dossier rejeté dans gestion_brigade
+            cur.execute("""
+                INSERT INTO gestion_brigade 
+                (nom_dossier, date_ajout, date_assignation_termin_n2, date_assignation_n3, statut, 
+                n1_admin, n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade, objet)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                dossier[1], dossier[2], dossier[3], dossier[4], 'Rejeté',
+                dossier[6], dossier[7], dossier[8], dossier[9], dossier[10],motif_rejet
+            ))
+
+            # Supprimer le dossier de gestion_verification_chef_brigade
+            cur.execute("DELETE FROM gestion_verification_chef_brigade WHERE id = %s", (id_dossier,))
+            # Confirmer les modifications
+            mysql.connection.commit()
+
+            flash("Le dossier a été rejeté et renvoyé à la brigade.", "success")
+            return redirect(url_for('dossiers_a_verifier_brigade'))
+
+    except Exception as e:
+        flash(f"Une erreur est survenue : {str(e)}", "danger")
+        mysql.connection.rollback()
+        return redirect(url_for('dossiers_a_verifier_brigade'))
 
 
 ##### ------------ brigade
@@ -730,7 +1428,7 @@ def inscription_brigade():
         name = request.form['name']
         prenom = request.form['prenom']
         nom_complet = name + ' ' + prenom
-        email = request.form['email']
+        email = request.form['email'].lower()
         numero_telephone = request.form['numero_telephone']
         password = request.form['password']
         confirm_password = request.form['confirm_password']
@@ -751,25 +1449,32 @@ def inscription_brigade():
 
         try:
             cursor = mysql.connection.cursor()
-            query = """INSERT INTO `brigade` (nom_complet, email_brigade, numero_telephone, password) 
-                       VALUES (%s, %s, %s, %s)"""
-            cursor.execute(query, (nom_complet, email, numero_telephone, hashed_password))
+            query = """INSERT INTO `brigade` (nom_complet, email_brigade, numero_telephone, password, id_chef_brigarde) 
+                        VALUES (%s, %s, %s, %s, %s)"""
+            cursor.execute(query, (nom_complet, email, numero_telephone, hashed_password, loggedIn))
             mysql.connection.commit()
             return redirect('/inscription_brigade')
         except Exception as e:
             return f"Erreur lors de l'inscription : {e}"
     return render_template('brigade/connexion/cree_compte.html', firstName=firstName, data=data)
 
-@app.route('/supprimer_brigade/<int:id>')
+
+    
+@app.route('/supprimer_brigade/<int:id>', methods=['POST'])
 def supprimer_brigade(id):
     if 'email_chefbrigade' in session:
-        loggedIn, firstName = getLogin('email_chefbrigade', 'chef_brigade')
-        cur = mysql.connection.cursor()
-        cur.execute("DELETE from brigade WHERE ident=%s", (id,))
-        mysql.connection.commit()
-        cur.close()
-        flash('Administrateur supprimé avec succès.', 'success')
-        return redirect(url_for('inscription_brigade'), )
+        try:
+
+            loggedIn, firstName = getLogin('email_chefbrigade', 'chef_brigade')
+            cur = mysql.connection.cursor()
+            cur.execute("DELETE from brigade WHERE ident=%s", (id,))
+            mysql.connection.commit()
+            flash("supprimé avec succès", "success")
+        except Exception as e:
+            flash(f"Erreur lors de la suppression : {e}", "danger")
+        finally:
+            cur.close()
+        return redirect(url_for('inscription_brigade'))
     else:
         return redirect(url_for('login'))
 
@@ -783,15 +1488,43 @@ def brigade_tableau_de_bord():
     else:
         loggedIn, firstName = getLogin('email_brigade', 'brigade')
         cur = mysql.connection.cursor()
+      
+        from datetime import datetime
+        annee_en_cours = datetime.now().year  # Récupère l'année en cours
+        cur.execute(
+            "SELECT COUNT(*) FROM gestion_brigade WHERE statut='En Attente' AND YEAR(date_ajout) = %s",
+            (annee_en_cours,)
+        )
+        en_cours_urgent = cur.fetchone()[0]
+
+
+
         cur.execute("SELECT COUNT(*) FROM gestion_brigade WHERE id_brigade = %s AND statut='En cours'", [loggedIn])
         en_cours = cur.fetchone()[0]
         cur.execute("SELECT COUNT(*) FROM gestion_brigade_terminer WHERE id_brigade = %s AND statut = 'Terminé'"
                     "AND YEAR(date_ajout) = %s",  [loggedIn, annee_actuelle])
         termine = cur.fetchone()[0]
         cur.close()
-        return render_template('brigade/index.html', firstName=firstName,
-                                en_cours=en_cours, termine=termine
-                               )
+        return render_template('brigade/index.html', 
+                                firstName=firstName,
+                                en_cours=en_cours, termine=termine, 
+                                en_cours_urgent=en_cours_urgent)
+
+
+
+@app.route('/liste_gestion_brigade_urgents')
+def liste_gestion_brigade_urgents():
+    if 'email_brigade' not in session:
+        return redirect(url_for('login'))
+    else :
+        loggedIn, firstName = getLogin('email_brigade', 'brigade')
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT * FROM gestion_brigade WHERE  statut='En attente' ORDER BY id DESC")
+        dossiers = cur.fetchall()
+        cur.close()
+        return render_template('brigade/dossier/liste_brigade_urgent.html', 
+                                dossiers=dossiers, loggedIn=loggedIn, 
+                                firstName=firstName)
 
 
 @app.route('/liste_gestion_brigade')
@@ -803,9 +1536,88 @@ def liste_gestion_brigade():
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM gestion_brigade WHERE id_brigade = %s AND statut='En cours' ORDER BY id DESC", (loggedIn,))
     dossiers = cur.fetchall()
+    cur.close()
+    return render_template('brigade/dossier/liste_brigade.html', 
+                           dossiers=dossiers, loggedIn=loggedIn, 
+                           firstName=firstName)
+
+
+
+
+
+
+@app.route("/assigner_dossier_brigade_urgent/<int:id_dossier>", methods=['POST'])
+def assigner_dossier_brigade_urgent(id_dossier):
+    # Vérification de la session
+    if 'email_brigade' not in session:
+        return redirect(url_for('login'))
+
+    # Connexion à la base de données
+    loggedIn, firstName = getLogin('email_brigade', 'brigade')
+    cur = mysql.connection.cursor()
+
+    # Récupération des informations du chef de brigade
+    cur.execute(
+        """SELECT DISTINCT a.ident, a.nom_complet   
+           FROM chef_brigade a  
+           INNER JOIN brigade b ON a.ident = b.id_chef_brigarde  
+           WHERE a.ident = %s""", 
+        (loggedIn,)
+    )
+    
+    data = cur.fetchone()
+
+    # Vérification si les données existent
+    if not data:
+        flash("Aucune information trouvée pour le chef de brigade.", "danger")
+        return redirect(url_for('liste_gestion_brigade'))
+
+    ident_chef, nom_complet_chef = data  # Déballage sécurisé des valeurs
+
+    # Vérification de l'existence du dossier
+    cur.execute("SELECT * FROM gestion_brigade WHERE id = %s", (id_dossier,))
+    dossier = cur.fetchone()
+
+    if not dossier:
+        flash("Dossier introuvable.", "danger")
+        return redirect(url_for('liste_gestion_brigade'))
+
+    # Mise à jour du dossier
+    date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    cur.execute(
+        """UPDATE gestion_brigade 
+           SET date_assignation_n3 = %s, 
+               statut = %s, 
+               n3_brigade = %s, 
+               id_brigade = %s, 
+               n2_chef_brigade = %s, 
+               id_chef_brigade = %s  
+           WHERE id = %s""", 
+        (date_now, 'En cours',firstName, loggedIn, nom_complet_chef, ident_chef, id_dossier)
+    )
+
+    mysql.connection.commit()
+    cur.close()
+
+    flash("Le dossier a été pris en charge avec succès. Merci pour votre engagement.", "success")
+    return redirect(url_for('liste_gestion_brigade'))
+
+
+@app.route('/liste_gestion_brigade_rejeter')
+def liste_gestion_brigade_rejeter():
+    if 'email_brigade' not in session:
+        return redirect(url_for('login'))
+    
+    loggedIn, firstName = getLogin('email_brigade', 'brigade')
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM gestion_brigade WHERE id_brigade = %s AND statut='Rejeté' ORDER BY id DESC", (loggedIn,))
+    dossiers = cur.fetchall()
     
     cur.close()
-    return render_template('brigade/dossier/liste_brigade.html', dossiers=dossiers, loggedIn=loggedIn, firstName=firstName)
+    return render_template('brigade/dossier/liste_brigade_rejeter.html', dossiers=dossiers, loggedIn=loggedIn, firstName=firstName)
+
+
 
 
 @app.route("/assigner_dossier_brigade/<int:id_dossier>", methods=['POST'])
@@ -846,6 +1658,78 @@ def dossier_cours_brigade():
                                dossiers=dossiers, loggedIn=loggedIn, firstName=firstName)
 
 
+
+
+
+@app.route('/terminer_dossier_apres_rejet_brigade/<int:id_dossier>', methods=['POST'])
+def terminer_dossier_apres_rejet_brigade(id_dossier):
+    if 'email_brigade' not in session:
+        return redirect(url_for('login'))
+
+    try:
+        # Récupérer les informations de l'utilisateur connecté
+        loggedIn, firstName = getLogin('email_brigade', 'brigade')
+
+        # Récupérer l'objet de la vérification depuis le formulaire
+        objet = request.form['objet']
+
+        with mysql.connection.cursor() as cur:
+            # Vérifier si le dossier existe et est assigné à l'utilisateur
+            cur.execute("""
+                SELECT * FROM gestion_brigade 
+                WHERE id = %s AND id_brigade = %s AND 
+                statut = 'Rejeté' """, (id_dossier, loggedIn))
+            dossier = cur.fetchone()
+
+            if not dossier:
+                flash("Dossier introuvable ou non assigné.", "warning")
+                return redirect(url_for('dossier_cours_brigade'))
+
+            # Récupérer les valeurs des dates, si elles sont NULL, les remplacer par la date actuelle
+            date_ajout = dossier[2] if dossier[2] else datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            date_assignation_termin_n2 = dossier[3] if dossier[3] else datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            date_assignation_n3 = dossier[4] if dossier[4] else datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            # Générer la date actuelle pour l'envoi
+            date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            # Insérer les informations dans la table gestion_verification_chef_brigade
+            cur.execute("""
+                INSERT INTO gestion_verification_chef_brigade 
+                (nom_dossier, n1_admin, n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade, objet, date_envoie, 
+                date_ajout, date_assignation_termin_n2, date_assignation_n3, statut)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                dossier[1], 
+                dossier[6], 
+                dossier[7], 
+                dossier[8], 
+                firstName, 
+                loggedIn, 
+                objet, 
+                date_now,
+                date_ajout,
+                date_assignation_termin_n2,
+                date_assignation_n3,
+                'En cours'  # Statut récupéré de la base de données (il doit être 'En cours' ici)
+            ))
+            
+            cur.execute("DELETE FROM gestion_brigade WHERE id = %s", (id_dossier,))
+
+
+            # Confirmer les modifications
+            mysql.connection.commit()
+
+            flash("dossier envoyer  avec succès.", "success")
+            return redirect(url_for('dossiers_valides_brigade'))
+
+    except Exception as e:
+        flash(f"Une erreur est survenue : {str(e)}", "danger")
+        mysql.connection.rollback()
+        return redirect(url_for('dossiers_valides_brigade'))
+
+
+
 @app.route('/terminer_dossier_brigade/<int:id_dossier>', methods=['POST'])
 def terminer_dossier_brigade(id_dossier):
     if 'email_brigade' not in session:
@@ -854,6 +1738,9 @@ def terminer_dossier_brigade(id_dossier):
     try:
         # Récupérer les informations de l'utilisateur connecté
         loggedIn, firstName = getLogin('email_brigade', 'brigade')
+
+        # Récupérer l'objet de la vérification depuis le formulaire
+        objet = request.form['objet']
 
         with mysql.connection.cursor() as cur:
             # Vérifier si le dossier existe et est assigné à l'utilisateur
@@ -866,38 +1753,42 @@ def terminer_dossier_brigade(id_dossier):
                 flash("Dossier introuvable ou non assigné.", "warning")
                 return redirect(url_for('dossier_cours_brigade'))
 
-            # Générer la date actuelle
+            # Récupérer les valeurs des dates, si elles sont NULL, les remplacer par la date actuelle
+            date_ajout = dossier[2] if dossier[2] else datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            date_assignation_termin_n2 = dossier[3] if dossier[3] else datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            date_assignation_n3 = dossier[4] if dossier[4] else datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            # Générer la date actuelle pour l'envoi
             date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-            # Insérer dans la table gestion_securisation
+            # Insérer les informations dans la table gestion_verification_chef_brigade
             cur.execute("""
-                INSERT INTO gestion_securisation 
-                (nom_dossier, date_ajout, date_assignation_termin_n2, date_temine_n3, date_assignation_n4, statut, 
-                n1_admin, n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade, n4_securisation, id_securisation)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO gestion_verification_chef_brigade 
+                (nom_dossier, n1_admin, n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade, objet, date_envoie, 
+                date_ajout, date_assignation_termin_n2, date_assignation_n3, statut)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
-                dossier[1], dossier[2], dossier[3], date_now, date_now, 'En attente',
-                dossier[6], dossier[7], dossier[8], firstName, loggedIn, None, None
+                dossier[1], 
+                dossier[6], 
+                dossier[7], 
+                dossier[8], 
+                firstName, 
+                loggedIn, 
+                objet, 
+                date_now,
+                date_ajout,
+                date_assignation_termin_n2,
+                date_assignation_n3,
+                'En cours'  # Statut récupéré de la base de données (il doit être 'En cours' ici)
             ))
-
-            # Insérer dans la table gestion_brigade_terminer
-            cur.execute("""
-                INSERT INTO gestion_brigade_terminer 
-                (nom_dossier, date_ajout, date_assignation_termin_n2, date_assignation_n3, date_temine_n3, statut, 
-                n1_admin, n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (
-                dossier[1], dossier[2], dossier[3], dossier[4], date_now, 'Terminé',
-                dossier[6], dossier[7], dossier[8], firstName, loggedIn
-            ))
-
-            # Supprimer le dossier de la table gestion_brigade
+            
             cur.execute("DELETE FROM gestion_brigade WHERE id = %s", (id_dossier,))
+
 
             # Confirmer les modifications
             mysql.connection.commit()
 
-            flash("Le dossier a été marqué comme terminé avec succès.", "success")
+            flash("Le dossier a été inséré dans la table gestion_verification_chef_brigade avec succès.", "success")
             return redirect(url_for('dossiers_valides_brigade'))
 
     except Exception as e:
@@ -943,7 +1834,7 @@ def inscription_securisation():
             name = request.form['name']
             prenom = request.form['prenom']
             nom_complet=name+" "+prenom
-            email = request.form['email']
+            email = request.form['email'].lower()
             numero_telephone = request.form['numero_telephone']
             password = request.form['password']
             confirm_password = request.form['confirm_password']
@@ -975,19 +1866,25 @@ def inscription_securisation():
 
 
 
-@app.route('/supprimer_securisation/<int:id>')
+
+
+
+@app.route('/supprimer_securisation/<int:id>', methods=['POST'])
 def supprimer_securisation(id):
     if 'email_admin' in session:
-        loggedIn, firstName = getLogin('email_admin', 'admin')
-        cur = mysql.connection.cursor()
-        cur.execute("DELETE from securisation WHERE ident=%s", (id,))
-        mysql.connection.commit()
-        cur.close()
-        flash('Administrateur supprimé avec succès.', 'success')
-        return redirect(url_for('inscription_securisation'), )
+        try:
+            loggedIn, firstName = getLogin('email_admin', 'admin')
+            cur = mysql.connection.cursor()
+            cur.execute("DELETE from securisation WHERE ident=%s", (id,))
+            mysql.connection.commit()
+            flash("Evaluation cadastrale supprimé avec succès", "success")
+        except Exception as e:
+            flash(f"Erreur lors de la suppression : {e}", "danger")
+        finally:
+            cur.close()
+        return redirect(url_for('inscription_securisation'))
     else:
         return redirect(url_for('login'))
-
 
 
 @app.route("/securisation_tableau_de_bord")
@@ -1076,6 +1973,22 @@ def dossier_cours_securisation():
                                dossiers=dossiers, loggedIn=loggedIn, firstName=firstName)
 
 
+
+@app.route("/dossier_rejeter_securisation", methods=['POST', 'GET'])
+def dossier_rejeter_securisation():
+    if 'email_securisation' not in session:
+        flash("Vous devez être connecté pour accéder à cette page.", "danger")
+        return redirect(url_for('login'))
+    else:
+        loggedIn, firstName = getLogin('email_securisation', 'securisation')
+        # print(loggedIn)
+        cur = mysql.connection.cursor(DictCursor)
+        cur.execute("SELECT * FROM gestion_securisation WHERE statut='Réjeté' and  id_securisation = %s", (loggedIn,))
+        dossiers = cur.fetchall()
+        return render_template('securisation/dossier/liste_dossier_rejeter_securisation.html',
+                               dossiers=dossiers, loggedIn=loggedIn, firstName=firstName)
+
+
 @app.route('/terminer_dossier_securisation/<int:id_dossier>', methods=['POST'])
 def terminer_dossier_securisation(id_dossier):
     if 'email_securisation' not in session:
@@ -1101,20 +2014,92 @@ def terminer_dossier_securisation(id_dossier):
 
             # Générer la date actuelle
             date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            objet_validation= request.form['objet_validation']
 
             # Insérer dans la table gestion_evaluation_cadastrale
             cur.execute("""
                 INSERT INTO gestion_evaluation_cadastrale 
                 (nom_dossier, date_ajout, date_assignation_termin_n2, date_temine_n3, date_assignation_n4, 
                  date_temine_n4, date_assignation_n5, statut, n1_admin, n2_chef_brigade, id_chef_brigade, 
-                 n3_brigade, id_brigade, n4_securisation, id_securisation, n5_evaluation_cadastrale, id_evaluation_cadastrale)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                 n3_brigade, id_brigade, n4_securisation, id_securisation, n5_evaluation_cadastrale, id_evaluation_cadastrale, objet)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 dossier["nom_dossier"], dossier["date_ajout"], dossier["date_assignation_termin_n2"],
                 dossier["date_temine_n3"], dossier["date_assignation_n4"], date_now,
                 date_now, 'En attente', dossier["n1_admin"], dossier["n2_chef_brigade"], dossier["id_chef_brigade"],
                 dossier["n3_brigade"], dossier["id_brigade"], firstName, loggedIn,
+                None, None, objet_validation
+            ))
+
+            # Insérer dans la table gestion_securisation_terminer
+            cur.execute("""
+                INSERT INTO gestion_securisation_terminer 
+                (nom_dossier, date_ajout, date_assignation_termin_n2, date_temine_n3, date_assignation_n4, 
+                 date_temine_n4, statut, n1_admin, n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade, 
+                 n4_securisation, id_securisation, n5_evaluation, id_evaluation)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                dossier["nom_dossier"], dossier["date_ajout"], dossier["date_assignation_termin_n2"],
+                dossier["date_temine_n3"], dossier["date_assignation_n4"], date_now, 'Terminé',
+                dossier["n1_admin"], dossier["n2_chef_brigade"], dossier["id_chef_brigade"],
+                dossier["n3_brigade"], dossier["id_brigade"], dossier["n4_securisation"], loggedIn,
                 None, None
+            ))
+            cur.execute("DELETE FROM gestion_securisation WHERE id = %s", (id_dossier,))
+
+            # Confirmer les modifications
+            mysql.connection.commit()
+
+            flash("Le dossier a été marqué comme terminé avec succès.", "success")
+            return redirect(url_for('dossiers_valides_securisation'))
+
+    except Exception as e:
+        flash(f"Une erreur est survenue : {str(e)}", "danger")
+        mysql.connection.rollback()
+        return redirect(url_for('dossiers_valides_securisation'))
+
+
+
+@app.route('/terminer_dossier_rejet_securisation/<int:id_dossier>', methods=['POST'])
+def terminer_dossier_rejet_securisation(id_dossier):
+    if 'email_securisation' not in session:
+        return redirect(url_for('login'))
+
+    try:
+        # Récupérer les informations de l'utilisateur connecté
+        loggedIn, firstName = getLogin('email_securisation', 'securisation')
+
+        with mysql.connection.cursor() as cur:  # Utilisation d'un curseur classique
+            # Vérifier si le dossier existe et est assigné à l'utilisateur
+            cur.execute("""
+                SELECT * FROM gestion_securisation 
+                WHERE id = %s AND id_securisation = %s AND statut = 'Réjeté'
+            """, (id_dossier, loggedIn))
+            columns = [desc[0] for desc in cur.description]
+            result = cur.fetchone()
+            dossier = dict(zip(columns, result)) if result else None
+
+            if not dossier:
+                flash("Dossier introuvable ou non assigné.", "warning")
+                return redirect(url_for('dossier_cours_securisation'))
+
+            # Générer la date actuelle
+            date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            objet_validation= request.form['objet_validation']
+
+            # Insérer dans la table gestion_evaluation_cadastrale
+            cur.execute("""
+                INSERT INTO gestion_evaluation_cadastrale 
+                (nom_dossier, date_ajout, date_assignation_termin_n2, date_temine_n3, date_assignation_n4, 
+                 date_temine_n4, date_assignation_n5, statut, n1_admin, n2_chef_brigade, id_chef_brigade, 
+                 n3_brigade, id_brigade, n4_securisation, id_securisation, n5_evaluation_cadastrale, id_evaluation_cadastrale, objet)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                dossier["nom_dossier"], dossier["date_ajout"], dossier["date_assignation_termin_n2"],
+                dossier["date_temine_n3"], dossier["date_assignation_n4"], date_now,
+                date_now, 'En attente', dossier["n1_admin"], dossier["n2_chef_brigade"], dossier["id_chef_brigade"],
+                dossier["n3_brigade"], dossier["id_brigade"], firstName, loggedIn,
+                None, None, objet_validation
             ))
 
             # Insérer dans la table gestion_securisation_terminer
@@ -1158,36 +2143,62 @@ def rejeter_dossier_securisation(id_dossier):
         
         cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         
-        # Sélectionnez le dossier
         cur.execute("SELECT * FROM gestion_securisation WHERE id = %s", (id_dossier,))
         dossier = cur.fetchone()
         print(f"Debug: dossier={dossier}")
+        date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        objet_rejet = request.form.get('objet_rejet', '').strip()
 
         if not dossier:
             flash("Dossier introuvable.", "warning")
             return redirect(url_for('dossiers_valides_securisation'))
 
-        # Générer la date actuelle
-        date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-        # Insérez le dossier dans gestion_brigade
-        cur.execute("""
-            INSERT INTO gestion_brigade 
-            (nom_dossier, date_ajout, date_assignation_termin_n2, date_assignation_n3, statut, n1_admin, n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (
-            dossier['nom_dossier'], dossier['date_ajout'], dossier.get('date_assignation_termin_n2'), date_now, 
-            'En cours', dossier['n1_admin'], dossier.get('n2_chef_brigade'), dossier.get('id_chef_brigade'),
-            dossier.get('n3_brigade'), dossier.get('id_brigade')
-        ))
 
-        # Supprimez le dossier de la table gestion_securisation
-        cur.execute("DELETE FROM gestion_securisation WHERE id = %s", (id_dossier,))
+        elif dossier.get('n3_brigade') is None and  dossier.get('id_brigade') is None:
+            cur.execute("""
+                INSERT INTO gestion_brigade 
+                (nom_dossier, date_ajout, date_assignation_termin_n2, date_assignation_n3, statut, n1_admin, n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade, objet)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""", (
+                dossier['nom_dossier'], dossier['date_ajout'], 
+                dossier.get('date_assignation_termin_n2'), 
+                date_now, 
+                'En attente',
+                dossier['n1_admin'], 
+                dossier.get('n2_chef_brigade'), 
+                dossier.get('id_chef_brigade'),
+                dossier.get('n3_brigade'),
+                dossier.get('id_brigade'),
+                objet_rejet))
+            cur.execute("DELETE FROM gestion_securisation WHERE id = %s", (id_dossier,))
+
+            mysql.connection.commit()
+            flash("Le dossier a été rejeté avec succès.", "success")
+            return redirect(url_for('dossiers_valides_securisation'))
         
-        # Valider les transactions
-        mysql.connection.commit()
-        flash("Le dossier a été rejeté avec succès.", "success")
-        return redirect(url_for('dossiers_valides_securisation'))
+        elif dossier.get('n3_brigade'):
+            cur.execute("""
+            INSERT INTO gestion_brigade 
+            (nom_dossier, date_ajout, date_assignation_termin_n2, date_assignation_n3, statut, n1_admin, n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade, objet)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""", (
+            dossier['nom_dossier'], dossier['date_ajout'], 
+            dossier.get('date_assignation_termin_n2'), 
+            date_now, 
+            'En cours',
+            dossier['n1_admin'], 
+            dossier.get('n2_chef_brigade'), 
+            dossier.get('id_chef_brigade'),
+            dossier.get('n3_brigade'),
+            dossier.get('id_brigade'),
+            objet_rejet))
+            cur.execute("DELETE FROM gestion_securisation WHERE id = %s", (id_dossier,))
+            mysql.connection.commit()
+            flash("Le dossier a été rejeté avec succès.", "success")
+            return redirect(url_for('dossiers_valides_securisation'))
+        else :
+            flash("Dossier introuvable.", "warning")
+            return redirect(url_for('dossiers_valides_securisation'))
+
 
     except Exception as e:
         if cur:
@@ -1218,9 +2229,6 @@ def dossiers_valides_securisation():
                                )
 
 
-
-
-
 ###################evaluationcadastrale evaluationcadastrale
 @app.route("/inscription_evaluation_cadastrale",methods=['POST', 'GET'])
 def inscription_evaluation_cadastrale():
@@ -1236,7 +2244,7 @@ def inscription_evaluation_cadastrale():
             name = request.form['name']
             prenom = request.form['prenom']
             nom_complet = name + " " + prenom
-            email = request.form['email']
+            email = request.form['email'].lower()
             numero_telephone = request.form['numero_telephone']
             password = request.form['password']
             confirm_password = request.form['confirm_password']
@@ -1267,18 +2275,24 @@ def inscription_evaluation_cadastrale():
         return render_template('evaluation_cadastrale/connexion/cree_compte.html', data=data, firstName=firstName)
 
 
-@app.route('/supprimer_evaluation_cadastrale/<int:id>')
+
+@app.route('/supprimer_evaluation_cadastrale/<int:id>', methods=['POST'])
 def supprimer_evaluation_cadastrale(id):
     if 'email_admin' in session:
-        loggedIn, firstName = getLogin('email_admin', 'admin')
-        cur = mysql.connection.cursor()
-        cur.execute("DELETE from evaluation_cadastrale WHERE ident=%s", (id,))
-        mysql.connection.commit()
-        cur.close()
-        flash('Administrateur supprimé avec succès.', 'success')
-        return redirect(url_for('inscription_evaluation_cadastrale'), )
+        try:
+            loggedIn, firstName = getLogin('email_admin', 'admin')
+            cur = mysql.connection.cursor()
+            cur.execute("DELETE from evaluation_cadastrale WHERE ident=%s", (id,))
+            mysql.connection.commit()
+            flash("Evaluation cadastrale supprimé avec succès", "success")
+        except Exception as e:
+            flash(f"Erreur lors de la suppression : {e}", "danger")
+        finally:
+            cur.close()
+        return redirect(url_for('inscription_evaluation_cadastrale'))
     else:
         return redirect(url_for('login'))
+
 
 
 @app.route("/evaluation_cadastrale_tableau_de_bord")
@@ -1352,13 +2366,173 @@ def dossier_cours_evaluation_cadastrale():
         flash("Vous devez être connecté pour accéder à cette page.", "danger")
         return redirect(url_for('login'))
     else:
-        loggedIn, firstName = getLogin('email_evaluation_cadastrale', 'evaluation_cadastrale')
+        loggedIn, firstName = getLogin('email_evaluation_cadastrale',
+                                       'evaluation_cadastrale')
         # print(loggedIn)
         cur = mysql.connection.cursor(DictCursor)
-        cur.execute("SELECT * FROM gestion_evaluation_cadastrale WHERE statut='En cours' and  id_evaluation_cadastrale = %s", (loggedIn,))
+        cur.execute("SELECT * FROM gestion_evaluation_cadastrale WHERE statut='En cours' "
+                    "and  id_evaluation_cadastrale = %s", (loggedIn,))
         dossiers = cur.fetchall()
         return render_template('evaluation_cadastrale/dossier/liste_dossier_en_cours_evaluation_cadastrale.html',
                                dossiers=dossiers, loggedIn=loggedIn, firstName=firstName)
+
+
+@app.route("/dossiers_rejeter_evaluation_cadastrale", methods=['POST', 'GET'])
+def dossiers_rejeter_evaluation_cadastrale():
+    if 'email_evaluation_cadastrale' not in session:
+        flash("Vous devez être connecté pour accéder à cette page.", "danger")
+        return redirect(url_for('login'))
+    else:
+        loggedIn, firstName = getLogin('email_evaluation_cadastrale', 'evaluation_cadastrale')
+        # print(loggedIn)
+        cur = mysql.connection.cursor(DictCursor)
+        cur.execute("SELECT * FROM gestion_evaluation_cadastrale WHERE statut='Réjeté' and  id_evaluation_cadastrale = %s", (loggedIn,))
+        dossiers = cur.fetchall()
+        return render_template('evaluation_cadastrale/dossier/liste_dossier_rejeter_evaluation_cadastrale.html',
+                               dossiers=dossiers, loggedIn=loggedIn, firstName=firstName)
+
+
+@app.route('/rejet_dossier_evaluation_cadastrale/<int:id_dossier>', methods=['POST'])
+def rejet_dossier_evaluation_cadastrale(id_dossier):
+    if 'email_evaluation_cadastrale' not in session:
+        return redirect(url_for('login'))
+
+    try:
+        loggedIn, firstName = getLogin('email_evaluation_cadastrale', 'evaluation_cadastrale')
+
+        if not loggedIn or not firstName:
+            flash("Erreur: les informations utilisateur sont manquantes.", "danger")
+            return redirect(url_for('dossiers_valides_evaluation_cadastrale'))
+
+        with mysql.connection.cursor() as cur:
+            cur.execute("""
+                SELECT * FROM gestion_evaluation_cadastrale 
+                WHERE id = %s AND id_evaluation_cadastrale = %s AND statut = 'Réjeté'
+            """, (id_dossier, loggedIn))
+            result = cur.fetchone()
+
+            if not result:
+                flash("Dossier introuvable ou non assigné.", "warning")
+                return redirect(url_for('dossier_cours_evaluation_cadastrale'))
+
+            columns = [desc[0] for desc in cur.description]
+            dossier = dict(zip(columns, result))
+
+            date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            objet_validation= request.form['objet_validation']
+
+            cur.execute("""
+                INSERT INTO gestion_signature 
+                (nom_dossier, date_ajout, date_assignation_termin_n2, date_temine_n3, date_assignation_n4, 
+                 date_temine_n4, date_assignation_n5, date_temine_n5, date_assignation_n6, statut, n1_admin, 
+                 n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade, n4_securisation, id_securisation, 
+                 n5_evaluation_cadastrale, id_evaluation_cadastrale, n6_signature, id_signature, objet)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                dossier.get("nom_dossier"), dossier.get("date_ajout"), dossier.get("date_assignation_termin_n2"),
+                dossier.get("date_temine_n3"), dossier.get("date_assignation_n4"), dossier.get("date_temine_n4"),
+                dossier.get("date_assignation_n5"), date_now, date_now, 'En attente',
+                dossier.get("n1_admin"), dossier.get("n2_chef_brigade"),
+                int(dossier["id_chef_brigade"]) if dossier.get("id_chef_brigade") is not None else None,
+                dossier.get("n3_brigade"), dossier.get("id_brigade"), dossier.get("n4_securisation"),
+                dossier.get("id_securisation"), dossier.get("n5_evaluation_cadastrale"),
+                int(dossier["id_evaluation_cadastrale"]) if dossier.get("id_evaluation_cadastrale") is not None else None,
+                None, None, objet_validation
+            ))
+
+            cur.execute("DELETE FROM gestion_evaluation_cadastrale WHERE id = %s", (id_dossier,))
+            mysql.connection.commit()
+
+            flash("Le dossier a été marqué comme terminé avec succès.", "success")
+            return redirect(url_for('dossiers_valides_evaluation_cadastrale'))
+
+    except mysql.connector.Error as e:
+        flash("Une erreur interne est survenue. Veuillez réessayer.", "danger")
+        return redirect(url_for('dossiers_valides_evaluation_cadastrale'))
+
+
+
+
+@app.route('/terminer_dossier_rejeter_evaluation_cadastrale/<int:id_dossier>', methods=['POST'])
+def terminer_dossier_rejeter_evaluation_cadastrale(id_dossier):
+    if 'email_evaluation_cadastrale' not in session:
+        return redirect(url_for('login'))
+
+    try:
+        loggedIn, firstName = getLogin('email_evaluation_cadastrale', 'evaluation_cadastrale')
+
+        if not loggedIn or not firstName:
+            flash("Erreur: les informations utilisateur sont manquantes.", "danger")
+            return redirect(url_for('dossiers_valides_evaluation_cadastrale'))
+
+        objet_rejet = request.form['objet_rejet']
+        if not objet_rejet:
+            flash("L'objet de rejet est requis.", "warning")
+            return redirect(url_for('dossier_cours_evaluation_cadastrale'))
+
+        with mysql.connection.cursor() as cur:
+            cur.execute("""
+                SELECT * FROM gestion_evaluation_cadastrale 
+                WHERE id = %s AND id_evaluation_cadastrale = %s AND statut = 'En cours'
+            """, (id_dossier, loggedIn))
+            result = cur.fetchone()
+
+            if not result:
+                flash("Dossier introuvable ou non assigné.", "warning")
+                return redirect(url_for('dossier_cours_evaluation_cadastrale'))
+
+            columns = [desc[0] for desc in cur.description]
+            dossier = dict(zip(columns, result))
+
+            date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            cur.execute("""
+                INSERT INTO gestion_signature 
+                (nom_dossier, date_ajout, date_assignation_termin_n2, date_temine_n3, date_assignation_n4, 
+                 date_temine_n4, date_assignation_n5, date_temine_n5, date_assignation_n6, statut, n1_admin, 
+                 n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade, n4_securisation, id_securisation, 
+                 n5_evaluation_cadastrale, id_evaluation_cadastrale, n6_signature, id_signature, objet)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                dossier.get("nom_dossier"), dossier.get("date_ajout"), dossier.get("date_assignation_termin_n2"),
+                dossier.get("date_temine_n3"), dossier.get("date_assignation_n4"), dossier.get("date_temine_n4"),
+                dossier.get("date_assignation_n5"), date_now, date_now, 'En attente',
+                dossier.get("n1_admin"), dossier.get("n2_chef_brigade"),
+                int(dossier["id_chef_brigade"]) if dossier.get("id_chef_brigade") is not None else None,
+                dossier.get("n3_brigade"), dossier.get("id_brigade"), dossier.get("n4_securisation"),
+                dossier.get("id_securisation"), dossier.get("n5_evaluation_cadastrale"),
+                int(dossier["id_evaluation_cadastrale"]) if dossier.get("id_evaluation_cadastrale") is not None else None,
+                None, None, objet_rejet
+            ))
+
+            cur.execute("""
+                INSERT INTO gestion_evaluation_cadastrale_terminer 
+                (nom_dossier, date_ajout, date_assignation_termin_n2, date_temine_n3, date_assignation_n4, 
+                 date_temine_n4, date_assignation_n5, date_temine_n5, statut, n1_admin, n2_chef_brigade, id_chef_brigade, 
+                 n3_brigade, id_brigade, n4_securisation, id_securisation, n5_evaluation_cadastrale, id_evaluation_cadastrale)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                dossier.get("nom_dossier"), dossier.get("date_ajout"), dossier.get("date_assignation_termin_n2"),
+                dossier.get("date_temine_n3"), dossier.get("date_assignation_n4"), dossier.get("date_temine_n4"),
+                dossier.get("date_assignation_n5"), date_now, 'Terminé', dossier.get("n1_admin"),
+                dossier.get("n2_chef_brigade"),
+                int(dossier["id_chef_brigade"]) if dossier.get("id_chef_brigade") is not None else None,
+                dossier.get("n3_brigade"), dossier.get("id_brigade"), dossier.get("n4_securisation"),
+                dossier.get("id_securisation"), dossier.get("n5_evaluation_cadastrale"),
+                int(dossier["id_evaluation_cadastrale"]) if dossier.get("id_evaluation_cadastrale") is not None else None
+            ))
+
+            cur.execute("DELETE FROM gestion_evaluation_cadastrale WHERE id = %s", (id_dossier,))
+            mysql.connection.commit()
+
+            flash("Le dossier a été marqué comme terminé avec succès.", "success")
+            return redirect(url_for('dossiers_valides_evaluation_cadastrale'))
+
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f"Une erreur interne est survenue: {str(e)}", "danger")
+        return redirect(url_for('dossiers_valides_evaluation_cadastrale'))
+
 
 
 @app.route('/terminer_dossier_evaluation_cadastrale/<int:id_dossier>', methods=['POST'])
@@ -1388,22 +2562,29 @@ def terminer_dossier_evaluation_cadastrale(id_dossier):
             dossier = dict(zip(columns, result))
 
             date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            objet_validation= request.form['objet_validation']
 
             cur.execute("""
                 INSERT INTO gestion_signature 
                 (nom_dossier, date_ajout, date_assignation_termin_n2, date_temine_n3, date_assignation_n4, 
                  date_temine_n4, date_assignation_n5, date_temine_n5, date_assignation_n6, statut, n1_admin, 
                  n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade, n4_securisation, id_securisation, 
-                 n5_evaluation_cadastrale, id_evaluation_cadastrale, n6_signature, id_signature)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                 n5_evaluation_cadastrale, id_evaluation_cadastrale, n6_signature, id_signature, objet)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 dossier["nom_dossier"], dossier["date_ajout"], dossier["date_assignation_termin_n2"],
                 dossier["date_temine_n3"], dossier["date_assignation_n4"], dossier["date_temine_n4"],
                 dossier["date_assignation_n5"], date_now, date_now, 'En attente',
-                dossier["n1_admin"], dossier["n2_chef_brigade"], int(dossier["id_chef_brigade"]),
-                dossier["n3_brigade"], int(dossier["id_brigade"]), dossier["n4_securisation"], int(dossier["id_securisation"]),
-                dossier["n5_evaluation_cadastrale"], int(dossier["id_evaluation_cadastrale"]), 
-                None, None
+                dossier["n1_admin"],
+                dossier["n2_chef_brigade"],
+                int(dossier["id_chef_brigade"]) if dossier.get("id_chef_brigade") is not None else None,
+                dossier["n3_brigade"],
+                int(dossier["id_brigade"]) if dossier.get("id_brigade") is not None else None,
+                dossier["n4_securisation"],
+                int(dossier["id_securisation"]) if dossier.get("id_securisation") is not None else None,
+                dossier["n5_evaluation_cadastrale"],
+                int(dossier["id_evaluation_cadastrale"]) if dossier.get("id_evaluation_cadastrale") is not None else None,
+                None, None,objet_validation
             ))
 
             cur.execute("""
@@ -1413,11 +2594,23 @@ def terminer_dossier_evaluation_cadastrale(id_dossier):
                  n3_brigade, id_brigade, n4_securisation, id_securisation, n5_evaluation_cadastrale, id_evaluation_cadastrale)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
-                dossier["nom_dossier"], dossier["date_ajout"], dossier["date_assignation_termin_n2"],
-                dossier["date_temine_n3"], dossier["date_assignation_n4"], dossier["date_temine_n4"],
-                dossier["date_assignation_n5"], date_now, 'Terminé', dossier["n1_admin"],
-                dossier["n2_chef_brigade"], int(dossier["id_chef_brigade"]), dossier["n3_brigade"], int(dossier["id_brigade"]),
-                dossier["n4_securisation"], int(dossier["id_securisation"]), dossier["n5_evaluation_cadastrale"], int(dossier["id_evaluation_cadastrale"])
+                dossier["nom_dossier"],
+                dossier["date_ajout"],
+                dossier["date_assignation_termin_n2"],
+                dossier["date_temine_n3"],
+                dossier["date_assignation_n4"],
+                dossier["date_temine_n4"],
+                dossier["date_assignation_n5"],
+                date_now, 'Terminé',
+                dossier["n1_admin"],
+                dossier["n2_chef_brigade"],
+                int(dossier["id_chef_brigade"]) if dossier.get("id_chef_brigade") is not None else None,
+                dossier["n3_brigade"],
+                int(dossier["id_brigade"]) if dossier.get("id_brigade") is not None else None,
+                dossier["n4_securisation"],
+                int(dossier["id_securisation"]) if dossier.get("id_securisation") is not None else None,
+                dossier["n5_evaluation_cadastrale"],
+                int(dossier["id_evaluation_cadastrale"]) if dossier.get("id_evaluation_cadastrale") is not None else None
             ))
 
             cur.execute("DELETE FROM gestion_evaluation_cadastrale WHERE id = %s", (id_dossier,))
@@ -1429,6 +2622,7 @@ def terminer_dossier_evaluation_cadastrale(id_dossier):
     except mysql.connector.Error as e:
         flash("Une erreur interne est survenue. Veuillez réessayer.", "danger")
         return redirect(url_for('dossiers_valides_evaluation_cadastrale'))
+
 
 
 @app.route('/dossiers_valides_evaluation_cadastrale')
@@ -1445,16 +2639,11 @@ def dossiers_valides_evaluation_cadastrale():
             ORDER BY id DESC 
             LIMIT 50 """, [loggedIn])
         dossiers = cur.fetchall()
-
-        # duree_dossier=calculer_difference(dossiers[4], dossiers[3])
         print(dossiers)
         cur.close()
         return render_template('evaluation_cadastrale/dossier/dossiers_terminer_evaluation_cadastrale.html',
                                dossiers=dossiers, firstName=firstName, loggedIn=loggedIn
                                )
-
-
-
 
 
 
@@ -1476,7 +2665,7 @@ def inscription_signature():
             name = request.form['name']
             prenom = request.form['prenom']
             nom_complet=name+" "+prenom
-            email = request.form['email']
+            email = request.form['email'].lower()
             numero_telephone = request.form['numero_telephone']
             password = request.form['password']
             confirm_password = request.form['confirm_password']
@@ -1506,19 +2695,24 @@ def inscription_signature():
                 return f"Erreur lors de l'inscription : {e}"
         return render_template('signature/connexion/cree_compte.html', data=data, firstName=firstName)
 
-@app.route('/supprimer_signature/<int:id>')
+
+
+@app.route('/supprimer_signature/<int:id>', methods=['POST'])
 def supprimer_signature(id):
     if 'email_admin' in session:
-        loggedIn, firstName = getLogin('email_admin', 'admin')
-        cur = mysql.connection.cursor()
-        cur.execute("DELETE from signature WHERE ident=%s", (id,))
-        mysql.connection.commit()
-        cur.close()
-        flash('Administrateur supprimé avec succès.', 'success')
+        try:
+            loggedIn, firstName = getLogin('email_admin', 'admin')
+            cur = mysql.connection.cursor()
+            cur.execute("DELETE from signature WHERE ident=%s", (id,))
+            mysql.connection.commit()
+            flash("Evaluation cadastrale supprimé avec succès", "success")
+        except Exception as e:
+            flash(f"Erreur lors de la suppression : {e}", "danger")
+        finally:
+            cur.close()
         return redirect(url_for('inscription_signature'))
     else:
         return redirect(url_for('login'))
-
 
 
 @app.route("/signature_fonciere_tableau_de_bord")
@@ -1627,7 +2821,30 @@ def liste_dossiers_assignes_signature():
         loggedIn=loggedIn,
         firstName=firstName
     )
-    
+
+
+@app.route("/liste_dossiers_rejeter_signature")
+def liste_dossiers_rejeter_signature():
+    # Vérifier si l'utilisateur est connecté et est un membre de la sécurisation
+    if 'email_signature' not in session:
+        return redirect(url_for('login'))
+
+    # Récupérer l'état de connexion et le prénom
+    loggedIn, firstName = getLogin('email_signature', 'signature')
+    if not loggedIn:
+        return redirect(url_for('login'))
+    # Récupérer les dossiers en cours pour cet utilisateur
+    cur = mysql.connection.cursor(DictCursor)
+    cur.execute("SELECT * FROM gestion_signature WHERE statut='Réjeté' and  id_signature = %s ORDER BY id DESC LIMIT 50", (loggedIn,))
+    dossiers = cur.fetchall()
+    cur.close()
+    return render_template( 
+        "signature/dossier/dossiers_rejeter_signature.html",
+        dossiers=dossiers,
+        loggedIn=loggedIn,
+        firstName=firstName
+    )
+
 
 @app.route('/valider_dossier_signature/<int:id_dossier>', methods=['POST'])
 def valider_dossier_signature(id_dossier):
@@ -1659,6 +2876,8 @@ def valider_dossier_signature(id_dossier):
 
             # Marquer le dossier comme terminé
             date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            
+            objet_validation= request.form['objet_validation']
 
             # Insérer dans gestion_conversation_fonciere
             cur.execute("""
@@ -1666,8 +2885,8 @@ def valider_dossier_signature(id_dossier):
                 (nom_dossier, date_ajout, date_assignation_termin_n2, date_temine_n3, date_assignation_n4, 
                  date_temine_n4, date_assignation_n5, date_temine_n5, date_assignation_n6, date_temine_n6, date_assignation_n7, statut, n1_admin, 
                  n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade, n4_securisation, id_securisation, 
-                 n5_evaluation_cadastrale, id_evaluation_cadastrale, n6_signature, id_signature, n7_conversation_fonciere, id_conversation_fonciere)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                 n5_evaluation_cadastrale, id_evaluation_cadastrale, n6_signature, id_signature, n7_conversation_fonciere, id_conversation_fonciere, objet)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 dossier["nom_dossier"], dossier["date_ajout"], dossier["date_assignation_termin_n2"],
                 dossier["date_temine_n3"], dossier["date_assignation_n4"], dossier["date_temine_n4"],
@@ -1675,7 +2894,7 @@ def valider_dossier_signature(id_dossier):
                 dossier["n1_admin"], dossier["n2_chef_brigade"], dossier["id_chef_brigade"],
                 dossier["n3_brigade"], dossier["id_brigade"], dossier["n4_securisation"], dossier["id_securisation"],
                 dossier["n5_evaluation_cadastrale"], dossier["id_evaluation_cadastrale"],
-                dossier["n6_signature"], dossier["id_signature"], firstName, loggedIn
+                dossier["n6_signature"], dossier["id_signature"], firstName, loggedIn,objet_validation
             ))
 
             # Insérer dans gestion_signature_terminer
@@ -1723,6 +2942,174 @@ def valider_dossier_signature(id_dossier):
         return redirect(url_for('dossiers_signature_valide'))
 
 
+@app.route('/valider_dossier_rejet_signature/<int:id_dossier>', methods=['POST'])
+def valider_dossier_rejet_signature(id_dossier):
+    if 'email_signature' not in session:
+        return redirect(url_for('login'))
+    try:
+        loggedIn, firstName = getLogin('email_signature', 'signature')
+
+        if not loggedIn or not firstName:
+            flash("Erreur: les informations utilisateur sont manquantes.", "danger")
+            return redirect(url_for('login'))
+
+        with mysql.connection.cursor() as cur:
+            # Vérifier si le dossier existe
+            cur.execute("""SELECT * FROM gestion_signature 
+                        WHERE id = %s AND id_signature = %s AND statut = 'Réjeté'
+                        """, (id_dossier, loggedIn))
+            result = cur.fetchone()
+
+            if not result:
+                flash("Dossier introuvable ou non assigné.", "warning")
+                return redirect(url_for('dossiers_signature_valide'))
+
+            columns = [desc[0] for desc in cur.description]
+            dossier = dict(zip(columns, result))
+
+            # Marquer le dossier comme terminé
+            date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            
+            objet_validation= request.form['objet_validation']
+
+            # Insérer dans gestion_conversation_fonciere
+            cur.execute("""
+                INSERT INTO gestion_conversation_fonciere 
+                (nom_dossier, date_ajout, date_assignation_termin_n2, date_temine_n3, date_assignation_n4, 
+                 date_temine_n4, date_assignation_n5, date_temine_n5, date_assignation_n6, date_temine_n6, date_assignation_n7, statut, n1_admin, 
+                 n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade, n4_securisation, id_securisation, 
+                 n5_evaluation_cadastrale, id_evaluation_cadastrale, n6_signature, id_signature, n7_conversation_fonciere, id_conversation_fonciere, objet)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                dossier["nom_dossier"], dossier["date_ajout"], dossier["date_assignation_termin_n2"],
+                dossier["date_temine_n3"], dossier["date_assignation_n4"], dossier["date_temine_n4"],
+                dossier["date_assignation_n5"],dossier["date_temine_n5"],dossier["date_assignation_n6"], date_now, date_now, 'En attente',
+                dossier["n1_admin"], dossier["n2_chef_brigade"], dossier["id_chef_brigade"],
+                dossier["n3_brigade"], dossier["id_brigade"], dossier["n4_securisation"], dossier["id_securisation"],
+                dossier["n5_evaluation_cadastrale"], dossier["id_evaluation_cadastrale"],
+                dossier["n6_signature"], dossier["id_signature"], firstName, loggedIn,objet_validation
+            ))
+
+            # Insérer dans gestion_signature_terminer
+            cur.execute("""
+                INSERT INTO gestion_signature_terminer 
+                (
+                    nom_dossier, date_ajout, date_assignation_termin_n2, date_temine_n3, date_assignation_n4, 
+                    date_temine_n4, date_assignation_n5, date_temine_n5, date_temine_n6, statut, n1_admin, 
+                    n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade, n4_securisation, id_securisation, 
+                    n5_evaluation_cadastrale, id_evaluation_cadastrale, n6_signature, id_signature
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                dossier["nom_dossier"],
+                dossier["date_ajout"],
+                dossier["date_assignation_termin_n2"],
+                dossier["date_temine_n3"],
+                dossier["date_assignation_n4"],
+                dossier["date_temine_n4"],
+                dossier["date_assignation_n5"],
+                dossier["date_temine_n5"],
+                date_now,  # Utilisation de date_now pour date_temine_n6
+                'Terminé',
+                dossier["n1_admin"],
+                dossier["n2_chef_brigade"],
+                dossier["id_chef_brigade"],
+                dossier["n3_brigade"],
+                dossier["id_brigade"],
+                dossier["n4_securisation"],
+                dossier["id_securisation"],
+                dossier["n5_evaluation_cadastrale"],
+                dossier["id_evaluation_cadastrale"],
+                dossier["n6_signature"],
+                dossier["id_signature"]
+            ))
+
+            # Supprimer le dossier initial
+            cur.execute("DELETE FROM gestion_signature WHERE id = %s", (id_dossier,))
+            mysql.connection.commit()
+
+            flash("Le dossier a été marqué comme terminé avec succès.", "success")
+        return redirect(url_for('dossiers_signature_valide'))
+    except Exception as e:
+        return f"Erreur  : {e}"
+        return redirect(url_for('dossiers_signature_valide'))
+
+
+@app.route('/rejet_dossier_signature/<int:id_dossier>', methods=['POST'])
+def rejet_dossier_signature(id_dossier):
+    # Vérifier si l'utilisateur est connecté et est un membre de la sécurisation
+    if 'email_signature' not in session:
+        return redirect(url_for('login'))
+
+    try:
+        loggedIn, firstName = getLogin('email_signature', 'signature')
+
+        if not loggedIn or not firstName:
+            flash("Erreur: les informations utilisateur sont manquantes.", "danger")
+            return redirect(url_for('login'))
+
+        with mysql.connection.cursor() as cur:
+            # Vérifier si le dossier existe
+            cur.execute("""
+                SELECT * FROM gestion_signature 
+                WHERE id = %s AND id_signature = %s AND statut = 'En cours'
+            """, (id_dossier, loggedIn))
+            result = cur.fetchone()
+
+            if not result:
+                flash("Dossier introuvable ou non assigné.", "warning")
+                return redirect(url_for('dossiers_signature_valide'))
+
+            columns = [desc[0] for desc in cur.description]
+            dossier = dict(zip(columns, result))
+
+            # Marquer le dossier comme terminé
+            date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            rejet_validation = request.form['rejet_validation']
+            statut_rejet = "Rejeté" if dossier["n6_signature"] is not None and dossier["id_signature"] is not None else "En Attente"
+
+            # Insérer dans evalution_cadastrale
+
+            # Supprimer le dossier initial
+            cur.execute("""
+                INSERT INTO gestion_evaluation_cadastrale 
+                (nom_dossier, date_ajout, date_assignation_termin_n2, date_temine_n3, date_assignation_n4,
+                date_temine_n4, date_assignation_n5, statut, n1_admin,
+                n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade, n4_securisation, id_securisation,
+                n5_evaluation_cadastrale, id_evaluation_cadastrale, objet)
+
+
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                dossier["nom_dossier"],
+                dossier["date_ajout"],
+                dossier["date_assignation_termin_n2"] if dossier.get("date_assignation_termin_n2") is not None else date_now,
+                dossier["date_temine_n3"] if dossier.get("date_temine_n3") is not None else date_now,
+                dossier["date_assignation_n4"] if dossier.get("date_assignation_n4") is not None else date_now,
+                dossier["date_temine_n4"] if dossier.get("date_temine_n4") is not None else date_now,
+                dossier["date_assignation_n5"]if dossier.get("date_assignation_n5") is not None else date_now,
+                statut_rejet,
+                dossier["n1_admin"],
+                dossier["n2_chef_brigade"],
+                int(dossier["id_chef_brigade"]) if dossier.get("id_chef_brigade") is not None else None,
+                dossier["n3_brigade"],
+                int(dossier["id_brigade"]) if dossier.get("id_brigade") is not None else None,
+                dossier["n4_securisation"],
+                int(dossier["id_securisation"]) if dossier.get("id_securisation") is not None else None,
+                dossier["n5_evaluation_cadastrale"],
+                int(dossier["id_evaluation_cadastrale"]) if dossier.get("id_evaluation_cadastrale") is not None else None,
+                rejet_validation
+            ))
+            cur.execute("DELETE FROM gestion_signature WHERE id = %s", (id_dossier,))
+            mysql.connection.commit()
+
+            flash("Le dossier a été marqué comme terminé avec succès.", "success")
+        return redirect(url_for('dossiers_signature_valide'))
+    except Exception as e:
+        return f"Erreur  : {e}"
+        return redirect(url_for('dossiers_signature_valide'))
+
 
 @app.route("/dossiers_signature_valide")
 def dossiers_signature_valide():
@@ -1758,12 +3145,6 @@ def dossiers_signature_valide():
 
 
 
-
-
-
-
-
-
 ###################conversation_fonciere
 @app.route("/inscription_conversation_fonciere",methods=['POST', 'GET'])
 def inscription_conversation_fonciere():
@@ -1778,7 +3159,7 @@ def inscription_conversation_fonciere():
         if request.method == 'POST':
             name = request.form['name']
             prenom = request.form['prenom']
-            email = request.form['email']
+            email = request.form['email'].lower()
             numero_telephone = request.form['numero_telephone']
             password = request.form['password']
             confirm_password = request.form['confirm_password']
@@ -1809,18 +3190,25 @@ def inscription_conversation_fonciere():
         return render_template('conversation_fonciere/connexion/cree_compte.html', data=data, firstName=firstName)
 
 
-@app.route('/supprimer_conversation_fonciere/<int:id>')
+
+@app.route('/supprimer_conversation_fonciere/<int:id>', methods=['POST'])
 def supprimer_conversation_fonciere(id):
     if 'email_admin' in session:
-        loggedIn, firstName = getLogin('email_admin', 'admin')
-        cur = mysql.connection.cursor()
-        cur.execute("DELETE from conversation_fonciere WHERE ident=%s", (id,))
-        mysql.connection.commit()
-        cur.close()
-        flash('Administrateur supprimé avec succès.', 'success')
+        try:
+            loggedIn, firstName = getLogin('email_admin', 'admin')
+            cur = mysql.connection.cursor()
+            cur.execute("DELETE from conversation_fonciere WHERE ident=%s", (id,))
+            mysql.connection.commit()
+            flash("supprimé avec succès", "success")
+        except Exception as e:
+            flash(f"Erreur lors de la suppression : {e}", "danger")
+        finally:
+            cur.close()
         return redirect(url_for('inscription_conversation_fonciere'))
     else:
         return redirect(url_for('login'))
+
+
 
 @app.route("/conversation_fonciere_tableau_de_bord")
 def conversation_fonciere_tableau_de_bord():
@@ -1842,6 +3230,7 @@ def conversation_fonciere_tableau_de_bord():
         return render_template('conversation_fonciere/index.html', firstName=firstName,
                                 en_attente=en_attente, en_cours=en_cours, termine=termine
                                )
+
 
 @app.route("/liste_gestion_fonciere")
 def liste_gestion_fonciere():
@@ -1869,6 +3258,7 @@ def liste_gestion_fonciere():
         loggedIn=loggedIn,
         firstName=firstName
     )
+
 
 @app.route("/assigner_dossier_fonciere/<int:id_dossier>", methods=["POST"])
 def assigner_dossier_fonciere(id_dossier):
@@ -1998,6 +3388,73 @@ def fin_dossier_fonciere(id_dossier):
         flash(f"Erreur : {e}", "danger")
         return redirect(url_for('liste_dossiers_assignes_fonciere'))
 
+
+
+@app.route('/rejet_dossier_fonciere/<int:id_dossier>', methods=['POST'])
+def rejet_dossier_fonciere(id_dossier):
+    if 'email_conversation_fonciere' not in session:
+        return redirect(url_for('login'))
+
+    try:
+
+        loggedIn, firstName = getLogin('email_conversation_fonciere', 'conversation_fonciere')
+        with mysql.connection.cursor() as cur:
+            cur.execute("""SELECT * FROM gestion_conversation_fonciere 
+            WHERE id = %s AND id_conversation_fonciere = %s AND statut = 'En cours'
+            """, (id_dossier, loggedIn))
+            result = cur.fetchone()
+
+            columns = [desc[0] for desc in cur.description]
+            dossier = dict(zip(columns, result))
+
+            date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            objet_rejet= request.form['objet_rejet']
+            statut_rejet = "Rejeté" if dossier["n6_signature"] is not None and dossier["id_signature"] is not None else "En Attente"
+
+            cur.execute("""
+                            INSERT INTO gestion_signature 
+                            (nom_dossier, date_ajout, date_assignation_termin_n2, date_temine_n3, date_assignation_n4, 
+                             date_temine_n4, date_assignation_n5, date_temine_n5, date_assignation_n6, statut, n1_admin, 
+                             n2_chef_brigade, id_chef_brigade, n3_brigade, id_brigade, n4_securisation, id_securisation, 
+                             n5_evaluation_cadastrale, id_evaluation_cadastrale, n6_signature, id_signature, objet)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        """, (
+                dossier.get("nom_dossier"),
+                dossier.get("date_ajout"),
+                dossier["date_assignation_termin_n2"] if dossier.get("date_assignation_termin_n2") is not None else date_now,
+                dossier["date_temine_n3"] if dossier.get("date_temine_n3") is not None else date_now,
+                dossier["date_assignation_n4"] if dossier.get("date_assignation_n4") is not None else date_now,
+                dossier["date_temine_n4"] if dossier.get("date_temine_n4") is not None else date_now,
+                dossier["date_assignation_n5"] if dossier.get("date_assignation_n5") is not None else date_now,
+                dossier["date_temine_n5"] if dossier.get("date_temine_n5") is not None else date_now,
+                dossier["date_assignation_n6"] if dossier.get("date_assignation_n6") is not None else date_now,
+                statut_rejet,
+                dossier.get("n1_admin"),
+                dossier.get("n2_chef_brigade"),
+                int(dossier["id_chef_brigade"]) if dossier.get("id_chef_brigade") is not None else None,
+                dossier.get("n3_brigade"),
+                int(dossier["id_brigade"]) if dossier.get("id_brigade") is not None else None,
+                dossier.get("n4_securisation"),
+                int(dossier["id_securisation"]) if dossier.get("id_securisation") is not None else None,
+                dossier.get("n5_evaluation_cadastrale"),
+                int(dossier["id_evaluation_cadastrale"]) if dossier.get("id_evaluation_cadastrale") is not None else None,
+                dossier["n6_signature"],
+                int(dossier["id_signature"]) if dossier.get("id_signature") is not None else None,
+                objet_rejet
+            ))
+
+            cur.execute("DELETE FROM gestion_conversation_fonciere WHERE id = %s", (id_dossier,))
+            mysql.connection.commit()
+
+            flash("Le dossier a été marqué comme terminé avec succès.", "success")
+        return redirect(url_for('liste_dossiers_assignes_fonciere'))
+    except Exception as e:
+        flash("error de chargement de dossier ", "danger")
+        return redirect(url_for('liste_dossiers_assignes_fonciere'))
+
+
+
+
 @app.route("/dossiers_fonciere_valide")
 def dossiers_fonciere_valide():
     # Vérifier si l'utilisateur est connecté
@@ -2039,10 +3496,8 @@ def dossiers_fonciere_valide():
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form['email']
+        email = request.form['email'].upper()
         password = request.form['password']
-        print(email)
-        print(password)
 
         # Vérification des informations
         if is_valid(email, 'email_chefbrigade', password, 'chef_brigade'):
@@ -2078,13 +3533,16 @@ def login():
 
 
 #####******************* Mot de passe oublié
+
+################# login
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
-        email = request.form['email']
+        email = request.form['email'].lower()
 
         # Dictionnaire des tables et des colonnes d'email
         tables = {
+            "admin": "email_admin",
             "chef_brigade": "email_chefbrigade",
             "brigade": "email_brigade",
             "securisation": "email_securisation",
@@ -2092,6 +3550,7 @@ def forgot_password():
             "signature": "email_signature",
             "conversation_fonciere": "email_conversation_fonciere"
         }
+
 
         cursor = mysql.connection.cursor()
         user = None
@@ -2124,11 +3583,32 @@ def forgot_password():
 
             # Générer et envoyer le lien de réinitialisation
             reset_link = url_for('reset_password', token=reset_token, table=table_name, _external=True)
+
+            # Corps du message avec un design soigné en HTML
             msg = Message(
                 "Réinitialisation de votre mot de passe",
                 recipients=[email]
             )
-            msg.body = f"Bonjour, cliquez sur le lien suivant pour réinitialiser votre mot de passe : {reset_link}"
+            msg.html = render_template_string('''
+            <!DOCTYPE html>
+            <html lang="fr">
+            <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
+                <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+                    <h2 style="color: #333; text-align: center;">Réinitialisation de votre mot de passe</h2>
+                    <p style="font-size: 16px; color: #555;">Bonjour,</p>
+                    <p style="font-size: 16px; color: #555;">Nous avons reçu une demande pour réinitialiser votre mot de passe. Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe :</p>
+                    <div style="text-align: center; margin: 20px;">
+                        <a href="{{ reset_link }}" style="font-size: 16px; color: #fff; background-color: #0066cc; padding: 12px 25px; border-radius: 4px; text-decoration: none; display: inline-block;">Réinitialiser: mot de passe</a>
+                    </div>
+                    <p style="font-size: 14px; color: #555;">Ce lien est valable jusqu'au {{ expiration_time }}.</p>
+                    <p style="font-size: 14px; color: #555;">Si vous n'avez pas demandé de réinitialisation, vous pouvez ignorer cet e-mail. Votre mot de passe restera inchangé.</p>
+                    <hr style="border: none; border-top: 1px solid #eee;">
+                    <p style="font-size: 12px; color: #888; text-align: center;">Besoin d'aide ? Contactez notre équipe de support à <a href="mailto:abalo.awadi@gmail.com" style="color: #0066cc; text-decoration: none;">abalo.awadi@gmail.com</a>.</p>
+                </div>
+            </body>
+            </html>
+            ''', reset_link=reset_link, expiration_time=(datetime.now() + timedelta(hours=1)).strftime('%H:%M, %d/%m/%Y'))
+
             mail.send(msg)
 
             flash("Un e-mail contenant un lien de réinitialisation a été envoyé à votre adresse.", "success")
@@ -2142,8 +3622,9 @@ def forgot_password():
 
 @app.route('/reset_password/<table>/<token>', methods=['GET', 'POST'])
 def reset_password(table, token):
-    # Dictionnaire des colonnes d'email pour chaque table
+
     email_columns = {
+        "admin": "email_admin",
         "chef_brigade": "email_chefbrigade",
         "brigade": "email_brigade",
         "securisation": "email_securisation",
@@ -2195,6 +3676,8 @@ def reset_password(table, token):
         return redirect('/')
 
     return render_template('mot_de passe_oublier/reinitialiser_mot_de_passe.html', table=table, token=token)
+
+
 
 
 

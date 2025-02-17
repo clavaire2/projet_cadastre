@@ -1,24 +1,22 @@
 {% extends 'brigade/base.html' %}
 
 {% block titre %}
-<title>chef brigade - Dossiers en cours </title>
-
+<title>Chef Brigade - Dossiers Terminés</title>
 {% endblock %}
 
 {% block contenu %}
-
 <div class="page-content">
     <div class="container-fluid">
 
         <!-- Titre de la page -->
         <div class="row">
             <div class="col-12">
-                <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-light">
-                    <h4 class="mb-sm-0">Liste des dossiers Terminé </h4>
+                <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-gradient-primary text-white rounded shadow-sm py-3 px-4">
+                    <h4 class="mb-sm-0">Liste des Dossiers Terminés</h4>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
-                            <li class="breadcrumb-item"><a href="javascript: void(0);">Accueil</a></li>
-                            <li class="breadcrumb-item active">Dossiers  Terminés</li>
+                            <li class="breadcrumb-item"><a href="javascript: void(0);" class="text-white">Accueil</a></li>
+                            <li class="breadcrumb-item active text-light">Dossiers Terminés</li>
                         </ol>
                     </div>
                 </div>
@@ -26,10 +24,10 @@
         </div>
 
         <!-- Liste des dossiers -->
-        <div class="row">
+        <div class="row mt-4">
             <div class="col-xl-12">
-                <div class="card">
-                    <div class="card-header align-items-center d-flex">
+                <div class="card shadow-sm rounded">
+                    <div class="card-header align-items-center d-flex bg-light rounded-top">
                         <h4 class="card-title mb-0 flex-grow-1">Dossiers Terminés</h4>
                     </div>
 
@@ -40,7 +38,7 @@
                                 {% if messages %}
                                 <div>
                                     {% for category, message in messages %}
-                                    <div class="alert alert-{{ category }}" role="alert">
+                                    <div class="alert alert-{{ category }} rounded shadow-sm" role="alert">
                                         {{ message }}
                                     </div>
                                     {% endfor %}
@@ -51,34 +49,31 @@
                                 <table class="table table-hover align-middle table-striped mb-0">
                                     <thead class="table-light">
                                     <tr>
-                                        <th class="text-center">Nom du dossier</th>
-                                        <th class="text-center">Date d'ajout</th>
-                                        <th class="text-center">Date assigée</th>
-                                        <th class="text-center">Date Terminé</th>
-                                        <th class="text-center">Durées du <br>traintement dossier</th>
-                                        <th class="text-center">Ajouté par N1</th>
-                                        <th class="text-center">Traitement N2</th>
-                                        <th class="text-center">Traitement N3</th>
+                                        <th class="text-center">Nom du Dossier</th>
+                                        <th class="text-center">Date d'Ajout</th>
+                                        <th class="text-center">Date Assignée</th>
+                                        <th class="text-center">Date Terminée</th>
+                                        <th class="text-center">Durée Traitement</th>
+                                        <th class="text-center">Admin N1</th>
+                                        <th class="text-center">Chef Brigade N2</th>
+                                        <th class="text-center">Brigade N3</th>
                                         <th class="text-center">Statut</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     {% for dossier in dossiers %}
                                     <tr>
-                                        <td class="text-center"><b class="text-primary">{{dossier[1]}}</b></td>
-                                        <td class="text-center">{{dossier[2]}}</td>
-                                        <td class="text-center">{{ dossier[4]}}</td>
+                                        <td class="text-center"><b class="text-primary">{{ dossier[1] }}</b></td>
+                                        <td class="text-center">{{ dossier[2] }}</td>
+                                        <td class="text-center">{{ dossier[4] }}</td>
                                         <td class="text-center">{{ dossier[5] }}</td>
-                                        <td class="text-center"> {{ dossier[5]-dossier[4] }}
+                                        <td class="text-center">{{ dossier[5] - dossier[4] }} jours</td>
                                         <td class="text-center">{{ dossier[7] }}</td>
                                         <td class="text-center">{{ dossier[8] }}</td>
                                         <td class="text-center">{{ dossier[10] }}</td>
-                                        <td>
-                                        <b style="color: blue;">
-                                            {{ dossier[6] }}
-                                        </b>
+                                        <td class="text-center">
+                                            <span class="badge bg-success text-white py-1 px-3 rounded">{{ dossier[6] }}</span>
                                         </td>
-
                                     </tr>
                                     {% endfor %}
                                     </tbody>
@@ -91,5 +86,35 @@
         </div><!-- Fin row -->
     </div><!-- Fin container-fluid -->
 </div>
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(90deg, #4e73df 0%, #224abe 100%);
+    }
+    .card {
+        border: none;
+        border-radius: 12px;
+    }
+    .card-header {
+        border-bottom: 2px solid #e9ecef;
+    }
+    .table-card table {
+        border-collapse: separate;
+        border-spacing: 0 10px;
+    }
+    .table-card table th {
+        text-transform: uppercase;
+        font-size: 0.875rem;
+        font-weight: bold;
+        color: #6c757d;
+    }
+    .table-card table td {
+        vertical-align: middle;
+    }
+    .table-card .badge {
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+</style>
 
 {% endblock %}

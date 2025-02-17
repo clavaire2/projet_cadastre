@@ -226,3 +226,17 @@ CREATE TABLE IF NOT EXISTS gestion_signature_terminer (
   id_signature varchar(225) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
