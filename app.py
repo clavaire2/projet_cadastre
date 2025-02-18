@@ -508,6 +508,60 @@ def supprimer_dossier(id):
         return redirect(url_for('login'))
 
 
+@app.route("/recherche_dossier", methods=['GET', 'POST'])
+def recherche_dossier():
+    if 'email_admin' not in session:
+        return redirect(url_for('login'))
+    else:
+        loggedIn, firstName = getLogin('email_admin', 'admin')
+
+        # Initialisation du curseur
+        cur = mysql.connection.cursor()
+
+        # Récupérer la valeur du champ de recherche
+        search_query = request.form.get('search_query')
+
+        # Condition pour la recherche
+        if search_query:
+            # Recherche avec LIKE en utilisant %s pour MySQL
+            cur.execute("SELECT * FROM dossier WHERE nom_dossier LIKE %s", ('%' + search_query + '%',))
+            dossiers = cur.fetchall()
+        else:
+            # Récupérer tous les dossiers si pas de recherche
+            cur.execute("SELECT * FROM dossier limit 1")
+            dossiers = cur.fetchall()
+
+        # Récupérer les données pour d'autres tables
+        cur.execute("SELECT ident, nom_complet FROM chef_brigade")
+        chef_brigades = cur.fetchall()
+
+        cur.execute("SELECT ident, nom_complet FROM securisation")
+        securisation = cur.fetchall()
+
+        cur.execute("SELECT ident, nom_complet FROM evaluation_cadastrale")
+        evaluation_cadastrale = cur.fetchall()
+
+        cur.execute("SELECT ident, nom_complet FROM signature")
+        signature = cur.fetchall()
+
+        cur.execute("SELECT ident, nom_complet FROM conversation_fonciere")
+        conversation_fonciere = cur.fetchall()
+
+        # Fermeture du curseur après utilisation
+        cur.close()
+
+        return render_template(
+            'admin/dossier/liste_dossier.html',
+            dossiers=dossiers,
+            firstName=firstName,
+            securisation=securisation,
+            chef_brigades=chef_brigades,
+            evaluation_cadastrale=evaluation_cadastrale,
+            signature=signature,
+            conversation_fonciere=conversation_fonciere
+        )
+
+
 @app.route("/liste_dossier")
 def liste_dossier():
     if 'email_admin' not in session:
@@ -515,29 +569,28 @@ def liste_dossier():
     else:
         loggedIn, firstName = getLogin('email_admin', 'admin')
         cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM dossier  ORDER BY `dossier`.`id` DESC")  # Vous pouvez ajuster cette requête si vous avez des filtres
-        dossiers = cur.fetchall()  # Récupérer tous les résultats sous forme de liste
-        
+        cur.execute("SELECT * FROM dossier  ORDER BY `dossier`.`id` DESC")
+        dossiers = cur.fetchall()
+
         cur.execute("SELECT ident, nom_complet FROM chef_brigade")
         chef_brigades = cur.fetchall()
 
         cur.execute("SELECT ident, nom_complet FROM securisation")
         securisation = cur.fetchall()
-        
+
         cur.execute("SELECT ident, nom_complet FROM evaluation_cadastrale")
         evaluation_cadastrale = cur.fetchall()
 
         cur.execute("SELECT ident, nom_complet FROM signature")
         signature = cur.fetchall()
 
-
         cur.execute("SELECT ident, nom_complet FROM conversation_fonciere")
         conversation_fonciere = cur.fetchall()
- 
+
         return render_template('admin/dossier/liste_dossier.html',
-                               dossiers=dossiers,firstName=firstName,
+                               dossiers=dossiers, firstName=firstName,
                                securisation=securisation, chef_brigades=chef_brigades,
-                               evaluation_cadastrale=evaluation_cadastrale, 
+                               evaluation_cadastrale=evaluation_cadastrale,
                                signature=signature, conversation_fonciere=conversation_fonciere)
 
 

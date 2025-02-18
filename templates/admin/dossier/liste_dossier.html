@@ -19,72 +19,87 @@
         <!-- Liste des dossiers -->
         <div class="row">
             <div class="col-12">
-                            <!-- Messages Flash -->
-            {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-            <div class="mt-3">
-                {% for category, message in messages %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <!-- Messages Flash -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div class="mt-3">
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-            {% endwith %}
+                {% endif %}
+                {% endwith %}
                 <div class="card shadow-lg border-0">
                     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                         <h4 class="mb-0" style="color: aliceblue;">Liste des dossiers</h4>
+
                         <button class="btn btn-light" data-bs-toggle="modal">
-                            <a href="{{url_for('liste_dossier_delete')}}">supprimer dossier</a> 
+                            <a href="{{url_for('liste_dossier_delete')}}">supprimer dossier</a>
                         </button>
+
                         <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#assignModal">
                             Assigner sélection
                         </button>
 
-                    </div>
-                    <div class="card-body">
-                        <form id="assignForm" method="POST" action="{{ url_for('assigner_dossiers') }}">
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th><input type="checkbox" id="selectAll"></th>
-                                            <th>ID</th>
-                                            <th>Nom du dossier</th>
-                                            <th>Date de création</th>
-                                            <th>Statut</th>
-                                            <th>Ajouté par</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for dossier in dossiers %}
-                                        <tr id="row-{{ dossier[0] }}">
-                                            <td><input type="checkbox" name="dossier_ids" value="{{ dossier[0] }}"></td>
-                                            <td>{{ dossier[0] }}</td>
-                                            <td>{{ dossier[1] }}</td>
-                                            <td>{{ dossier[2] }}</td>
-                                            <td><span class="badge bg-info">{{ dossier[3] }}</span></td>
-                                            <td>{{ dossier[4] }}</td>
-                                            <td>
-                                                <a href="{{url_for('modifier_dossier', id=dossier[0])}}" class="btn btn-success btn-sm">Modifier</a>
-                                            </td>
-                                           
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </form>
+
+                        <div class="btn btn-light" data-bs-toggle="modal">
+                            <form action="{{url_for('recherche_dossier')}}" method="POST">
+                                <input type="text" name="search_query" class="form-control w-100"
+                                       placeholder="Rechercher un dossier...">
+                            </form>
+                        </div>
+
+
                     </div>
                 </div>
+
+            </div>
+            <div class="card-body">
+                <form id="assignForm" method="POST" action="{{ url_for('assigner_dossiers') }}">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                            <tr>
+                                <th><input type="checkbox" id="selectAll"></th>
+                                <th>ID</th>
+                                <th>Nom du dossier</th>
+                                <th>Date de création</th>
+                                <th>Statut</th>
+                                <th>Ajouté par</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for dossier in dossiers %}
+                            <tr id="row-{{ dossier[0] }}">
+                                <td><input type="checkbox" name="dossier_ids" value="{{ dossier[0] }}"></td>
+                                <td>{{ dossier[0] }}</td>
+                                <td>{{ dossier[1] }}</td>
+                                <td>{{ dossier[2] }}</td>
+                                <td><span class="badge bg-info">{{ dossier[3] }}</span></td>
+                                <td>{{ dossier[4] }}</td>
+                                <td>
+                                    <a href="{{url_for('modifier_dossier', id=dossier[0])}}"
+                                       class="btn btn-success btn-sm">Modifier</a>
+                                </td>
+
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
+</div>
+</div>
 
-<!-- Modal d'assignation -->
+
 <div class="modal fade" id="assignModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -92,12 +107,13 @@
                 <h5 class="modal-title">Assigner des dossiers</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
+
             <div class="modal-body">
                 <form id="assignFormModal" action="{{ url_for('assigner_dossiers') }}" method="POST">
                     <input type="hidden" name="selected_dossiers" id="selectedDossiers">
                     <div class="mb-3">
                         <label>Chef de brigade 1 :</label>
-                        <select name="chef_brigade_1" class="form-select" >
+                        <select name="chef_brigade_1" class="form-select">
                             <option value="">Sélectionnez</option>
                             {% for chef_brigade in chef_brigades %}
                             <option value="{{ chef_brigade[0] }}">{{ chef_brigade[1] }}</option>
@@ -151,7 +167,7 @@
     </div>
 </div>
 
-<!-- Script JavaScript -->
+
 <script>
     function supprimerDossier(dossierId) {
         if (confirm("Voulez-vous vraiment supprimer ce dossier ?")) {
